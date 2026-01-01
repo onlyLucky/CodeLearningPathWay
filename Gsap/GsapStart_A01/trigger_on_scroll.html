@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trigger On Scroll</title>
+  <script src="../assets/libs/gsap3.13.0/gsap.min.js"></script>
+  <script src="../assets/libs/gsap3.13.0/ScrollTrigger.min.js"></script>
+  <style>
+    * {
+      padding: 0;
+      margin: 0;
+    }
+    body{
+      background-color: #232529;
+    }
+    main{
+      width: 100%;
+      height: 200vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #trigger-container{
+      position: relative;
+      display: block;
+      width: 50%;
+      max-width: 500px;
+      border-top: dashed 2px grey;
+      border-bottom: dashed 2px grey;
+      padding: 4rem;
+    }
+    .info{
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      width: 300px;
+      background-color: #191919;
+      border-radius: 10px;
+      height: 46px;
+      gap: 1rem;
+    }
+    .info h1{
+      font-size: 1.2rem;
+      text-align: center;
+      color: #fffce1;
+    }
+    .info h1 #text{
+      display: inline-block;
+      width: 200px;
+    }
+    #arrow{
+      height: 20px;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <div id="trigger-container">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 186 62">
+        <rect fill="url(#grad-1)" width="186" height="62" rx="31" />
+        <rect id="knob" fill="url(#grad-2)" width="93" height="62" rx="31" />
+        <defs>
+          <linearGradient id="grad-1" x1="47" y1="-80" x2="0" y2="99" gradientUnits="userSpaceOnUse">
+            <stop offset="0.3" stop-color="#FEC5FB"></stop>
+            <stop offset="1" stop-color="#00BAE2"></stop>
+          </linearGradient>
+          <linearGradient id="grad-2" x1="17" y1="30" x2="42" y2="80" gradientUnits="userSpaceOnUse">
+            <stop offset="0.2" stop-color="#FEC5FB"></stop>
+            <stop offset="1" stop-color="#00BAE2"></stop>
+          </linearGradient>
+        </defs>
+      </svg>
+    </div>
+  </main>
+  <div class="info">
+    <h1><span id="text">Scroll down</span></h1>
+    <svg id="arrow" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 11" aria-hidden="true">
+      <path fill="#fffce1" d="M4.055 0v7.71l-3-3L0 5.79l4.805 4.804 4.804-4.805-1.054-1.078-3 3V0h-1.5Z"></path>
+    </svg>
+  </div>
+  <script>
+    // 创建一个 GSAP 时间轴对象，并配置 ScrollTrigger 插件
+    gsap
+      .timeline({
+        paused: true, // 时间轴初始化时暂停
+        scrollTrigger: {
+          markers: true, // 显示标记，用于调试
+          trigger: "#trigger-container", // 触发滚动触发器的元素
+          start: "0 60%", // 触发开始的位置，当触发器顶部到达视口 60% 的位置时
+          end: "100% 40%", // 触发结束的位置，当触发器底部到达视口 40% 的位置时
+          toggleActions: "play reverse play reverse", // 定义滚动时的动画行为
+          onEnter: () => text.innerText = "onEnter", // 当进入触发区域时调用
+          onLeave: () => text.innerText = "onLeave", // 当离开触发区域时调用
+          onEnterBack: () => text.innerText = "onEnterBack", // 当从下方再次进入触发区域时调用
+          onLeaveBack: () => text.innerText = "onLeaveBack" // 当从下方离开触发区域时调用
+        }
+      })
+      .to(
+        "#knob", // 目标元素
+        {
+          duration: 1, // 动画持续时间，单位为秒
+          x: 93, // 在 X 轴方向上移动 93 像素
+          ease: "expo.inOut" // 使用 expo.inOut 缓动函数
+        }
+      );
+
+    // 改变导航栏中的箭头方向
+    let inZone = false; // 标记是否在滚动区域
+    ScrollTrigger.create({
+      start: 0, // 滚动触发器的开始位置
+      end: "max", // 滚动触发器的结束位置
+      onUpdate: (self) => { // 每次滚动触发器更新时调用的回调函数
+        if (self.direction !== self.prevDirection && !inZone) { // 如果方向改变且不在滚动区域
+          gsap.to("#arrow", { // 对箭头元素进行动画操作
+            rotation: self.direction === 1 ? 0 : -180, // 根据滚动方向旋转箭头
+            duration: 0.2
+          });
+          self.prevDirection = self.direction; // 更新前一个方向
+        }
+      }
+    });
+
+  </script>
+</body>
+</html>

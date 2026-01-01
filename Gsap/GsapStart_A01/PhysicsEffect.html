@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>physics-based effects</title>
+  <script src="../assets/libs/jquery3.7.1/jquery.min.js"></script>
+  <script src="../assets/libs/gsap3.13.0/gsap.min.js"></script>
+  <script src="../assets/libs/gsap3.13.0/Draggable.min.js"></script>
+  <script src="../assets/libs/gsap3.13.0/InertiaPlugin.min.js"></script>
+  <script src="../assets/libs/gsap3.13.0/Physics2DPlugin.min.js"></script>
+  <style>
+    body {
+      padding: 0;
+      margin: 0;
+      width: 100vw;
+      min-height: 100vh;
+      background-color: #232529;
+      color: #bbbaa6;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #emitter{
+      border: dashed 2px #fffce1;
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+    }
+    .dot {
+      background: radial-gradient(78.77% 78.77% at 71.71% 30.77%, #f0fcff 0%, #9bedff 67.21%, #98ecff 76.04%, #5be1ff 84.9%, #00bae2 94.79%);
+      border-radius: 50%;
+      position: absolute;
+    }
+  </style>
+</head>
+<body>
+  <div id="emitter"></div>
+  <script>
+    // 注册所需插件：拖拽、惯性、2D 物理
+    gsap.registerPlugin(Draggable, InertiaPlugin, Physics2DPlugin);
+
+    const emitter = document.getElementById('emitter'); // 爆炸中心元素
+    const container = document.createElement('div');    // 用于存放所有粒子，跟随爆炸点移动
+
+    /* 可调参数 */
+    const emitterSize = 100;   // 爆炸圆盘半径（像素）
+    const dotQuantity = 25;    // 粒子数量
+    const dotSizeMax  = 20;    // 粒子最大尺寸
+    const dotSizeMin  = 10;    // 粒子最小尺寸
+    const speed       = 3;     // 速度倍率
+    const gravity     = 3;     // 重力倍率（physics2D 里乘以 500）
+
+    /* 把 container 做成绝对定位的“画布”，不响应鼠标事件 */
+    container.style.cssText =
+      'position:absolute; left:0; top:0; overflow:visible; z-index:5000; pointer-events:none;';
+    document.body.appendChild(container);
+
+    // 预生成一次爆炸时间线，后续复用提升性能
+    const explosion = createExplosion(container);
+
+    /**
+     * 创建爆炸动画
+     * @param {HTMLElement} container 粒子父级
+     * @returns {Timeline} 返回一条包含所有粒子动画的 GSAP 时间线
+     */
+    function createExplosion(container) {
+      const tl = gsap.timeline({ paused: true }); // 先暂停，调用时 .play(0)
+
+      for (let i = 0; i < dotQuantity; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'dot';
+
+        /* 随机大小 */
+        const size = gsap.utils.random(dotSizeMin, dotSizeMax, 1);
+
+        /* 随机角度与距离，让粒子初始均匀分布在 emitter 圆内 */
+        const angle  = Math.random() * Math.PI * 2;                 // 弧度
+        const length = Math.random() * (emitterSize / 2 - size / 2); // 距离圆心长度
+
+        /* 初始状态：位置、尺寸、居中偏移、开启 3D 加速 */
+        gsap.set(dot, {
+          x: Math.cos(angle) * length,
+          y: Math.sin(angle) * length,
+          width: size,
+          height: size,
+          xPercent: -50,
+          yPercent: -50,
+          force3D: true
+        });
+        container.appendChild(dot);
+
+        /* 物理动画：角度 + 初速度 + 重力 */
+        tl.to(
+          dot,
+          {
+            physics2D: {
+              angle: (angle * 180) / Math.PI,          // 初始发射角度（度）
+              velocity: (100 + Math.random() * 250) * speed, // 随机初速度
+              gravity: 500 * gravity                     // 重力加速度
+            },
+            duration: 1 + Math.random()                // 1~2 秒随机落点
+          },
+          0 // 全部粒子同时开始
+        )
+          /* 渐隐消失，比下落稍早一丢丢，看起来更自然 */
+          .to(
+            dot,
+            { opacity: 0, duration: 0.2, ease: 'power2.inOut' },
+            0.7
+          );
+      }
+
+      return tl;
+    }
+
+    /**
+     * 在指定元素中心触发爆炸
+     * @param {HTMLElement} element 作为爆炸中心的 DOM 元素
+     */
+    function explode(element) {
+      const bounds = element.getBoundingClientRect();
+      /* 把 container 移到元素中心 */
+      gsap.set(container, {
+        x: bounds.left + bounds.width / 2,
+        y: bounds.top + bounds.height / 2
+      });
+      /* 从第 0 秒重新播放 */
+      explosion.play(0);
+    }
+
+    /* ========== 事件绑定 ========== */
+    explode(emitter);                 // 页面加载后自动爆一次
+    emitter.addEventListener('click', () => explode(emitter)); // 点击再爆
+
+    /* ========== 让 emitter 本身也能拖拽 ========== */
+    Draggable.create('#emitter', {
+      inertia: true,     // 松手后继续滑动
+      bounds: window,    // 不允许拖出视窗
+      edgeResistance: 0.7 // 边缘回弹
+    });
+
+  </script>
+</body>
+</html>

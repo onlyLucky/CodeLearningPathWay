@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Card Stack</title>
+  <script src="https://cdn.bootcdn.net/ajax/libs/gsap/3.13.0/gsap.min.js"></script>
+  <script src="https://cdn.bootcdn.net/ajax/libs/gsap/3.13.0/Flip.min.js"></script>
+  
+  <style>
+    body {
+      padding: 0;
+      margin: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: #232529;
+      color: #bbbaa6;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .slider {
+      position: absolute;
+      width: 300px;
+      height: 200px;
+      perspective: 100px;
+      top: 30vh;
+      left: 50%;
+      transform: translateX(-50%)
+    }
+
+    .item {
+      position: absolute;
+      width: 300px;
+      aspect-ratio: 2/3;
+      background: transparent;
+      cursor: pointer;
+    }
+    .item:nth-child(5) {
+      left: 0;
+      top: 0;
+    }
+    .item:nth-child(4) {
+      left: 20px;
+      top: -20px;
+    }
+    .item:nth-child(3) {
+      left: 40px;
+      top: -40px;
+    }
+    .item:nth-child(2) {
+      left: 60px;
+      top: -60px;
+    }
+    .item:nth-child(1) {
+      left: 80px;
+      top: -80px;
+    }
+  </style>
+</head>
+<body>
+  <div class="slider">
+    <img class="item item-5" src="https://assets.codepen.io/16327/portrait-number-5.png" alt="" />
+    <img class="item item-4" src="https://assets.codepen.io/16327/portrait-number-4.png" alt="" />
+    <img class="item item-3" src="https://assets.codepen.io/16327/portrait-number-3.png" alt="" />
+    <img class="item item-2" src="https://assets.codepen.io/16327/portrait-number-2.png" alt="" />
+    <img class="item item-1" src="https://assets.codepen.io/16327/portrait-number-1.png" alt="" />
+  </div>
+  <script>
+    console.clear(); // 清空控制台，方便调试
+
+    /* 1. 注册 Flip 插件（必须最先执行） */
+    gsap.registerPlugin(Flip);
+
+    /* 2. 获取 DOM ---------------------------------------------------------- */
+    const slider = document.querySelector('.slider');      // 卡片容器
+    const items  = gsap.utils.toArray('.item');            // 当前所有卡片
+    const offset = 30;                                     // 预留间距（代码里未用，可扩展）
+
+    /* 3. 逻辑：把“最后一张”挪到最前面 ------------------------------ */
+    function moveCard() {
+      const lastItem = slider.querySelector('.item:last-child');
+      if (!lastItem) return;               // 安全防护
+
+      // 3-1 先隐藏，避免 Flip 记录它当前在尾部的位置
+      lastItem.style.display = 'none';
+
+      // 3-2 克隆一张新图（保持相同类名与 src）
+      const newItem = document.createElement('img');
+      newItem.className = lastItem.className;
+      newItem.src       = lastItem.src;
+
+      // 3-3 插到容器最前面，成为新的首张
+      slider.insertBefore(newItem, slider.firstChild);
+    }
+
+    /* 4. 点击整页：触发 Flip 无限轮播动画 -------------------------- */
+    document.body.addEventListener('click', () => {
+      /* 4-1 记录所有 .item 的“旧”位置与尺寸 */
+      const state = Flip.getState('.item');
+
+      /* 执行 DOM 变更（尾→首） */
+      moveCard();
+
+      /* Flip 自动计算差异并补间 ------------------------------ */
+      Flip.from(state, {
+        targets: '.item',     // 要过渡的元素
+        ease: 'sine.inOut',   // 整体缓动
+        absolute: true,       // 使用 position:absolute 防止抖动
+
+        /* 新元素进入动画（插入到首位的这张） */
+        onEnter: (elements) =>
+          gsap.from(elements, {
+            duration: 0.3,
+            yPercent: 20,     // 从下方滑入
+            opacity: 0,
+            ease: 'expo.out'
+          }),
+
+        /* 旧元素离开动画（尾张被 Flip 检测到消失） */
+        onLeave: (elements) =>
+          gsap.to(elements, {
+            duration: 0.3,
+            yPercent: 5,
+            xPercent: -5,
+            transformOrigin: 'bottom left',
+            opacity: 0,
+            ease: 'expo.out',
+            onComplete: () => {
+              // 动画完成后真正移除 DOM，避免内存泄漏
+              slider.removeChild(elements[0]);
+            }
+          })
+      });
+    });
+
+
+  </script>
+</body>
+</html>

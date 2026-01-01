@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KMP</title>
+</head>
+<body>
+  <script>
+    /**
+     * @param {string} haystack
+     * @param {string} needle
+     * @return {number}
+     */
+    var strStr = function(haystack, needle) {
+        const n = haystack.length;
+        const m = needle.length;
+        
+        if (m === 0) return 0; // 边界：needle为空（题目提示m≥1，兼容处理）
+        if (m > n) return -1;
+        
+        // 步骤1：计算needle的前缀函数π
+        const computePrefix = (s) => {
+            const len = s.length;
+            const π = new Array(len).fill(0); // π[0]默认0（无前缀）
+            for (let j = 1; j < len; j++) {
+                let k = π[j - 1]; // 初始尝试前一个位置的前缀长度
+                // 若当前字符不匹配，回溯k到π[k-1]，直到k=0
+                while (k > 0 && s[j] !== s[k]) {
+                    k = π[k - 1];
+                }
+                // 若匹配，k+1（前缀长度+1）
+                if (s[j] === s[k]) {
+                    k++;
+                }
+                π[j] = k;
+            }
+            return π;
+        };
+        
+        const π = computePrefix(needle);
+        console.log("computePrefix: ",π)
+        let i = 0; // haystack指针
+        let j = 0; // needle指针
+        
+        // 步骤2：利用前缀函数匹配
+        while (i < n) {
+            if (haystack[i] === needle[j]) {
+                i++;
+                j++;
+            }
+            if (j === m) {
+                // 找到匹配，返回起始下标
+                return i - j;
+            } else if (i < n && haystack[i] !== needle[j]) {
+                // 匹配失败，回溯j（复用前缀）
+                if (j > 0) {
+                    j = π[j - 1];
+                } else {
+                    // j=0仍不匹配，haystack指针后移
+                    i++;
+                }
+            }
+        }
+        
+        return -1; // 未找到匹配
+    };
+    var strStr = function(haystack, needle) {
+        var hays = []
+        for(var i = 0; i<haystack.length-needle.length+1;i++){
+            hays.push(haystack.slice(i,needle.length+i))
+        }
+        for(var x = 0; x<hays.lenght;x++){
+            if(hays[x] == needle) return x
+        }
+        return -1;
+    };
+    // case01
+    strStr("sadbutsad","sad")
+    strStr("leetcode","toto")
+    strStr("leetcode","oooo")
+  </script>
+</body>
+</html>

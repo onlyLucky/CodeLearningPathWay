@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Responsive Animation</title>
+  <script src="../assets/libs/gsap3.13.0/gsap.min.js"></script>
+  <style>
+    * {
+      padding: 0;
+      margin: 0;
+    }
+    body {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background-color: #232529;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      gap: 2em;
+    }
+    .box{
+      background: #fffce1;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 2rem;
+      opacity: 0;
+    }
+    .small {
+      aspect-ratio: 9/16;
+      width: 20%;
+    }
+    .large {
+      aspect-ratio: 16/9;
+      width: 50%;
+    }
+    .box img {
+      width:33%;
+    }
+  </style>
+</head>
+<body>
+  <div class="box small">
+    <img src="../assets/images/scroll-flair-2.png" alt="" />
+  </div>
+  <div class="box large">
+    <img src="../assets/images/scroll-flair-2.png" alt="" />
+  </div>
+  <script>
+    // 使用 GSAP 的 set 方法立即设置所有类名为 .box 的元素的不透明度为 1
+    gsap.set(".box", {opacity: 1});
+
+    // 创建一个 matchMedia 实例，用于响应式设计，根据不同的媒体查询条件执行不同的动画
+    const mm = gsap.matchMedia();
+
+    // 添加媒体查询条件和对应的回调函数
+    mm.add({
+      isSmall: "(max-width: 800px)",  // 定义小屏幕条件：最大宽度为 800px
+      isLarge: "(min-width: 801px)"   // 定义大屏幕条件：最小宽度为 801px
+    }, (c) => {  // c 是一个包含条件信息的对象
+      if (c.conditions.isSmall) {  // 如果当前满足小屏幕条件
+        gsap.set(".large", { display: "none"});  // 将类名为 .large 的元素设置为不可见
+        gsap.from(".small", { scale: 0, ease: "back.out"});  // 将类名为 .small 的元素从缩放为 0 开始动画，使用 back.out 缓动函数
+        gsap.to(".small img", { rotation: 360, repeat: -1, ease: "none", duration: 1});  // 将类名为 .small 的 img 元素旋转 360 度，无限重复，无缓动函数，持续时间 1 秒
+      };
+      if (c.conditions.isLarge) {  // 如果当前满足大屏幕条件
+        gsap.set(".small", { display: "none"});  // 将类名为 .small 的元素设置为不可见
+        gsap.from(".large", { scale: 0, ease: "back.out"});  // 将类名为 .large 的元素从缩放为 0 开始动画，使用 back.out 缓动函数
+        gsap.to(".large img", { rotation: -360, repeat: -1, ease: "none", duration: 1});  // 将类名为 .large 的 img 元素旋转 -360 度，无限重复，无缓动函数，持续时间 1 秒
+      };
+    });
+
+    // 替代语法
+    /*
+    mm.add("(max-width: 800px)", () => {  // 添加小屏幕条件
+      gsap.set(".large", { display: "none"});
+      gsap.from(".small", { scale: 0, ease: "back.out"});
+      gsap.to(".small img", { rotation: 360, repeat: -1, ease: "none", duration: 1});
+    });
+
+    mm.add("(min-width: 801px)", () => {  // 添加大屏幕条件
+      gsap.set(".small", { display: "none"});
+      gsap.from(".large", { scale: 0, ease: "back.out"});
+      gsap.to(".large img", { rotation: -360, repeat: -1, ease: "none", duration: 1});
+    });
+    */
+  </script>
+</body>
+</html>

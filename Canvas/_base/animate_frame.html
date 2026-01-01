@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>animate</title>
+</head>
+<body>
+  <canvas id="myCanvas" width="600" height="600" style="border: 1px solid #ccc;"></canvas>
+  <button onclick="pauseAnimation()">暂停</button>
+  <button onclick="resumeAnimation()">继续</button>
+  
+  <script>
+    // 1. 获取 Canvas 元素
+    const canvas = document.getElementById('myCanvas');
+    // 2. 获取 2D 绘图上下文（核心对象，所有绘图操作通过 ctx 完成）
+    const ctx = canvas.getContext('2d');
+
+    let animationId; // 动画ID，用于暂停/重启
+    var ball = { x: 50, y: 300, r: 30, dx: 1, dy: -1}; // 小球对象（dx/dy 是x/y方向速度）
+    let lastTime = 0; // 上一帧时间戳
+    var speed = 0.2
+
+    // 动画循环函数
+    function animate(timestamp) {
+      // 计算帧间隔（毫秒）
+      const deltaTime = timestamp - lastTime;
+      lastTime = timestamp;
+
+      // 1. 清空画布（关键：避免帧重叠）
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // 2. 绘制元素（小球）
+      ctx.beginPath();
+      ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2);
+      ctx.fillStyle = 'blue';
+      ctx.fill();
+      // 3. 更新元素状态（运动逻辑）
+      ball.x += ball.dx * speed * deltaTime;
+      ball.y += ball.dy * speed * deltaTime;
+      
+      // 4. 边界碰撞检测（反弹效果）
+      if (ball.x + ball.r >= canvas.width || ball.x - ball.r <= 0) {
+        ball.dx = -ball.dx; // x方向反向
+      }
+      if (ball.y + ball.r >= canvas.height || ball.y - ball.r <= 0) {
+        ball.dy = -ball.dy; // y方向反向
+      }
+      
+      // 5. 递归调用，持续动画
+      animationId = requestAnimationFrame(animate);
+    }
+
+    // 启动时初始化 lastTime
+    requestAnimationFrame((timestamp) => {
+      lastTime = timestamp;
+      animate(timestamp);
+    });
+
+    // 暂停动画
+    function pauseAnimation() {
+      cancelAnimationFrame(animationId);
+      animationId = null
+    }
+
+    // 重启动画
+    function resumeAnimation() {
+      if(animationId){
+        cancelAnimationFrame(animationId);
+      }
+      requestAnimationFrame((timestamp) => {
+        lastTime = timestamp;
+        animate(timestamp);
+      });
+    }
+
+
+  </script>
+</body>
+</html>

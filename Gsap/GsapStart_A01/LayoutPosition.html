@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Animate between layout positions</title>
+  <script src="../assets/libs/gsap3.13.0/gsap.min.js"></script>
+  <script src="../assets/libs/gsap3.13.0/Flip.min.js"></script>
+  <style>
+    body {
+      padding: 0;
+      margin: 0;
+      width: 100vw;
+      min-height: 100vh;
+      background-color: #232529;
+      color: #bbbaa6;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .container{
+      position: relative;
+      width: 90vw;
+      height: 90vh;
+      max-width: 700px;
+      max-height: 700px;
+    }
+    #element{
+      background: linear-gradient(137.1deg, #ecfcff 27.5%, #a6efff 94.09%);
+      border-radius: 15px;
+      width: 100px;
+      height: 100px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #232529;
+    }
+    #absolute-marker{
+      width: 100px;
+      height: 100px;
+      border-radius: 10px;
+      outline: dashed 2px #fffce1;
+      z-index: -1;
+      outline-offset: 0.5rem;
+    }
+    #element.absolute,#absolute-marker{
+      position: absolute;
+      bottom: 30px;
+      right: 30px;
+    }
+    button{
+      display: inline-block;
+      outline: none;
+      border: solid 2px #bbbaa6;
+      color: #bbbaa6;
+      background: #232529;
+      text-decoration: none;
+      border-radius: 99px;
+      padding: 12px 25px;
+      cursor: pointer;
+      line-height: 1;
+      font-size: 0.9rem;
+      transition: opacity 0.2s ease-out;
+      position: absolute;
+      top: 1rem;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    button:hover {
+      border: solid 2px #fffce1;
+      color: #fffce1;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div id="element">
+      relative
+    </div>
+    <div id="absolute-marker"></div>
+    <button>Change the position</button>
+  </div>
+  <script>
+    // 注册 Flip 插件
+    gsap.registerPlugin(Flip);
+
+    const button = document.querySelector('button');
+    const element = document.querySelector('#element');
+
+    button.addEventListener('click', () => {
+      // 记录元素当前状态（位置、尺寸、背景色）
+      const state = Flip.getState(element, 'backgroundColor');
+
+      // 切换定位方式并更新文字
+      element.classList.toggle('absolute');
+      element.innerText = element.classList.contains('absolute') ? 'absolute' : 'relative';
+
+      // 从旧状态平滑过渡到新状态
+      Flip.from(state, {
+        duration: 1,
+        ease: 'power1.inOut',
+        spin: 2, // 额外旋转两圈
+      });
+    });
+  </script>
+</body>
+</html>

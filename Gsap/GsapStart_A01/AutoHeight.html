@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Animate auto height</title>
+  <script src="../assets/libs/gsap3.13.0/gsap.min.js"></script>
+  <script src="../assets/libs/gsap3.13.0/GSDevTools.min.js"></script>
+  <script src="../assets/libs/gsap3.13.0/CustomEase.min.js"></script>
+  <script src="../assets/libs/gsap3.13.0/CustomBounce.min.js"></script>
+  <script src="../assets/libs/gsap3.13.0/CustomWiggle.min.js"></script>
+  <script src="../assets/libs/gsap3.13.0/ScrollTrigger.min.js"></script>
+  <script src="../assets/libs/gsap3.13.0/SplitText.min.js"></script>
+  <style>
+    body {
+      padding: 0;
+      margin: 0;
+      width: 100vw;
+      min-height: 100vh;
+      background-color: #232529;
+      color: #bbbaa6;
+      letter-spacing: 2.4px;
+      font-size: 13px;
+    }
+
+    nav {
+      height: 55px;
+      padding-left: 24px;
+      display: flex;
+      align-items: center;
+    }
+    .nav-link:hover {
+      cursor: pointer;
+    }
+    #expanded-menu {
+      background-color: transparent;
+      border-bottom: 1px solid #fffce1;
+      overflow: hidden;
+      height: 0;
+    }
+
+    .content {
+      padding: 24px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .content img {
+      width: 32%;
+      max-height: 50vh;
+      object-fit: cover;
+      opacity: 0;
+    }
+
+  </style>
+</head>
+<body>
+  <nav>
+    <div id="menu-trigger" class="nav-link">
+      Explore
+    </div>
+  </nav>
+  <div id="expanded-menu">
+    <div id="sub-menu" class="content">
+      <img src="https://assets.codepen.io/16327/portrait-image-5.jpg" alt="" />
+      <img src="https://assets.codepen.io/16327/portrait-image-1.jpg" alt="" />
+      <img src="https://assets.codepen.io/16327/portrait-image-11.jpg" alt="" />
+    </div>
+  </div>
+  <script>
+    const trigger = document.getElementById("menu-trigger");
+    const expandedMenu = document.getElementById("expanded-menu");
+
+    let tl = gsap
+      .timeline({ paused: true })
+      .to("#expanded-menu", {
+        duration: 1.2,
+        delay: 0.1,
+        height: "auto", // height auto animation 🙌
+        ease: "power4.out"
+      })
+      .to(
+        "#sub-menu img",
+        {
+          duration: 1,
+          opacity: 1,
+          ease: "power4.inOut",
+          stagger: 0.05
+        },
+        0.3
+      )
+      .reverse();
+
+    trigger.addEventListener("click", (event) => {
+      tl.reversed(!tl.reversed());
+    });
+
+  </script>
+</body>
+</html>

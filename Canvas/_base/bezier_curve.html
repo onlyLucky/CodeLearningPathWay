@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>bezier curve</title>
+</head>
+<body>
+  <canvas id="myCanvas" width="600" height="600" style="border: 1px solid #ccc;"></canvas>
+  <script>
+    // 获取 Canvas 元素
+    const canvas = document.getElementById('myCanvas');
+    // 获取 2D 绘图上下文（核心对象，所有绘图操作通过 ctx 完成）
+    const ctx = canvas.getContext('2d');
+
+    // 绘制三次贝塞尔曲线（复杂路径）
+    ctx.beginPath();
+    ctx.moveTo(100, 300); // 起点
+    // 三次贝塞尔：2个控制点（x1,y1）、（x2,y2），终点（x,y）
+    ctx.bezierCurveTo(150, 100, 450, 100, 500, 300);
+    ctx.strokeStyle = 'red';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+
+    // 绘制自定义平滑形状（结合多条贝塞尔曲线）
+    ctx.beginPath();
+    ctx.moveTo(200, 400);
+    ctx.bezierCurveTo(250, 350, 350, 350, 400, 400);
+    ctx.bezierCurveTo(450, 450, 350, 500, 300, 480);
+    ctx.bezierCurveTo(250, 500, 150, 450, 200, 400);
+    ctx.fillStyle = 'rgba(0, 128, 255, 0.6)';
+    ctx.fill();
+    ctx.strokeStyle = '#000';
+    ctx.stroke();
+    
+  </script>
+</body>
+</html>

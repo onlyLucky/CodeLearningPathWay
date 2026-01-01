@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>touch opt</title>
+</head>
+<body>
+  <canvas id="myCanvas" width="600" height="600" style="border: 1px solid #ccc;"></canvas>
+  <script>
+    // 获取 Canvas 元素
+    const canvas = document.getElementById('myCanvas');
+    // 获取 2D 绘图上下文（核心对象，所有绘图操作通过 ctx 完成）
+    const ctx = canvas.getContext('2d');
+
+    let lastTouches = []; // 上一帧的触摸点
+    const shape = { x: canvas.width/2, y: canvas.height/2, width: 200, height: 150, scale: 1, rotate: 0 };
+
+    function handleTouchStart(e) {
+      e.preventDefault();
+      lastTouches = Array.from(e.touches).map(touch => getCanvasTouchCoordinates(touch));
+    }
+
+    function handleTouchMove(e) {
+      e.preventDefault();
+      const currentTouches = Array.from(e.touches).map(touch => getCanvasTouchCoordinates(touch));
+      
+      // 双指手势（缩放+旋转）
+      if (currentTouches.length === 2 && lastTouches.length === 2) {
+        // 计算上一帧和当前帧的双指距离（用于缩放）
+        const lastDist = getDistance(lastTouches[0], lastTouches[1]);
+        const currentDist = getDistance(currentTouches[0], currentTouches[1]);
+        const scaleRatio = currentDist / lastDist; // 缩放比例
+        
+        // 计算上一帧和当前帧的双指角度（用于旋转）
+        const lastAngle = getAngle(lastTouches[0], lastTouches[1]);
+        const currentAngle = getAngle(currentTouches[0], currentTouches[1]);
+        const rotateDelta = currentAngle - lastAngle; // 旋转角度变化
+        
+        // 更新形状状态
+        shape.scale *= scaleRatio;
+        shape.rotate += rotateDelta;
+        
+        // 计算双指中心点（用于平移）
+        const lastCenter = getCenter(lastTouches[0], lastTouches[1]);
+        const currentCenter = getCenter(currentTouches[0], currentTouches[1]);
+        shape.x += currentCenter.x - lastCenter.x;
+        shape.y += currentCenter.y - lastCenter.y;
+      }
+      
+      // 单指手势（平移）
+      if (currentTouches.length === 1 && lastTouches.length === 1) {
+        shape.x += currentTouches[0].x - lastTouches[0].x;
+        shape.y += currentTouches[0].y - lastTouches[0].y;
+      }
+      
+      // 绘制形状（应用缩放和旋转）
+      drawShape();
+      
+      lastTouches = currentTouches;
+    }
+
+    // 工具函数：计算两点距离
+    function getDistance(p1, p2) {
+      const dx = p2.x - p1.x;
+      const dy = p2.y - p1.y;
+      return Math.sqrt(dx*dx + dy*dy);
+    }
+
+    // 工具函数：计算两点连线与x轴的夹角
+    function getAngle(p1, p2) {
+      const dx = p2.x - p1.x;
+      const dy = p2.y - p1.y;
+      return Math.atan2(dy, dx);
+    }
+
+    // 工具函数：计算两点中心点
+    function getCenter(p1, p2) {
+      return { x: (p1.x + p2.x)/2, y: (p1.y + p2.y)/2 };
+    }
+
+    // 绘制带缩放和旋转的形状
+    function drawShape() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // 保存当前绘图状态（避免旋转/缩放影响其他图形）
+      ctx.save();
+      
+      // 平移到形状中心（旋转/缩放的原点）
+      ctx.translate(shape.x, shape.y);
+      // 旋转（弧度转角度，或直接使用弧度）
+      ctx.rotate(shape.rotate);
+      // 缩放
+      ctx.scale(shape.scale, shape.scale);
+      
+      // 绘制矩形（此时的原点是形状中心，需调整坐标）
+      ctx.fillStyle = 'rgba(0, 128, 255, 0.6)';
+      ctx.fillRect(-shape.width/2, -shape.height/2, shape.width, shape.height);
+      
+      // 恢复绘图状态
+      ctx.restore();
+    }
+    drawShape();
+  </script>
+</body>
+</html>

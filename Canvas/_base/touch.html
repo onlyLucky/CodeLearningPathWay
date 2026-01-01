@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>touch</title>
+</head>
+<body>
+  <canvas id="myCanvas" width="600" height="600" style="border: 1px solid #ccc;"></canvas>
+  <script>
+    // 获取 Canvas 元素
+    const canvas = document.getElementById('myCanvas');
+    // 获取 2D 绘图上下文（核心对象，所有绘图操作通过 ctx 完成）
+    const ctx = canvas.getContext('2d');
+
+    // 触摸事件绑定
+    canvas.addEventListener('touchstart', handleTouchStart);
+    canvas.addEventListener('touchmove', handleTouchMove);
+
+    // 触摸坐标转换（类似鼠标坐标）
+    function getCanvasTouchCoordinates(touch) {
+      const rect = canvas.getBoundingClientRect();
+      return {
+        x: (touch.clientX - rect.left) * (canvas.width / rect.width),
+        y: (touch.clientY - rect.top) * (canvas.height / rect.height)
+      };
+    }
+
+    // 处理触摸开始（获取多个触摸点）
+    function handleTouchStart(e) {
+      e.preventDefault(); // 阻止默认行为（如页面滚动）
+      const touches = e.touches; // 所有当前触摸点的集合
+      for (let i = 0; i < touches.length; i++) {
+        const { x, y } = getCanvasTouchCoordinates(touches[i]);
+        console.log(`触摸点${i+1}：(${x}, ${y})`);
+      }
+    }
+
+    // 处理触摸移动
+    function handleTouchMove(e) {
+      e.preventDefault();
+      const touches = e.touches;
+      for (let i = 0; i < touches.length; i++) {
+        const { x, y } = getCanvasTouchCoordinates(touches[i]);
+        // 触摸点移动逻辑（如拖拽、缩放）
+        console.log(`触摸移动${i+1}：(${x}, ${y})`);
+      }
+    }
+  </script>
+</body>
+</html>

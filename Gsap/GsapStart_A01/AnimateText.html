@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Animate Text</title>
+  <script src="../assets/libs/gsap3.13.0/gsap.min.js"></script>
+  <script src="../assets/libs/gsap3.13.0/SplitText.min.js"></script>
+  <style>
+    * {
+      padding: 0;
+      margin: 0;
+    }
+    body {
+      width: 100vw;
+      min-height: 100vh;
+      background-color: #232529;
+      color: #bbbaa6;
+      font-size: calc( ((16 / 16) * 1rem) + (18 - 16) * calc( (100vw - 320 / 16 * 1rem) / (1140 - 320) ) );
+      font-weight: 400;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .container{
+      position: relative;
+      width: 90vw;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-evenly;
+      border-radius: 9px;
+    }
+    .container .button-wrapper{
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .button-wrapper button{
+      display: inline-block;
+      outline: none;
+      border: solid 2px #bbbaa6;
+      color: #bbbaa6;
+      background: #232529;
+      text-decoration: none;
+      border-radius: 99px;
+      padding: 12px 25px;
+      cursor: pointer;
+      line-height: 1;
+      font-size: 0.9rem;
+      transition: opacity 0.2s ease-out;
+    }
+    .text{
+      color: #dfdcff;
+      font-size: clamp(2rem, 12rem, 5vw);
+      line-height: 1.2;
+      box-sizing: border-box;
+      padding: 5%;
+      width: 100%;
+      text-align: center;
+      perspective: 500px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="button-wrapper">
+      <button id="chars" class="button">Characters</button>
+      <button id="words" class="button">Words</button>
+      <button id="lines" class="button">Lines</button>
+    </div>
+    <div class="text">
+      Break apart HTML text into characters, words, and/or lines for easy animation.
+    </div>
+  </div>
+  <script>
+    // 注册 GSAP 插件 SplitText
+    gsap.registerPlugin(SplitText);
+
+    // 定义 split 和 animation 变量，用于存储 SplitText 实例和动画实例
+    let split, animation;
+
+    // 为按钮 #chars 添加点击事件监听器
+    document.querySelector("#chars").addEventListener("click", () => {
+      // 如果 animation 已存在，调用 revert 方法恢复到初始状态
+      animation && animation.revert();
+      // 创建一个新的动画实例，对 split.chars 进行动画操作
+      animation = gsap.from(split.chars, {
+        x: 150, // 每个字符在 X 轴方向移动 150 像素
+        opacity: 0, // 每个字符的不透明度设置为 0
+        duration: 0.7, // 动画持续时间，单位为秒
+        ease: "power4", // 使用 power4 缓动函数
+        stagger: 0.04 // 每个字符之间的动画延迟，单位为秒
+      });
+    });
+
+    // 为按钮 #words 添加点击事件监听器
+    document.querySelector("#words").addEventListener("click", () => {
+      // 如果 animation 已存在，调用 revert 方法恢复到初始状态
+      animation && animation.revert();
+      // 创建一个新的动画实例，对 split.words 进行动画操作
+      animation = gsap.from(split.words, {
+        y: -100, // 每个单词在 Y 轴方向移动 -100 像素
+        opacity: 0, // 每个单词的不透明度设置为 0
+        rotation: "random(-80, 80)", // 每个单词随机旋转 -80 到 80 度
+        duration: 0.7, // 动画持续时间，单位为秒
+        ease: "back", // 使用 back 缓动函数
+        stagger: 0.15 // 每个单词之间的动画延迟，单位为秒
+      });
+    });
+
+    // 为按钮 #lines 添加点击事件监听器
+    document.querySelector("#lines").addEventListener("click", () => {
+      // 如果 animation 已存在，调用 revert 方法恢复到初始状态
+      animation && animation.revert();
+      // 创建一个新的动画实例，对 split.lines 进行动画操作
+      animation = gsap.from(split.lines, {
+        rotationX: -100, // 每行文字绕 X 轴旋转 -100 度
+        transformOrigin: "50% 50% -160px", // 设置旋转的原点
+        opacity: 0, // 每行文字的不透明度设置为 0
+        duration: 0.8, // 动画持续时间，单位为秒
+        ease: "power3", // 使用 power3 缓动函数
+        stagger: 0.25 // 每行文字之间的动画延迟，单位为秒
+      });
+    });
+
+    // 定义 setup 函数，用于初始化 SplitText 和动画
+    function setup() {
+      // 如果 split 已存在，调用 revert 方法恢复到初始状态
+      split && split.revert();
+      // 如果 animation 已存在，调用 revert 方法恢复到初始状态
+      animation && animation.revert();
+      // 创建一个新的 SplitText 实例，将文本拆分为字符、单词和行
+      split = SplitText.create(".text", {type: "chars,words,lines"});
+    }
+
+    // 调用 setup 函数初始化
+    setup();
+
+    // 为窗口的 resize 事件添加监听器，当窗口大小改变时重新初始化
+    window.addEventListener("resize", setup);
+  </script>
+</body>
+</html>

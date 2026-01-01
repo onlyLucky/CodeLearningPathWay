@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>sort big date</title>
+</head>
+<body>
+  <button onclick="startSort()">开始排序</button>
+  <div id="status">准备就绪</div>
+  <div id="result"></div>
+
+  <script>
+    let worker;
+    function startSort(){
+      // 创建专用 Worker
+      worker = new Worker('sortWorker.js');
+      document.getElementById('status').textContent = '排序中...';
+
+      // 生成100万条随机数
+      const data = Array.from({ length: 1000000 }, () => Math.random() * 1000000);
+
+      // 向 Worker 发送数据
+      worker.postMessage({ type: 'sort', data });
+
+      // 接收排序结果
+      worker.onmessage = (e) => {
+        const { type, result, time } = e.data;
+        if (type === 'sorted') {
+          document.getElementById('status').textContent = '排序完成';
+          document.getElementById('result').textContent = `耗时：${time}ms，前10项：${result.slice(0, 10).join(', ')}`;
+          // 关闭 Worker
+          worker.terminate();
+        }
+      };
+
+      // 监听错误
+      worker.onerror = (error) => {
+        console.error(`Worker 错误：${error.message}（行：${error.lineno}）`);
+        worker.terminate();
+      };
+
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Toggle Direction</title>
+  <script src="../assets/libs/gsap3.13.0/gsap.min.js"></script>
+  <style>
+    body {
+      padding: 0;
+      margin: 0;
+      width: 100vw;
+      min-height: 100vh;
+      background-color: #232529;
+      color: #bbbaa6;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+    }
+    button {
+      text-transform: none;
+      margin: 0.25rem;
+      background: #fffce1;
+      border: solid 2px #0e100f;
+      outline: none;
+      color: #0e100f;
+      text-decoration: none;
+      border-radius: 99px;
+      padding: 12px 25px;
+      cursor: pointer;
+      line-height: 1;
+      font-size: 0.9rem;
+      transition: opacity 0.2s ease-out;
+    }
+    .flair{
+      width: 100px;
+      height: 100px;
+      background-size: contain;
+      background-repeat: no-repeat;
+      will-change: transform;
+    }
+    .flair--25{
+      background-image: url(https://assets.codepen.io/16327/flair-25.png);
+    }
+    .nav.light {
+      padding-top: 2rem;
+      background-color: transparent;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center
+    }
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="flair flair--25"></div>
+    <div class="nav light">
+      <button id="toggle">toggle direction</button>
+    </div>
+  </div>
+  <script>
+    // 获取导航元素（当前未使用，可留作后续逻辑）
+    const nav = document.querySelector('.nav');
+
+    // 创建并暂停一个 GSAP 动画实例，初始状态为反向（reversed）
+    const tween = gsap.to('.flair', {
+      duration: 2,        // 动画时长 2 秒
+      xPercent: 300,      // 水平移动自身宽度的 300%
+      rotation: 360,      // 旋转一圈
+      ease: 'none',       // 线性缓动，无加减速
+      paused: true        // 创建后立即暂停，等待手动控制
+    }).reverse();          // 反向标记，第一次点击会正向播放
+
+    // 点击按钮切换动画方向：正向 ↔ 反向
+    document.querySelector('#toggle').onclick = () => {
+      tween.reversed(!tween.reversed());
+    };
+  </script>
+</body>
+</html>

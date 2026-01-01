@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>excel parser</title>
+</head>
+<body>
+  <input type="file" accept=".xlsx,.xls" onchange="parseExcel(event)">
+  <div id="progress">进度：0%</div>
+  <div id="data"></div>
+
+  <script>
+    let worker;
+    function parseExcel(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      worker = new Worker('excelWorker.js');
+      const progressEl = document.getElementById('progress');
+      const dataEl = document.getElementById('data');
+
+      // 读取文件为 ArrayBuffer
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        worker.postMessage({ type: 'parse', data: e.target.result });
+      };
+      reader.readAsArrayBuffer(file);
+
+      // 接收解析进度和结果
+      worker.onmessage = (e) => {
+        const { type, progress, data } = e.data;
+        if (type === 'progress') {
+          progressEl.textContent = `进度：${progress}%`;
+        } else if (type === 'result') {
+          progressEl.textContent = '解析完成';
+          console.log("解析结果：",data)
+          dataEl.textContent = JSON.stringify(data, null, 2);
+          worker.terminate();
+        }
+      };
+
+    }
+  </script>
+</body>
+</html>

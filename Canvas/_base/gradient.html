@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>gradient</title>
+</head>
+<body>
+  <canvas id="myCanvas" width="600" height="600" style="border: 1px solid #ccc;"></canvas>
+  <script>
+    // 获取 Canvas 元素
+    const canvas = document.getElementById('myCanvas');
+    // 获取 2D 绘图上下文（核心对象，所有绘图操作通过 ctx 完成）
+    const ctx = canvas.getContext('2d');
+
+    // 1. 线性渐变（x0,y0：起点；x1,y1：终点）
+    const linearGradient = ctx.createLinearGradient(100, 100, 100, 300);
+    linearGradient.addColorStop(0, 'red'); // 起点颜色（偏移0）
+    linearGradient.addColorStop(0.5, 'yellow'); // 中间颜色（偏移0.5）
+    linearGradient.addColorStop(1, 'blue'); // 终点颜色（偏移1）
+
+    // 2. 径向渐变（x0,y0,r0：内圆；x1,y1,r1：外圆）
+    const radialGradient = ctx.createRadialGradient(300, 450, 20, 300, 450, 80);
+    radialGradient.addColorStop(0, 'white');
+    radialGradient.addColorStop(1, 'green');
+
+    // 绘制渐变图形
+    ctx.fillStyle = linearGradient;
+    ctx.fillRect(100, 100, 300, 200);
+
+    ctx.beginPath();
+    ctx.arc(300, 450, 80, 0, Math.PI * 2);
+    ctx.fillStyle = radialGradient;
+    ctx.fill();
+  </script>
+</body>
+</html>

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>animate_move</title>
+</head>
+<body>
+  <canvas id="myCanvas" width="600" height="600" style="border: 1px solid #ccc;"></canvas>
+  <div>
+    <button onclick="accelerateAnimate()">加速运动</button>
+    <button onclick="decelerateAnimate()">减速运行</button>
+    <button onclick="elasticityAnimate()">弹性运动</button>
+  </div>
+  <script>
+    // 1. 获取 Canvas 元素
+    const canvas = document.getElementById('myCanvas');
+    // 2. 获取 2D 绘图上下文（核心对象，所有绘图操作通过 ctx 完成）
+    const ctx = canvas.getContext('2d');
+
+    let animationId; // 动画ID，用于暂停/重启
+
+    function drawBall(){
+      const ball = { x: 50, y: 300, r: 30};
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+      ctx.beginPath();
+      ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2);
+      ctx.fillStyle = 'orange';
+      ctx.fill();
+    }
+    drawBall()
+    // 加速运动
+    function accelerateAnimate() {
+      const ball = { x: 50, y: 300, r: 30, dx: 0, dy: 0, ax: 0.2, ay: 0.1 }; // ax/ay 为加速度
+      if(animationId){
+        cancelAnimationFrame(animationId);
+      }
+      function animate(){
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+        // 绘制小球
+        ctx.beginPath();
+        ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2);
+        ctx.fillStyle = 'orange';
+        ctx.fill();
+        
+        // 加速逻辑：速度 = 速度 + 加速度
+        ball.dx += ball.ax;
+        ball.dy += ball.ay;
+        
+        // 更新位置
+        ball.x += ball.dx;
+        ball.y += ball.dy;
+        
+        // 边界限制（避免小球超出画布）
+        if (ball.x + ball.r >= canvas.width) ball.x = canvas.width - ball.r;
+        if (ball.y + ball.r >= canvas.height) ball.y = canvas.height - ball.r;
+        
+        animationId = requestAnimationFrame(animate);
+      }
+      animate()
+    }
+
+    // 减速运动
+    function decelerateAnimate(){
+      const ball = { x: 50, y: 300, r: 30, dx: 8, dy: 6, friction: 0.98 }; // friction 摩擦系数（0~1）
+
+      function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        ctx.beginPath();
+        ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2);
+        ctx.fillStyle = 'orange';
+        ctx.fill();
+        
+        // 减速逻辑：速度 = 速度 * 摩擦系数（逐渐趋近于0）
+        ball.dx *= ball.friction;
+        ball.dy *= ball.friction;
+        
+        // 位置更新（速度趋近于0时，小球逐渐停止）
+        ball.x += ball.dx;
+        ball.y += ball.dy;
+
+        // 边界限制（避免小球超出画布）
+        if (ball.x + ball.r >= canvas.width) ball.x = canvas.width - ball.r;
+        if (ball.y + ball.r >= canvas.height) ball.y = canvas.height - ball.r;
+        
+        animationId = requestAnimationFrame(animate);
+      }
+      animate()
+    }
+
+    // 弹性运动
+    function elasticityAnimate(){
+      const ball = { x: 50, y: 300, r: 30, dx: 5, dy: -3, elasticity: 0.8 }; // elasticity 弹性系数（0~1）
+
+      function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        ctx.beginPath();
+        ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2);
+        ctx.fillStyle = 'orange';
+        ctx.fill();
+        
+        ball.x += ball.dx;
+        ball.y += ball.dy;
+        
+        // 弹性碰撞：反向 + 速度衰减
+        if (ball.x + ball.r >= canvas.width || ball.x - ball.r <= 0) {
+          ball.dx = -ball.dx * ball.elasticity;
+        }
+        if (ball.y + ball.r >= canvas.height || ball.y - ball.r <= 0) {
+          ball.dy = -ball.dy * ball.elasticity;
+        }
+        
+        // 速度过小时停止（避免无限小幅反弹）
+        if (Math.abs(ball.dx) < 0.1 && Math.abs(ball.dy) < 0.1) {
+          ball.dx = 0;
+          ball.dy = 0;
+          cancelAnimationFrame(animationId);
+        }
+        
+        animationId = requestAnimationFrame(animate);
+      }
+      animate()
+    }
+
+
+
+  </script>
+</body>
+</html>

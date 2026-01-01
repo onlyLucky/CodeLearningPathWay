@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>particle</title>
+</head>
+<body>
+  <canvas id="myCanvas" width="600" height="600" style="border: 1px solid #ccc;"></canvas>
+  <script>
+    // 获取 Canvas 元素
+    const canvas = document.getElementById('myCanvas');
+    // 获取 2D 绘图上下文（核心对象，所有绘图操作通过 ctx 完成）
+    const ctx = canvas.getContext('2d');
+
+    class Particle {
+      constructor(x, y) {
+        this.x = x; // 位置
+        this.y = y;
+        this.r = Math.random() * 5 + 2; // 半径（随机2~7像素）
+        this.dx = Math.random() * 4 - 2; // x方向速度（-2~2）
+        this.dy = Math.random() * 4 - 2; // y方向速度（-2~2）
+        this.color = `rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 0.8)`; // 随机颜色
+        this.life = 100; // 生命周期（帧数）
+      }
+
+      // 更新粒子状态（位置、生命周期）
+      update() {
+        this.x += this.dx;
+        this.y += this.dy;
+        this.life--; // 每帧减少生命周期
+      }
+
+      // 绘制粒子
+      draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+        ctx.fillStyle = this.color;
+        ctx.fill();
+      }
+    }
+
+    // 粒子系统管理
+    const particles = [];
+
+    // 生成粒子（鼠标点击位置生成10个粒子）
+    canvas.addEventListener('click', (e) => {
+      const { x, y } = getCanvasCoordinates(e);
+      for (let i = 0; i < 10; i++) {
+        particles.push(new Particle(x, y));
+      }
+    });
+
+    // 坐标转换工具函数
+    function getCanvasCoordinates(e) {
+      // 获取 Canvas 元素在屏幕中的位置信息（包含 left/top/width/height）
+      const rect = canvas.getBoundingClientRect();
+      // 计算相对坐标（减去元素偏移，考虑设备像素比）
+      return {
+        x: (e.clientX - rect.left) * (canvas.width / rect.width),
+        y: (e.clientY - rect.top) * (canvas.height / rect.height)
+      };
+    }
+
+    // 动画循环（更新并绘制所有粒子）
+    function animateParticles() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // 过滤存活的粒子，更新并绘制
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.update();
+        p.draw();
+        
+        // 生命周期结束，移除粒子（避免内存泄漏）
+        if (p.life <= 0) {
+          particles.splice(i, 1);
+        }
+      }
+      
+      requestAnimationFrame(animateParticles);
+    }
+
+    animateParticles();
+  </script>
+</body>
+</html>

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>graphic composite</title>
+</head>
+<body>
+  <canvas id="myCanvas" width="600" height="600" style="border: 1px solid #ccc;"></canvas>
+  <script>
+    // 获取 Canvas 元素
+    const canvas = document.getElementById('myCanvas');
+    // 获取 2D 绘图上下文（核心对象，所有绘图操作通过 ctx 完成）
+    const ctx = canvas.getContext('2d');
+    
+    // 绘制第一个图形（蓝色矩形）
+    ctx.fillStyle = 'blue';
+    ctx.fillRect(100, 100, 200, 200);
+
+    // 设置合成模式（新图形与旧图形交集部分显示新图形）
+    ctx.globalCompositeOperation = 'source-in';
+
+    // 绘制第二个图形（黄色圆形）
+    ctx.beginPath();
+    ctx.arc(250, 250, 150, 0, Math.PI * 2);
+    ctx.fillStyle = 'yellow';
+    ctx.fill();
+
+    // 重置合成模式
+    ctx.globalCompositeOperation = 'source-over';
+  </script>
+</body>
+</html>

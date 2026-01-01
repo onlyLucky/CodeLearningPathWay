@@ -1,22 +1,121 @@
-### AL ###
-#Template for AL projects for Dynamics 365 Business Central
-#launch.json folder
+# -------------------------- 1. 依赖包目录（核心忽略项）--------------------------
+# Node.js 依赖包，体积大、可通过包管理器重装，无需提交
+node_modules/
+# pnpm 专属依赖存储目录
+*.pnpm-store/
+# yarn 离线缓存（可选，根据团队使用情况调整）
+.yarn/cache/
+.yarn/unplugged/
+.yarn/build-state.yml
+.yarn/install-state.gz
+
+# -------------------------- 2. 构建/打包产物（可通过命令重新生成）--------------------------
+# 通用构建输出目录（大部分前端工具默认/常用）
+dist/
+build/
+out/
+# 临时构建目录
+tmp/
+temp/
+# Webpack DLL 打包产物
+*.dll
+*.dll.js
+*.manifest.json
+# 静态资源生成文件
+assets/*/generated/
+# 打包压缩包
+*.zip
+*.tar.gz
+*.rar
+
+# -------------------------- 3. 缓存与系统临时文件 --------------------------
+# 工具缓存目录
+.cache/
+.vite/
+.next/cache/
+.gatsby-cache/
+# 编辑器/系统临时文件
+*.swp
+*.swo
+*.tmp
+*.bak
+*.orig
+# macOS 系统专属文件
+.DS_Store
+.localized
+# Windows 系统专属文件
+Thumbs.db
+Desktop.ini
+
+# -------------------------- 4. 编辑器/IDE 配置文件（个性化配置，不共享）--------------------------
+# VS Code
 .vscode/
-#Cache folder
-.alcache/
-#Symbols folder
-.alpackages/
-#Snapshots folder
-.snapshots/
-#Testing Output folder
-.output/
-#Extension App-file
-*.app
-#Rapid Application Development File
-rad.json
-#Translation Base-file
-*.g.xlf
-#License-file
-*.flf
-#Test results file
-TestResults.xml
+# 例外：如果团队需要共享VS Code插件推荐/设置，可保留以下两行（移除注释）
+# !.vscode/extensions.json
+# !.vscode/settings.json
+# WebStorm/IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
+# Eclipse
+.project
+.classpath
+.settings/
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+# Neovim
+.nvim/
+
+# -------------------------- 5. 环境变量与敏感配置（核心安全忽略项）--------------------------
+# 通用环境变量文件
+.env
+.env.local
+.env.*.local
+# 所有环境变量文件（排除示例文件，方便团队参考配置格式）
+*.env
+!.env.example
+!.env.template
+# direnv 配置文件
+.envrc
+# 自定义本地配置
+config/local.js
+config/local.json
+
+# -------------------------- 6. 日志文件 --------------------------
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+webpack-dev-server.log*
+
+# -------------------------- 7. 框架/工具专属文件 --------------------------
+# Vue 相关
+.vuepress/dist/
+# React CRA 相关
+coverage/
+# Next.js 相关
+.next/
+# Nuxt.js 相关
+.nuxt/
+# Gatsby 相关
+public/
+# Grunt 相关
+.grunt/
+# Babel 缓存
+.babel-cache/
+
+# -------------------------- 8. 其他冗余文件 --------------------------
+# SourceMap（如需调试可取消忽略，建议生产环境忽略）
+*.map
+!*.min.js.map
+# 备份文件
+*.bak
+*.orig
+# 依赖压缩包
+node_modules.tar.gz
+# IDE 索引文件
+*.idea/

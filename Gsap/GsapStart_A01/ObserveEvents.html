@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Observe events</title>
+  <script src="../assets/libs/gsap3.13.0/gsap.min.js"></script>
+  <script src="../assets/libs/gsap3.13.0/Observer.min.js"></script>
+  <style>
+    body {
+      padding: 0;
+      margin: 0;
+      width: 100vw;
+      min-height: 100vh;
+      background-color: #232529;
+      color: #bbbaa6;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    svg{
+      width: 400px;
+      max-width: 90vw;
+      max-height: 60vh;
+      overflow: visible;
+    }
+  </style>
+</head>
+<body>
+  <svg viewBox="0 0 284 284">
+    <path d="M141.48 268.08c-68.91 0-125.62-56.7-125.62-125.62 0-68.91 56.7-125.62 125.62-125.62 68.91 0 125.62 56.7 125.62 125.62v.01c-.08 68.88-56.74 125.54-125.62 125.61Z" fill="none" stroke="#42433d" opacity="1" stroke-width="1" />
+
+    <g id="velocity">
+      <path d="M141.48 268.08c-68.91 0-125.62-56.7-125.62-125.62 0-68.91 56.7-125.62 125.62-125.62 68.91 0 125.62 56.7 125.62 125.62v.01c-.08 68.88-56.74 125.54-125.62 125.61Z" fill="none" stroke="#42433d" opacity="0" stroke-width="1" />
+      <path d="M211.45 70.68 70.68 211.44l1.33 1.33L212.78 72.01l-1.33-1.33Z" fill="#42433d" />
+      <path d="m72.02 70.69-1.33 1.33 140.76 140.76 1.33-1.33L72.02 70.7Z" fill="#42433d" />
+    </g>
+
+    <g id="arrow" fill-rule="nonzero">
+      <path d="M141.48 268.08c-68.91 0-125.62-56.7-125.62-125.62 0-68.91 56.7-125.62 125.62-125.62 68.91 0 125.62 56.7 125.62 125.62v.01c-.08 68.88-56.74 125.54-125.62 125.61Z" fill="#0b0e1e" opacity="0" />
+      <path d="M142.18 122.89V40.83l-14.61 82.06h14.61Z" fill="url(#paint1_radial_2682_58269)" />
+      <path d="M142.18 122.89V40.83l14.6 82.06h-14.6Z" fill="url(#paint6_linear_2682_58269)" />
+      <path d="M140.75 169.9h-.01a28.3 28.3 0 0 1-28.17-28.17 28.3 28.3 0 0 1 28.17-28.17 28.3 28.3 0 0 1 28.17 28.17v.01a28.3 28.3 0 0 1-28.16 28.16Z" fill="url(#paint1_radial_2682_58269)" />
+      <path d="M140.75 156.78c-8.23 0-15-6.77-15-15s6.77-15 15-15 15 6.77 15 15a15.12 15.12 0 0 1-15 15Z" fill="url(#paint6_linear_2682_58269)" />
+    </g>
+
+    <defs>
+      <radialGradient id="paint1_radial_2682_58269" cx="0" cy="0" r="1" gradientTransform="matrix(23.84625 -275.8462 115.30595 9.96792 718.508 256.309)" gradientUnits="userSpaceOnUse">
+        <stop stop-color="#E8FBFF"></stop>
+        <stop offset=".672" stop-color="#67D9F2"></stop>
+        <stop offset=".802" stop-color="#00BAE2"></stop>
+        <stop offset="1" stop-color="#018CAA"></stop>
+      </radialGradient>
+      <linearGradient id="paint6_linear_2682_58269" x1="-10.592" x2="111.856" y1="-3.379" y2="165.26" gradientUnits="userSpaceOnUse">
+        <stop stop-color="#E1FAFF"></stop>
+        <stop offset=".188" stop-color="#CAF1F9"></stop>
+        <stop offset="1" stop-color="#68DCF5"></stop>
+      </linearGradient>
+    </defs>
+  </svg>
+  <script>
+    // 依赖注册：Observer 插件（用于统一监听滚轮、触摸、滚动、指针事件）
+    gsap.registerPlugin(Observer);
+
+    let animating;//动画锁：防止一次手势触发多次旋转
+
+    // 将箭头与速度指示器的旋转中心设为正中心，方便后续旋转
+    gsap.set('#arrow, #velocity', { transformOrigin: 'center' });
+
+    
+    const box       = document.querySelector('.box');          // 可移动元素
+    const ySetter   = gsap.quickSetter(box, 'y', 'px');        // 快速设置 y 轴位移
+    const clamper   = gsap.utils.clamp(0, 10000);              // 限制范围 0~10000（暂未使用）
+
+    /**
+     * 速度映射管道：
+     * 1. 先 clamp 到 [-21000, 21000]
+     * 2. 再线性映射到 [-800, 800]（用于旋转角度）
+     */
+    const transformer = gsap.utils.pipe(
+      gsap.utils.clamp(-21000, 21000),
+      gsap.utils.mapRange(-21000, 21000, -800, 800)
+    );
+
+    // 取绝对值更大的数，决定用水平还是垂直速度
+    function absoluteMost(a, b) {
+      return Math.abs(a) > Math.abs(b) ? a : b;
+    }
+
+    // 当前位移（保留接口，可扩展）
+    let y = 0;
+    let x = 0;
+
+    /**
+     * 快速旋转函数：根据手势方向让箭头转到指定角度
+     * @param {number} value 目标角度
+     */
+    const quickRotate = gsap.quickTo('#velocity', 'rotation');
+
+    function rotate(value) {
+      if (animating) return;          // 防止并发
+      animating = true;
+
+      gsap.to('#arrow', {
+        rotate: value + '_short',     // _short 让 GSAP 选择最短路径
+        ease: 'back.out',
+        duration: 0.2,
+        onComplete: () => animating = false
+      });
+    }
+
+    /**
+     * 创建 Observer 实例
+     * 统一监听 wheel/touch/scroll/pointer 四种输入
+     */
+    Observer.create({
+      type: 'wheel,touch,scroll,pointer',
+      preventDefault: true, // 阻止默认滚动，避免页面抖动
+      tolerance: 10,        // 方向判定阈值（像素）
+
+      /**
+       * 任何方向变化都会触发
+       * 用速度最大的轴驱动速度针旋转
+       */
+      onChange: self => {
+        const maxVel = absoluteMost(self.velocityX, self.velocityY);
+        quickRotate(transformer(maxVel));
+      },
+
+      /**
+       * 四大方向手势：让箭头转到对应象限
+       */
+      onUp:    () => rotate(0),    // 上
+      onDown:  () => rotate(180),  // 下
+      onLeft:  () => rotate(270),  // 左
+      onRight: () => rotate(90),   // 右
+
+      /**
+       * 按压反馈：缩小箭头，松手回弹
+       */
+      onPress:  () => gsap.to('#arrow', { scale: 0.7 }),
+      onRelease: () => gsap.to('#arrow', { scale: 1, ease: 'back.out' })
+    });
+  </script>
+</body>
+</html>

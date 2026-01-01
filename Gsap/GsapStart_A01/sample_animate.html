@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>sample animate</title>
+  <script src="../assets/libs/gsap3.13.0/gsap.min.js"></script>
+  <style>
+    * {
+      padding: 0;
+      margin: 0;
+    }
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 2rem;
+      overflow: hidden;
+      background-color: #232529;
+    }
+
+    .box {
+      width: 75px;
+      height: 75px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      background: linear-gradient(114.41deg, #0ae448 20.74%, #abff84 65.5%);
+      background-blend-mode: color-dodge; /* Blend the noise texture with the gradient */
+      font-weight: 600;
+      line-height: 1.2;
+      will-change: transform;
+    }
+  </style>
+</head>
+<body>
+  <div class="box green"></div>
+  <script>
+    // 使用 GSAP 的 to 方法对所有类名为 .box 的元素进行动画操作
+    /* gsap.to(".box", { 
+      x: 200,               // 在 X 轴方向上移动 200 像素
+      rotation: 360,        // 元素旋转 360 度
+      scale: 1.2,           // 元素放大到 1.2 倍
+      duration: 1,          // 动画持续时间，单位为秒
+      repeat: 1,            // 动画重复一次
+      yoyo: true,           // 动画在重复时来回播放
+      delay: 1,             // 动画延迟 1 秒后开始
+      ease: "back.out"      // 使用 back.out 缓动函数，使动画在结束时有回弹效果
+    }); */
+
+    /* 
+    // 使用 GSAP 的 from 方法对所有类名为 .box 的元素进行动画操作
+    gsap.from(".box", { 
+      x: -200,              // 从 X 轴方向上 -200 像素的位置开始
+      rotation: -360,       // 从旋转 -360 度开始
+      scale: 0,             // 从缩放为 0 开始
+      duration: 1,          // 动画持续时间，单位为秒
+      repeat: 1,            // 动画重复一次
+      ease: "back.out"      // 使用 back.out 缓动函数，使动画在结束时有回弹效果
+    });
+    */
+
+    // 使用 GSAP 的 fromTo 方法对所有类名为 .box 的元素进行动画操作
+    gsap.fromTo(".box", {
+      x: -200,              // 从 X 轴方向上 -200 像素的位置开始
+      rotation: -360,       // 从旋转 -360 度开始
+      scale: 0,             // 从缩放为 0 开始
+      repeat: 1,            // 动画重复一次
+    }, { 
+      x: 200,               // 动画结束时在 X 轴方向上移动到 200 像素
+      rotation: 360,        // 动画结束时旋转 360 度
+      scale: 1.2,           // 动画结束时放大到 1.2 倍
+      duration: 1,          // 动画持续时间，单位为秒
+      repeat: 1,            // 动画重复一次
+      ease: "back.out"      // 使用 back.out 缓动函数，使动画在结束时有回弹效果
+    });
+
+  </script>
+</body>
+</html>

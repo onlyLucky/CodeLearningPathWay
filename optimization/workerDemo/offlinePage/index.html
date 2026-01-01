@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>离线博客</title>
+</head>
+<body>
+  <nav>
+    <a href="/">首页</a>
+    <a href="/article1.html">文章1</a>
+    <a href="/article2.html">文章2</a>
+  </nav>
+  <div id="content">首页内容</div>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', async () => {
+        try {
+          await navigator.serviceWorker.register('/sw.js');
+          console.log('Service Worker 注册成功');
+        } catch (err) {
+          console.error('注册失败:', err);
+        }
+      });
+    }
+  </script>
+</body>
+</html>

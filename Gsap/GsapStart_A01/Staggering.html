@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>A01 Staggering</title>
+  <script src="../assets/libs/gsap3.13.0/gsap.min.js"></script>
+  <style>
+    * {
+      padding: 0;
+      margin: 0;
+    }
+    body {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background-color: #232529;
+    }
+    .section{
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      flex-direction: row;
+      width: 100%;
+      height: 100%;
+    }
+    .box {
+      cursor: pointer;
+      opacity: 0;
+      width: 75px;
+      height: 75px;
+      border-radius: 12px;
+    }
+    .green{
+      background: linear-gradient(114.41deg, #0ae448 20.74%, #abff84 65.5%);
+    }
+    .purple{
+      background: linear-gradient(153.58deg, #f7bdf8 32.25%, #2f3cc0 92.68%);
+    }
+    .orange{
+      background: linear-gradient(111.45deg, #ff8709 19.42%, #f7bdf8 73.08%);
+    }
+  </style>
+</head>
+<body>
+  <div class="section">
+    <div class="box green"></div>
+    <div class="box purple"></div>
+    <div class="box orange"></div>
+    <div class="box purple"></div>
+    <div class="box green"></div>
+  </div>
+  <script>
+    gsap.to(".box", {
+      duration: 1,         // 动画持续时间，单位为秒
+      rotation: 360,       // 元素旋转 360 度
+      opacity: 1,          // 元素的不透明度设置为 1（完全不透明）
+      delay: 0.5,          // 动画延迟 0.5 秒后开始
+      stagger: 0.1,        // 从左边开始，每个元素间隔 0.1 秒依次开始动画
+      ease: "sine.out"     // 使用 sine.out 缓动函数，使动画在结束时逐渐减速
+    });
+    document.querySelectorAll(".box").forEach((box, index) => {
+      box.addEventListener("click", () => {
+        gsap.to(".box", {
+          duration: 0.5,
+          opacity: 0,
+          y: -100,
+          stagger: {
+            from: index,   // 从已单击元素的索引开始
+            amount: 1      // 总的交错时间是 1 秒，即最后一个元素比第一个元素晚 1 秒开始动画
+          },
+          ease: "back.in", // 使用 back.in 缓动函数，使动画在开始时有回弹效果
+          overwrite: "auto"// 自动覆盖任何冲突的动画
+        });
+      });
+    });
+
+  </script>
+</body>
+</html>

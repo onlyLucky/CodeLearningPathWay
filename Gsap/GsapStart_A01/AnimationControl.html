@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Animation Control</title>
+  <script src="../assets/libs/gsap3.13.0/gsap.min.js"></script>
+  <style>
+    * {
+      padding: 0;
+      margin: 0;
+    }
+    body {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background-color: #232529;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .flair{
+      width: 100px;
+      height: 100px;
+      background-image: url(../assets/images/flair.png);
+      background-size: contain;
+      background-repeat: no-repeat;
+      will-change: transform;
+    }
+    .flair--25{
+      background-image: url(../assets/images/flair-25.png);
+    }
+    .nav.light {
+      padding-top: 2rem;
+      background-color: transparent;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center
+    }
+    button {
+      text-transform: none;
+      margin: 0.25rem;
+      background: #fffce1;
+      border: solid 2px #0e100f;
+      outline: none;
+      color: #0e100f;
+      text-decoration: none;
+      border-radius: 99px;
+      padding: 12px 25px;
+      cursor: pointer;
+      line-height: 1;
+      font-size: 0.9rem;
+      transition: opacity 0.2s ease-out;
+    }
+    
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="flair flair--25"></div>
+      <div class="nav light">
+      <button id="play">play()</button>
+      <button id="pause">pause()</button>
+      <button id="resume">resume()</button>
+      <button id="reverse">reverse()</button>
+      <button id="restart">restart()</button>
+    </div>
+  </div>
+  <script>
+    // 获取页面中类名为 .nav 的元素
+    let nav = document.querySelector('.nav');
+
+    let tween = gsap.to(".flair", {
+      duration: 2, // 动画持续时间，单位为秒
+      x: () => nav.offsetWidth, // 动画的 x 值动态计算为 .nav 元素的宽度（单位为像素）
+      xPercent: -100, // 动画的 x 值偏移量，以百分比表示，这里表示偏移自身宽度的 -100%
+      rotation: 360, // 元素旋转 360 度
+      ease: "none", // 不使用缓动函数，动画线性进行
+      paused: true // 动画初始化时暂停
+    });
+
+    // 为控制动画的按钮添加点击事件监听器
+    document.querySelector("#play").onclick = () => tween.play(); // 播放动画
+    document.querySelector("#pause").onclick = () => tween.pause(); // 暂停动画
+    document.querySelector("#resume").onclick = () => tween.resume(); // 恢复动画
+    document.querySelector("#reverse").onclick = () => tween.reverse(); // 反向播放动画
+    document.querySelector("#restart").onclick = () => tween.restart(); // 重新开始动画
+  </script>
+</body>
+</html>

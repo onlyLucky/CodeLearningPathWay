@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Text scrambling</title>
+  <script src="../assets/libs/gsap3.13.0/gsap.min.js"></script>
+  <script src="../assets/libs/gsap3.13.0/ScrambleTextPlugin.min.js"></script>
+  <style>
+    body {
+      padding: 0;
+      margin: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: #232529;
+      color: #bbbaa6;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      font-size: calc( ((16 / 16) * 1rem) + (18 - 16) * calc( (100vw - 320 / 16 * 1rem) / (1140 - 320) ) );
+      font-weight: 400;
+    }
+    .text{
+      box-sizing: border-box;
+      padding: 10% 5% 5% 5%;
+      text-align: center;
+      width: 90vw;
+      height: 300px;
+      max-width: 50ch;
+    }
+    .heading-text{
+      -webkit-text-fill-color:transparent;
+      background: radial-gradient( 129.03% 100% at 120.97% 81.45%, #dfdcff 27.08%, #a69eff 100% );
+      background-clip: text;
+    }
+    .border{
+      outline: grey 2px dashed;
+      outline-offset: 5px;
+      border-radius: 10px;
+    }
+    button{
+      display: inline-block;
+      outline: none;
+      border: solid 2px #bbbaa6;
+      color: #bbbaa6;
+      background: #232529;
+      text-decoration: none;
+      border-radius: 99px;
+      padding: 12px 25px;
+      cursor: pointer;
+      line-height: 1;
+      font-size: 0.9rem;
+      transition: opacity 0.2s ease-out;
+    }
+  </style>
+</head>
+<body>
+  <h1 class="text heading-text">
+    Scramble or unscramble text progressively.
+  </h1>
+  <button id="next" class="button">Next</button>
+  <script>
+    // 注册 GSAP 的 ScrambleText 插件
+    gsap.registerPlugin(ScrambleTextPlugin);
+
+    /* 待展示的文本池 */
+    const blurbs = [
+      "Scramble or unscramble text progressively.",
+      "Use specific chars like 'XO' or use only numbers, UPPERCASE or lowercase.",
+      "Even add a class to the new or old text."
+    ];
+    let curIndex = 0; // 当前显示文本的索引
+    /* 点击“下一条”按钮时触发 */
+    document.querySelector("#next").addEventListener("click", () => {
+      // 循环索引
+      curIndex = (curIndex + 1) % blurbs.length;
+      // 执行 ScrambleText 动画
+      gsap.to(".text", {
+        scrambleText: {
+          text: blurbs[curIndex],        // 目标文本
+          chars: "upperAndLowerCase",    // 乱码字符集：大小写字母
+          revealDelay: 0.2,              // 0.2 秒后开始揭示真实文本
+          tweenLength: true,             // 动态补/删字符以匹配目标长度
+          newClass: curIndex === 2 ? "border" : "" // 第三条文本追加 CSS 类
+        },
+        ease: "power2.inOut",            // 缓动函数
+        overwrite: "auto",               // 自动覆盖之前的相同属性动画
+        duration: 4.2                    // 总动画时长（秒）
+      });
+    });
+
+  </script>
+</body>
+</html>

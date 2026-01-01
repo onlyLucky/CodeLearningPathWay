@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>canvas</title>
+</head>
+<body>
+  <!-- 基础结构：width/height 是画布实际像素尺寸，style 控制显示尺寸（避免拉伸） -->
+  <canvas id="myCanvas" width="200" height="200" style="border: 1px solid #ccc;"></canvas>
+  <script>
+    // 1. 获取 Canvas 元素
+    const canvas = document.getElementById('myCanvas');
+    // 2. 获取 2D 绘图上下文（核心对象，所有绘图操作通过 ctx 完成）
+    const ctx = canvas.getContext('2d');
+
+    // 3. 动态设置画布尺寸（避免拉伸的正确方式）
+    function resizeCanvas() {
+      // 方式1：直接设置 width/height 属性（会清空画布）
+      canvas.width = window.innerWidth * 0.8;
+      canvas.height = window.innerHeight * 0.6;
+      
+      // 方式2：保持比例缩放（适合固定比例的场景，如游戏、图表）
+      const ratio = 1 / 1; // 宽高比 1:1
+      const maxWidth = window.innerWidth * 0.8;
+      const maxHeight = window.innerHeight * 0.8;
+      if (maxWidth / maxHeight > ratio) {
+        canvas.height = maxHeight;
+        canvas.width = maxHeight * ratio;
+      } else {
+        canvas.width = maxWidth;
+        canvas.height = maxWidth / ratio;
+      }
+      console.log(canvas.width, canvas.height)
+      // 重新绘制（因为设置 width/height 会清空画布）
+      drawBasicShapes()
+    }
+
+    // 监听窗口 resize 事件，适配屏幕
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    function drawBasicShapes(){
+      // 清空画布（避免重复绘制）
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawRect()
+      drawCircle()
+      drawPath()
+      drawText()
+    }
+    function drawRect() {
+      // 1. 填充矩形（fillRect(x, y, width, height)）
+      ctx.fillStyle = 'rgba(255, 0, 0, 0.5)'; // 填充颜色（支持 hex、rgb、rgba、颜色名）
+      ctx.fillRect(50, 50, 200, 100); // 左上角(50,50)，宽200，高100
+      
+      // 2. 描边矩形（strokeRect(x, y, width, height)）
+      ctx.strokeStyle = '#0000ff'; // 描边颜色
+      ctx.lineWidth = 3; // 线条宽度
+      ctx.strokeRect(300, 50, 200, 100);
+      
+      // 3. 清除矩形（clearRect(x, y, width, height)）
+      ctx.clearRect(60, 60, 80, 80); // 清除指定区域（变为透明）
+    }
+    function drawCircle() {
+      // 1. 开始路径（重置当前路径）
+      ctx.beginPath();
+      // 2. 绘制弧线（arc(x, y, r, startAngle, endAngle, anticlockwise)）
+      ctx.arc(400, 300, 80, 0, Math.PI * 2, false); // 圆心(400,300)，半径80，0到2π（完整圆形）
+      ctx.fillStyle = 'yellow';
+      ctx.fill(); // 填充圆形
+      
+      // 绘制半圆（仅上半圆）
+      ctx.beginPath();
+      ctx.arc(200, 300, 80, 0, Math.PI, true); // 逆时针绘制上半圆
+      ctx.strokeStyle = 'green';
+      ctx.lineWidth = 4;
+      ctx.stroke(); // 描边半圆
+    }
+
+    function drawPath() {
+      // 1. 开始路径（必须调用，避免与之前的路径关联）
+      ctx.beginPath();
+      
+      // 2. 定义路径（移动起点→绘制线段/曲线）
+      ctx.moveTo(100, 400); // 移动起点到(100,400)
+      ctx.lineTo(300, 400); // 绘制线段到(300,400)
+      ctx.lineTo(200, 250); // 绘制线段到(200,250)
+      ctx.closePath(); // 闭合路径（连接终点到起点）
+      
+      // 3. 设置样式
+      ctx.fillStyle = 'rgba(128, 0, 128, 0.6)'; // 填充色（紫色半透明）
+      ctx.strokeStyle = '#333';
+      ctx.lineWidth = 2;
+      
+      // 4. 填充+描边（顺序不影响，但若先描边后填充，描边会被部分覆盖）
+      ctx.fill();
+      ctx.stroke();
+      
+      // 绘制贝塞尔曲线（二次贝塞尔）
+      ctx.beginPath();
+      ctx.moveTo(400, 400);
+      ctx.quadraticCurveTo(500, 300, 600, 400); // 控制点(500,300)，终点(600,400)
+      ctx.strokeStyle = 'orange';
+      ctx.lineWidth = 3;
+      ctx.stroke();
+    }
+
+    function drawText() {
+      // 1. 填充文字
+      ctx.font = 'bold 36px Arial, sans-serif'; // 字体样式（粗细、大小、字体族）
+      ctx.fillStyle = '#333';
+      ctx.textAlign = 'center'; // 水平对齐方式（left/center/right）
+      ctx.textBaseline = 'middle'; // 垂直对齐基线（top/middle/bottom）
+      ctx.fillText('Canvas 基础学习', canvas.width / 2, 50); // 文字内容、x坐标、y坐标
+      
+      // 2. 描边文字
+      ctx.font = '24px "Microsoft YaHei"';
+      ctx.strokeStyle = 'red';
+      ctx.lineWidth = 1;
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'top';
+      ctx.strokeText('自定义路径与文字', 50, 500);
+    }
+  </script>
+</body>
+</html>

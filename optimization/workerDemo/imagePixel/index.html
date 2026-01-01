@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>image pixel handle</title>
+</head>
+<body>
+  <input type="file" accept="image/*" onchange="loadImage(event)">
+  <canvas id="original" style="display: none;"></canvas>
+  <img id="processed" alt="处理后的图片">
+
+  <script>
+    let worker;
+    const originalCanvas = document.getElementById('original');
+    const originalCtx = originalCanvas.getContext('2d');
+    const processedImg = document.getElementById('processed');
+
+    function loadImage(){
+      const file = event.target.files[0];
+      console.log("loadImage")
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.src = e.target.result;
+        console.log("onload")
+        img.onload = () => {
+          // 绘制图片到画布
+          originalCanvas.width = img.width;
+          originalCanvas.height = img.height;
+          originalCtx.drawImage(img, 0, 0);
+          // 获取像素数据
+          const imageData = originalCtx.getImageData(0, 0, img.width, img.height);
+          console.log("imageData",imageData)
+          // 创建 Worker 处理像素
+          worker = new Worker('imageWorker.js');
+          worker.postMessage({ type: 'grayscale', data: imageData });
+          // 接收处理结果
+          worker.onmessage = (e) => {
+            const processedData = e.data;
+            // 显示处理后的图片
+            originalCtx.putImageData(processedData, 0, 0);
+            processedImg.src = originalCanvas.toDataURL();
+            worker.terminate();
+          };
+        }
+      }
+      reader.readAsDataURL(file);
+    }
+
+  </script>
+</body>
+</html>

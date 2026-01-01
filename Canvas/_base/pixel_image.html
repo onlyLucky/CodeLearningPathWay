@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>pixel image</title>
+</head>
+<body>
+  <canvas id="myCanvas" width="600" height="600" style="border: 1px solid #ccc;"></canvas>
+  <script>
+    // 获取 Canvas 元素
+    const canvas = document.getElementById('myCanvas');
+    // 获取 2D 绘图上下文（核心对象，所有绘图操作通过 ctx 完成）
+    const ctx = canvas.getContext('2d');
+
+    // 加载图片并处理像素
+    const img = new Image();
+    img.src = 'https://picsum.photos/500/500';
+    img.crossOrigin = 'anonymous';
+
+    img.onload = function() {
+      // 绘制图片到画布
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      
+      // 获取像素数据（width, height：获取区域；data：Uint8ClampedArray，每个像素4个值：r,g,b,a）
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const data = imageData.data;
+      
+      // 像素处理：灰度滤镜（每个像素的r,g,b取平均值）
+      for (let i = 0; i < data.length; i += 4) {
+        const r = data[i];
+        const g = data[i + 1];
+        const b = data[i + 2];
+        const gray = (r + g + b) / 3; // 灰度值
+        data[i] = gray; // 红色通道
+        data[i + 1] = gray; // 绿色通道
+        data[i + 2] = gray; // 蓝色通道
+        // alpha通道（i+3）保持不变
+      }
+      
+      // 其他滤镜示例：
+      // 1. 反色滤镜：data[i] = 255 - r; data[i+1] = 255 - g; data[i+2] = 255 - b;
+      // 2. 亮度调整：data[i] = Math.min(255, r + 50);（增加50亮度，避免溢出）
+      
+      // 将处理后的像素数据绘制回画布
+      ctx.putImageData(imageData, 0, 0);
+    };
+  </script>
+</body>
+</html>

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cursor Trail</title>
+  <script src="../assets/libs/gsap3.13.0/gsap.min.js"></script>
+  <style>
+    body {
+      padding: 0;
+      margin: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: #232529;
+      color: #bbbaa6;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .flair {
+      position: fixed;
+      opacity: 0;
+      width: 50px;
+    }
+  </style>
+</head>
+<body>
+  <div class="content">
+    <img class="flair" src="../assets/images/flair.png" alt="">
+    <img class="flair" src="../assets/images/Revised+Flair-1.png" alt="">
+    <img class="flair" src="../assets/images/Revised+Flair-2.png" alt="">
+    <img class="flair" src="../assets/images/flair-5.png" alt="">
+    <img class="flair" src="../assets/images/flair-25.png" alt="">
+    <img class="flair" src="../assets/images/Revised+Flair-5.png" alt="">
+    <img class="flair" src="../assets/images/Revised+Flair-6.png" alt="">
+    <img class="flair" src="../assets/images/Revised+Flair-7.png" alt="">
+    <img class="flair" src="../assets/images/Revised+Flair-8.png" alt="">
+    <img class="flair" src="../assets/images/flair.png" alt="">
+    <img class="flair" src="../assets/images/Revised+Flair-1.png" alt="">
+    <img class="flair" src="../assets/images/Revised+Flair-2.png" alt="">
+    <img class="flair" src="../assets/images/flair-5.png" alt="">
+    <img class="flair" src="../assets/images/flair-25.png" alt="">
+    <img class="flair" src="../assets/images/Revised+Flair-5.png" alt="">
+    <img class="flair" src="../assets/images/Revised+Flair-6.png" alt="">
+    <img class="flair" src="../assets/images/Revised+Flair-7.png" alt="">
+    <img class="flair" src="../assets/images/Revised+Flair-8.png" alt="">
+  </div>
+  <script>
+    /* ==========================================================
+      通用方法：让单个图形从无到有、旋转、坠落
+      ========================================================== */
+    function playAnimation(shape) {
+      // 为每个图形单独创建一条时间线，避免多个动画互相覆盖/冲突
+      let tl = gsap.timeline();
+
+      /* 1. 弹性出现阶段 从透明+缩放0 -> 正常尺寸，营造“弹出”效果 */
+      tl.from(shape, {
+        opacity: 0,
+        scale: 0,
+        ease: "elastic.out(1, 0.3)", // 弹性曲线：幅度1，衰减0.3
+      })
+      /* 2. 同时（"<"）加入随机旋转 随机选择顺时针360°或逆时针360°，增加趣味性 */
+      .to(shape, {
+        rotation: "random([-360, 360])",
+      }, "<") // "<" 表示与上一段动画同时开始
+      /* 3. 下落阶段 整体时间轴0秒处开始向下掉，1秒完成 */
+      .to(shape, {
+        y: "120vh",          // 目标位置：视窗底部之外（120%视窗高度）
+        ease: "back.in(.4)", // 轻微回弹后加速下落，模拟重力
+        duration: 1,
+      }, 0); // 0表示与整条时间线起点对齐
+    }
+
+    /* ==========================================================
+      鼠标跟随拖尾逻辑
+      ========================================================== */
+    // 把所有 .flair 元素变成数组，方便轮询使用
+    const flair = gsap.utils.toArray(".flair");
+    const gap = 100;            // 鼠标移动多少像素才生成新图形（控制密度）
+    let index = 0;              // 当前要使用的 flair 下标
+    const wrapper = gsap.utils.wrap(0, flair.length); // 循环索引工具，超出长度自动回绕
+
+    // 鼠标位置缓存
+    let mousePos = { x: 0, y: 0 };      // 当前实时鼠标位置
+    let lastMousePos = mousePos;        // 上一次记录位置（用于计算移动距离）
+    let cachedMousePos = mousePos;      // 插值后的平滑位置（用于给图形初始定位，避免突兀）
+
+    // 监听鼠标移动，更新实时位置
+    window.addEventListener("mousemove", (e) => {
+      mousePos = { x: e.x, y: e.y };
+    });
+
+    // 每帧检查是否满足生成条件
+    gsap.ticker.add(ImageTrail);
+
+    function ImageTrail() {
+      // 计算鼠标从上一次记录到现在的直线移动距离
+      const travelDistance = Math.hypot(
+        lastMousePos.x - mousePos.x,
+        lastMousePos.y - mousePos.y
+      );
+
+      /* 对鼠标位置做平滑插值（0.1 = 10% 逼近速度）这样图形出现的位置不会生硬地跳变，而是略带“尾随”效果 */
+      // gsap.utils.interpolate 提供的一个数值/对象平滑插值工具，作用是在两个值之间按指定比例“混”出一个中间值，常用于平滑过渡、追赶效果、阻尼动画。
+      cachedMousePos.x = gsap.utils.interpolate(
+        cachedMousePos.x || mousePos.x, // 首次插值时 fallback 到当前位置
+        mousePos.x,
+        0.1
+      );
+      cachedMousePos.y = gsap.utils.interpolate(
+        cachedMousePos.y || mousePos.y,
+        mousePos.y,
+        0.1
+      );
+
+      /* 只有当鼠标移动距离超过阈值才生成新图形 避免移动过慢时密集生成，也避免过密导致性能问题 */
+      if (travelDistance > gap) {
+        animateImage();       // 生成一颗新图形
+        lastMousePos = mousePos; // 更新参考点，用于下次计算
+      }
+    }
+
+    /* ==========================================================
+      生成单个图形：复位 → 移到鼠标 → 播放动画
+      ========================================================== */
+    function animateImage() {
+      // 通过 wrap 工具实现索引循环，超过数组长度自动回到 0
+      const wrappedIndex = wrapper(index);
+      const img = flair[wrappedIndex];
+
+      /* 1. 清空之前可能残留的动画与样式 确保每次都是从“干净”状态开始 */
+      gsap.killTweensOf(img);      // 杀掉该元素上所有未完成的 tween
+      gsap.set(img, { clearProps: "all" }); // 清除行内样式（位置、旋转、透明度等）
+
+      /* 2. 把图形瞬间放到当前鼠标位置 xPercent/yPercent = -50 让元素中心对准鼠标，而非左上角 */
+      gsap.set(img, {
+        opacity: 1,           // 确保可见
+        left: cachedMousePos.x, // 使用平滑后的鼠标坐标
+        top: cachedMousePos.y,
+        xPercent: -50,
+        yPercent: -50,
+      });
+
+      /* 3. 执行出现-旋转-坠落动画 */
+      playAnimation(img);
+
+      /* 4. 索引自增，下次用下一张图，实现循环使用池 */
+      index++;
+    }
+
+  </script>
+</body>
+</html>

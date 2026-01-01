@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Animate text replacement</title>
+  <script src="../assets/libs/gsap3.13.0/gsap.min.js"></script>
+  <script src="../assets/libs/gsap3.13.0/TextPlugin.min.js"></script>
+  <style>
+    body {
+      padding: 0;
+      margin: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: #232529;
+      color: #bbbaa6;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      font-size: calc( ((16 / 16) * 1rem) + (18 - 16) * calc( (100vw - 320 / 16 * 1rem) / (1140 - 320) ) );
+      font-weight: 400;
+    }
+    button{
+      color: #0e100f;
+      background: radial-gradient(129% 99% at 120% 81%, rgb(223, 220, 255) 30%, rgb(166, 158, 255) 100%);
+      background-blend-mode: color-dodge;
+      font-weight: 600;
+      font-size: 35px;
+      line-height: 18px;
+      height: 100px;
+      outline: none;
+      border: none;
+      border-radius: 99px;
+      padding: 12px 65px;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <button>Send</button>
+  <script>
+    // TextPlugin（提供 text 动画能力）
+    gsap.registerPlugin(TextPlugin);
+
+    const btn = document.querySelector('button');
+    // 按钮抬起时从头播放时间轴（play(0) 强制回到第 0 秒）
+    btn.addEventListener('pointerup', () => btnTL.play(0));
+
+    // 创建一条“发送”流程时间轴，初始状态暂停
+    const btnTL = gsap.timeline({ paused: true })
+      /* 文字变为“Sending...”*/
+      .to(btn, {
+        duration: 1,
+        text: { value: 'Sending...', type: 'diff' },//type:'diff' 仅替换变化的部分，性能更好
+        ease: 'sine.in'
+      })
+      /* 省略号闪烁动画*/
+      .to(btn, {
+        duration: 0.6,
+        text: { value: 'Sending', type: 'diff' },
+        ease: 'sine.inOut',
+        repeat: 4,
+        yoyo: true
+      })
+      /* 最终文字“Sent!”*/
+      .to(btn, {
+        text: 'Sent!',
+        ease: 'none'
+      }, '+=0.5'); // "+=0.5" 表示在前一动画结束后延迟 0.5 秒执行
+
+    /* 需要把文字与状态还原 */
+    btnTL.eventCallback('onComplete', () => {
+      gsap.delayedCall(2, () => { // 2 秒后自动复位
+        btn.innerText = 'Send';   // 恢复初始文字
+        btnTL.pause(0);           // 时间轴回到起点并暂停
+      });
+    });
+  </script>
+</body>
+</html>

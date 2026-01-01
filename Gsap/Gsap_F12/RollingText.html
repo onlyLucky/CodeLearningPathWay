@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rolling Text</title>
+  <script src="../assets/libs/gsap3.13.0/gsap.min.js"></script>
+  <script src="../assets/libs/gsap3.13.0/SplitText.min.js"></script>
+  <style>
+    html {
+      box-sizing: border-box;
+    }
+    *,
+    *:before,
+    *:after {
+      box-sizing: inherit;
+    }
+
+    body,
+    html {
+      height: 100%;
+      width: 100%;
+      margin: 0;
+      padding: 0;
+      background: #232529;
+    }
+
+    .container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      visibility: hidden;
+    }
+
+    .tube {
+      position: relative;
+      width: 100%;
+      height: 24vw;
+    }
+
+    .line {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      line-height: 1;
+      margin: 0;
+      letter-spacing: -0.6vw;
+      font-size: 18vw;
+      white-space: nowrap;
+      text-align: center;
+      color: #fff;
+    }
+
+    .line div {
+      backface-visibility: hidden;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="tube">
+      <h1 class="line line1">SplitText</h1>
+      <h1 class="line line2">SplitText</h1>
+      <h1 class="line line3">SplitText</h1>
+      <h1 class="line line3">SplitText</h1>
+    </div>
+  </div>
+  <script>
+    // 注册 SplitText 插件，用于按字符拆分文字
+    gsap.registerPlugin(SplitText);
+    console.clear();
+
+    /* 1. 让容器可见（避免 FOUC） */
+    const container = document.querySelector('.container');
+    gsap.set(container, { visibility: 'visible' });
+
+    /* 2. 获取所有文字行，并拆分成单个字符 */
+    const lines = document.querySelectorAll('.line');
+    const splitLines = Array.from(lines).map(
+      line => new SplitText(line, { type: 'chars', charsClass: 'char' })
+    );
+
+    /* 3. 3D 透视设置 */
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    const depth = -width / 8; // 景深：负值让旋转更立体
+    const transformOrigin = `50% 50% ${depth}`;
+
+    gsap.set(lines, {
+      perspective: 700,           // 透视距离
+      transformStyle: 'preserve-3d' // 保持 3D 变换
+    });
+
+    /* 4. 无限循环时间线 */
+    const animTime = 0.9; // 每行动画时长
+    const tl = gsap.timeline({ repeat: -1 });
+
+    /* 5. 逐行动画：-90° → 90° 旋转，形成翻页效果 */
+    splitLines.forEach((split, index) => {
+      tl.fromTo(
+        split.chars,
+        { rotationX: -90 }, // 初始背向屏幕
+        {
+          rotationX: 90,    // 翻转到另一侧
+          stagger: 0.08,    // 字符间延迟
+          duration: animTime,
+          ease: 'none',
+          transformOrigin  // 3D 旋转中心
+        },
+        index * 0.45 // 行与行之间的错位延迟
+      );
+    });
+
+  </script>
+</body>
+</html>

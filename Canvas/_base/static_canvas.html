@@ -1,0 +1,102 @@
+ <!DOCTYPE html>
+ <html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>离屏canvas优化</title>
+ </head>
+ <body>
+  <canvas id="myCanvas" width="600" height="600" style="border: 1px solid #ccc;"></canvas>
+  <script>
+    // 获取 Canvas 元素
+    const canvas = document.getElementById('myCanvas');
+    // 获取 2D 绘图上下文（核心对象，所有绘图操作通过 ctx 完成）
+    const ctx = canvas.getContext('2d');
+
+    // 创建离屏 Canvas（尺寸与主画布一致）
+    const offscreenCanvas = document.createElement('canvas');
+    const offscreenCtx = offscreenCanvas.getContext('2d');
+    offscreenCanvas.width = canvas.width;
+    offscreenCanvas.height = canvas.height;
+
+    // 预绘制静态内容（如背景、网格）
+    function preDrawStaticContent() {
+      // 绘制网格
+      offscreenCtx.strokeStyle = '#eee';
+      offscreenCtx.lineWidth = 1;
+      const gridSize = 50;
+      // 水平网格线
+      for (let y = 0; y < offscreenCanvas.height; y += gridSize) {
+        offscreenCtx.beginPath();
+        offscreenCtx.moveTo(0, y);
+        offscreenCtx.lineTo(offscreenCanvas.width, y);
+        offscreenCtx.stroke();
+      }
+      // 垂直网格线
+      for (let x = 0; x < offscreenCanvas.width; x += gridSize) {
+        offscreenCtx.beginPath();
+        offscreenCtx.moveTo(x, 0);
+        offscreenCtx.lineTo(x, offscreenCanvas.height);
+        offscreenCtx.stroke();
+      }
+    }
+
+    preDrawStaticContent();
+
+    var ball = { x: 50, y: 300, r: 30, dx: 5, dy: -3}; // 小球对象（dx/dy 是x/y方向速度）
+
+    let lastTime = 0;
+    const fps = 60;
+    const interval = 1000 / fps; // 每帧间隔（毫秒）
+
+    let frameCount = 0;
+    let startTime = performance.now();
+
+    // 动画循环（仅绘制动态内容，静态内容直接从离屏Canvas复制）
+    function animateWithOffscreen(timestamp) {
+
+      frameCount++;
+      const currentTime = performance.now();
+      const elapsedTime = currentTime - startTime;
+      
+      // 每1秒计算一次帧率
+      if (elapsedTime >= 1000) {
+        const fps = frameCount / (elapsedTime / 1000);
+        console.log(`当前帧率：${fps.toFixed(1)} FPS`);
+        frameCount = 0;
+        startTime = currentTime;
+      }
+
+      if (timestamp - lastTime < interval) {
+        requestAnimationFrame(animateWithOffscreen);
+        return;
+      }
+      
+      lastTime = timestamp;
+
+      // 清空画布（关键：避免帧重叠）
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // 1. 绘制静态内容（从离屏Canvas复制，比重新绘制快）
+      ctx.drawImage(offscreenCanvas, 0, 0);
+      
+      // 2. 绘制动态内容（如移动的小球）
+      ctx.beginPath();
+      ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2);
+      ctx.fillStyle = 'blue';
+      ctx.fill();
+      
+      // 3. 更新动态内容状态
+      ball.x += ball.dx;
+      ball.y += ball.dy;
+      if (ball.x + ball.r >= canvas.width || ball.x - ball.r <= 0) ball.dx = -ball.dx;
+      if (ball.y + ball.r >= canvas.height || ball.y - ball.r <= 0) ball.dy = -ball.dy;
+      
+      requestAnimationFrame(animateWithOffscreen);
+    }
+
+    requestAnimationFrame(animateWithOffscreen);
+
+  </script>
+ </body>
+ </html>

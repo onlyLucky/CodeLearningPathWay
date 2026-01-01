@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Generating Randomness</title>
+  <script src="../assets/libs/gsap3.13.0/gsap.min.js"></script>
+  <style>
+    * {
+      padding: 0;
+      margin: 0;
+    }
+    body {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background-color: #232529;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+    }
+    .box {
+      width: 75px;
+      height: 75px;
+      border-radius: 12px;
+      background-color: #0ae448;
+    }
+    .box:after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(114.41deg,#ffffffbf 20.74%, #fffce100 65.5%),url("../assets/images/noise-e82662fe.png");
+      background-blend-mode: color-dodge;
+      border-radius: 12px;
+      opacity: 0.4;
+    }
+  </style>
+</head>
+<body>
+  <div class="box"></div>
+  <script>
+    // 随机生成一个介于 -100 和 100 之间的数字
+    let randomNum = gsap.utils.random(-100, 100);
+    console.log("random number between -100 and 100", randomNum);
+
+    // 随机生成一个介于 -100 和 100 之间的数字，并且结果会四舍五入到最接近的 5 的倍数
+    let randomSnap = gsap.utils.random(-100, 100, 5);
+    console.log("snapped to closest increment of 5", randomSnap);
+
+    // 从颜色数组中随机获取一个值
+    let randomValue = gsap.utils.random(["red", "blue", "green"]);
+    console.log("a random value from an array of colors", randomValue);
+
+    let colors = ["#0ae448", "#fec5fb", "#ff8709", "#9d95ff", "#abff84"]
+
+    gsap.to('.box', {
+      x: "random(-400, 400, 5)",// 使用快捷字符串语法，随机生成一个介于 -400 和 400 之间的数字，并且结果会四舍五入到最接近的 5 的倍数
+      backgroundColor: () => gsap.utils.random(colors),// 使用回调函数，从颜色数组中随机获取一个颜色值
+      repeat: -1,// 无限重复动画
+      repeatRefresh: true,// 每次重复时刷新动画的起始值
+      duration: 1,
+      repeatDelay: 0.2// 每次重复之间的延迟，单位为秒
+    });
+  </script>
+</body>
+</html>

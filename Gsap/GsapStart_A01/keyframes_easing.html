@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>keyframes easing</title>
+  <script src="../assets/libs/gsap3.13.0/gsap.min.js"></script>
+  <style>
+    * {
+      padding: 0;
+      margin: 0;
+    }
+    body {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background-color: #232529;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      gap: 2em;
+    }
+    .box {
+      width: 75px;
+      height: 75px;
+      border-radius: 12px;
+    }
+    .gradient-green{
+      background: linear-gradient(114.41deg,#0ae448 20.74%,#abff84 65.5%);
+    }
+  </style>
+</head>
+<body>
+  <div class="box gradient-green"></div>
+  <div class="box gradient-green"></div>
+  <div class="box gradient-green"></div>
+  <div class="box gradient-green"></div>
+  <script>
+    gsap.to(".box", {
+      keyframes: {
+        y: [0, 80, -10, 30, 0], // y 轴方向上的关键帧值，所有元素将在这些值之间移动
+        ease: "none", // 整个关键帧序列的缓动函数，默认值为 "none"，表示没有缓动效果
+        easeEach: "power2.inOut" // 每个关键帧之间的缓动函数，默认值为 "power1.inOut"
+      },
+      rotate: 180, // 元素旋转 180 度
+      ease: "elastic", // 旋转动画的缓动函数，这里使用 "elastic"，表示有弹性效果
+      duration: 5, // 动画持续时间，单位为秒
+      stagger: 0.2 // 每个 .box 元素之间的动画延迟，单位为秒
+    });
+  </script>
+</body>
+</html>

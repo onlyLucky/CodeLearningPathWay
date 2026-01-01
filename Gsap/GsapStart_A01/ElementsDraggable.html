@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>elements draggable</title>
+  <script src="../assets/libs/gsap3.13.0/gsap.min.js"></script>
+  <script src="../assets/libs/gsap3.13.0/Draggable.min.js"></script>
+  <script src="../assets/libs/gsap3.13.0/InertiaPlugin.min.js"></script>
+  <style>
+    body {
+      padding: 0;
+      margin: 0;
+      width: 100vw;
+      min-height: 100vh;
+      background-color: #232529;
+      color: #bbbaa6;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .container{
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+    }
+    .flair{
+      width: 100px;
+      height: 100px;
+      max-height: 20vh;
+      max-width: 20vh;
+      cursor: pointer;
+      background-image: url(https://assets.codepen.io/16327/flair.png);
+      background-size: contain;
+      background-repeat: no-repeat;
+      will-change: transform;
+    }
+    .flair--1{
+      background-image: url(https://assets.codepen.io/16327/flair.png);
+    }
+    .flair--3b{
+      background-image: url(https://assets.codepen.io/16327/ui-flair-2.png);
+    }
+    .flair--4b{
+      background-image: url(https://assets.codepen.io/16327/ui-flair-4.png);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="wrapper">
+      <div class="flair flair--1"></div>
+    </div>
+    <div class="wrapper">
+      <div class="flair flair--3b"></div>
+    </div>
+    <div class="wrapper">
+      <div class="flair flair--4b"></div>
+    </div>
+  </div>
+  <script>
+    /**
+     * 注册 GSAP 的拖拽与惯性插件：
+     *    Draggable：让元素可拖动
+     *    InertiaPlugin：松手后产生惯性滑动/旋转效果
+     */
+    gsap.registerPlugin(Draggable, InertiaPlugin);
+
+    // 元素 .flair--1 只能沿 x 轴左右拖动，拖动范围限制在 .container 盒子内
+    Draggable.create('.flair--1', {
+      type: 'x',          // 锁定方向：x 轴
+      bounds: '.container'// 可拖动的边界容器
+    });
+
+    // 元素 .flair--3b 以中心点为轴进行旋转拖拽，松开鼠标后惯性继续旋转
+    Draggable.create('.flair--3b', {
+      type: 'rotation',   // 锁定方向：rotation（旋转）
+      inertia: true       // 开启惯性插件，松手后顺滑减速
+    });
+
+    // 元素 .flair--4b 可在容器内任意方向拖动，松手后带惯性滑动，且不会拖出容器
+    Draggable.create('.flair--4b', {
+      bounds: '.container', // 边界限制
+      inertia: true         // 开启惯性
+      // 不指定 type 时默认 x,y 均可移动
+    });
+  </script>
+</body>
+</html>

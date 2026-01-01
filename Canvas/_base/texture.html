@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>texture</title>
+  <style>
+    *{margin: 0;padding: 0;}
+    body{width: 100vw;height: 100vh;}
+    canvas{width: 100%;height: 100%;}
+  </style>
+</head>
+<body>
+  <canvas id="myCanvas" width="400" height="400"></canvas>
+  <script>
+    // 获取 Canvas 元素
+    const canvas = document.getElementById('myCanvas');
+    // 获取 2D 绘图上下文（核心对象，所有绘图操作通过 ctx 完成）
+    const ctx = canvas.getContext('2d');
+    
+    // 1. 离屏画布画一个小纹理
+    const tex = document.createElement('canvas');
+    tex.width = tex.height = 20;
+    const tctx = tex.getContext('2d');
+    tctx.fillStyle = '#222';
+    tctx.fillRect(0, 0, 10, 10);
+    tctx.fillRect(10, 10, 10, 10);   // 棋盘格
+
+    // 2. 主画布使用
+    const pat = ctx.createPattern(tex, 'repeat');
+    ctx.fillStyle = pat;
+    ctx.fillRect(0, 0, 100, 100);
+  </script>
+</body>
+</html>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>event bind</title>
+</head>
+<body>
+  <canvas id="myCanvas" width="600" height="600" style="border: 1px solid #ccc;"></canvas>
+  <script>
+    // 1. 获取 Canvas 元素
+    const canvas = document.getElementById('myCanvas');
+    // 2. 获取 2D 绘图上下文（核心对象，所有绘图操作通过 ctx 完成）
+    const ctx = canvas.getContext('2d');
+
+    // 坐标转换工具函数
+    function getCanvasCoordinates(e) {
+      // 获取 Canvas 元素在屏幕中的位置信息（包含 left/top/width/height）
+      const rect = canvas.getBoundingClientRect();
+      // 计算相对坐标（减去元素偏移，考虑设备像素比）
+      return {
+        x: (e.clientX - rect.left) * (canvas.width / rect.width),
+        y: (e.clientY - rect.top) * (canvas.height / rect.height)
+      };
+    }
+
+    // 定义一个矩形对象
+    const rect = { x: 50, y: 50, width: 200, height: 100 };
+
+    function drawBasicFunc(){
+      ctx.fillStyle = 'rgba(255, 0, 0, 0.5)'; // 填充颜色（支持 hex、rgb、rgba、颜色名）
+      ctx.fillRect(50, 50, 200, 100); // 左上角(50,50)，宽200，高100
+    }
+
+    let isRectClicked = false;
+
+    function handleMouseClick(e) {
+      const { x, y } = getCanvasCoordinates(e);
+      const isInRect = x >= rect.x && x <= rect.x + rect.width && y >= rect.y && y <= rect.y + rect.height;
+      
+      if (isInRect) {
+        isRectClicked = !isRectClicked;
+        // 重新绘制
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = isRectClicked ? 'green' : 'rgba(255, 0, 0, 0.5)';
+        ctx.fillRect(rect.x, rect.y, rect.width, rect.height);
+      }
+    }
+
+    let isDragging = false;
+    let dragOffset = { x: 0, y: 0 }; // 鼠标与矩形左上角的偏移量（避免瞬移）
+
+    function handleMouseDown(e) {
+      const { x, y } = getCanvasCoordinates(e);
+      if (x >= rect.x && x <= rect.x + rect.width && y >= rect.y && y <= rect.y + rect.height) {
+        isDragging = true;
+        // 计算偏移量（鼠标位置 - 矩形左上角位置）
+        dragOffset.x = x - rect.x;
+        dragOffset.y = y - rect.y;
+      }
+    }
+
+    function handleMouseUp(e) {
+      isDragging = false;
+    }
+
+    // 优化 mousemove 事件（结合拖拽状态）
+    function handleMouseMove(e) {
+      const { x, y } = getCanvasCoordinates(e);
+      
+      if (isDragging) {
+        // 更新矩形位置（鼠标位置 - 偏移量）
+        rect.x = x - dragOffset.x;
+        rect.y = y - dragOffset.y;
+      }
+      
+      // 绘制逻辑
+      const isHover = !isDragging && x >= rect.x && x <= rect.x + rect.width && y >= rect.y && y <= rect.y + rect.height;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = isHover ? 'rgba(255, 0, 0, 0.8)' : (isRectClicked ? 'green' : 'rgba(255, 0, 0, 0.5)');
+      ctx.fillRect(rect.x, rect.y, rect.width, rect.height);
+    }
+
+    drawBasicFunc()
+    canvas.addEventListener('click', handleMouseClick);
+    canvas.addEventListener('mousedown', handleMouseDown);
+    canvas.addEventListener('mousemove', handleMouseMove);
+    canvas.addEventListener('mouseup', handleMouseUp);
+  </script>
+</body>
+</html>

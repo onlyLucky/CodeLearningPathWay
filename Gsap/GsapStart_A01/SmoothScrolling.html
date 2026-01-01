@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smooth Scrolling</title>
+  <script src="../assets/libs/gsap3.13.0/gsap.min.js"></script>
+  <script src="../assets/libs/gsap3.13.0/ScrollSmoother.min.js"></script>
+  <script src="../assets/libs/gsap3.13.0/ScrollTrigger.min.js"></script>
+  <script src="../assets/libs/gsap3.13.0/ScrollToPlugin.min.js"></script>
+
+  <style>
+    * {
+      padding: 0;
+      margin: 0;
+    }
+    body{
+      overscroll-behavior: none;
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+      background-color: #232529;
+      font-weight: 400;
+      line-height: 1.45;
+      font-size: 22px;
+    }
+    #smooth-content{
+      overflow: visible;
+      width: 100%;
+      height: 4000px;
+      background-image: 
+        linear-gradient(rgba(255, 255, 255, 0.07) 2px, transparent 2px), /* 水平方向的细线，每 100px 重复一次 */
+        linear-gradient(90deg, rgba(255, 255, 255, 0.07) 2px, transparent 2px), /* 垂直方向的细线，每 100px 重复一次 */
+        linear-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px), /* 水平方向的更细的线，每 20px 重复一次 */
+        linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px); /* 垂直方向的更细的线，每 20px 重复一次 */
+      background-size: 
+        100px 100px, /* 第一对线性渐变的大小，100px x 100px */
+        100px 100px, /* 第二对线性渐变的大小，100px x 100px */
+        20px 20px, /* 第三对线性渐变的大小，20px x 20px */
+        20px 20px; /* 第四对线性渐变的大小，20px x 20px */
+      background-position: 
+        -2px -2px, /* 第一对线性渐变的位置偏移 */
+        -2px -2px, /* 第二对线性渐变的位置偏移 */
+        -1px -1px, /* 第三对线性渐变的位置偏移 */
+        -1px -1px; /* 第四对线性渐变的位置偏移 */
+    }
+    .header{
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      padding-top: 2.5rem;
+    }
+    .header .heading-l{
+      margin: 10px 0 10px 0;
+      font-weight: 400;
+      line-height: 1.2;
+      font-size: max(2.625rem, min(5.56634vw + 1.32039rem, 8rem));
+    }
+    .header .heading-scroll{
+      -webkit-text-fill-color:transparent;
+      background: linear-gradient( 317.42deg, #ffe9fe 10.4%, #ff96f9 83.03% );
+      background-clip: text;
+    }
+    .header .button{
+      position: relative;
+      margin-top: 1rem;
+      display: inline-block;
+      outline: none;
+      background: #232529;
+      border: solid 2px #bbbaa6;
+      color: #bbbaa6;
+      text-decoration: none;
+      border-radius: 99px;
+      padding: 12px 25px;
+      cursor: pointer;
+      line-height: 1;
+      font-size: 0.9rem;
+    }
+    .box,.shape{
+      width: 100px;
+      height: 100px;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 100;
+      line-height: 100px;
+      text-align: center;
+      will-change: transform;
+    }
+    .box{
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+    }
+    .box-a{
+      top: 400px;
+    }
+    .box-b{
+      top: 900px;
+    }
+    .shape{
+      top: 1300px;
+      will-change: transform;
+    }
+    .gradient-pink{
+      color: #232529;
+      background: linear-gradient( 317.42deg, #ffe9fe 10.4%, #ff96f9 83.03% ), url(https://assets.codepen.io/16327/noise.png);
+      background-blend-mode: color-dodge;
+    }
+    .gradient-purple{
+      color: #232529;
+      background: linear-gradient(153.58deg, #f7bdf8 32.25%, #2f3cc0 92.68%), url(https://assets.codepen.io/16327/noise.png);
+      background-blend-mode: color-dodge;
+    }
+  </style>
+</head>
+<body>
+  <div id="smooth-wrapper">
+    <div id="smooth-content">
+      <header class="header">
+        <h1 class="heading-l heading-scroll">ScrollSmoother</h1>
+        <button class="button">Jump to shape</button>
+      </header>
+      <div class="box box-a gradient-pink" data-speed="clamp(0.5)">a</div>
+      <div class="box box-b gradient-purple" data-speed="clamp(0.8)">b</div>
+      <img class="shape" data-speed="1.5" src="https://assets.codepen.io/16327/2D-keyframe-2.png" alt="" />
+      <div class="line"></div>
+    </div>
+  </div>
+  <script>
+    // 注册 GSAP 插件 ScrollTrigger 和 ScrollSmoother
+    gsap.registerPlugin(ScrollTrigger, ScrollSmoother);
+
+    // 创建平滑滚动器（ScrollSmoother）实例
+    let smoother = ScrollSmoother.create({
+      smooth: 2, // 平滑滚动的持续时间，单位为秒
+      effects: true, // 启用滚动效果
+      normalizeScroll: true // 标准化滚动行为
+    });
+
+    // 创建一个滚动触发器（ScrollTrigger），用于固定（pin）元素
+    ScrollTrigger.create({
+      trigger: ".shape", // 触发滚动触发器的元素
+      pin: true, // 固定触发器元素
+      start: "center center", // 触发开始的位置，当触发器元素的中心到达视口中心时
+      end: "+=300" // 触发结束的位置，从开始位置向下滚动 300px
+    });
+
+    // 为页面中的按钮添加点击事件监听器
+    document.querySelector("button").addEventListener("click", (e) => {
+      // 滚动到触发器元素（.shape）的中心位置
+      // 参数：目标元素，是否平滑滚动，滚动到的位置
+      smoother.scrollTo(".shape", true, "center center");
+
+      // 或者，你可以通过动画滚动到指定位置：
+      /* gsap.to(smoother, {
+        scrollTop: smoother.offset(".shape", "center center"), // 计算滚动到目标位置的偏移量
+        duration: 1 // 动画持续时间，单位为秒
+      }); */
+    });
+
+  </script>
+</body>
+</html>

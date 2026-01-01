@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>basic timeline</title>
+  <script src="../assets/libs/gsap3.13.0/gsap.min.js"></script>
+  <style>
+    * {
+      padding: 0;
+      margin: 0;
+    }
+    body {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background-color: #232529;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+    }
+    .box {
+      width: 75px;
+      height: 75px;
+      border-radius: 12px;
+    }
+    .green{
+      background: linear-gradient(114.41deg, #0ae448 20.74%, #abff84 65.5%);
+    }
+    .purple{
+      background: linear-gradient(153.58deg, #f7bdf8 32.25%, #2f3cc0 92.68%);
+    }
+    .orange{
+      background: linear-gradient(111.45deg, #ff8709 19.42%, #f7bdf8 73.08%);
+    }
+  </style>
+</head>
+<body>
+  <div class="box box1 green"></div>
+  <div class="box box2 orange"></div>
+  <div class="box box3 purple"></div>
+  <script>
+    // 创建一个时间轴（timeline）对象，用于序列化动画。repeat: -1：时间轴无限重复（-1 表示无限重复）。
+    var tl = gsap.timeline({delay: 1, repeat: -1, yoyo: true});
+
+    // 在时间轴上添加动画，按顺序依次执行
+    // 第一个动画：对类名为 .box1 的元素进行动画操作
+    tl.to(".box1", {duration: 1, rotation: -360})
+      // 第二个动画：对类名为 .box2 的元素进行动画操作
+      .to(".box2", {duration: 2, x: -100, ease: 'elastic.out'})
+      // 第三个动画：对类名为 .box3 的元素进行动画操作
+      .to(".box3", {duration: 2, rotation: 360, x: 100, ease: 'expo.out'});
+  </script>
+</body>
+</html>

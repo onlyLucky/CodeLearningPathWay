@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WebGL 纯色三角形</title>
+</head>
+<body>
+  <canvas id="webgl" width="500" height="500" style="border: 1px solid black;"></canvas>
+  <script>
+    const canvas = document.getElementById('webgl');
+    const gl = canvas.getContext('webgl');
+
+    if (!gl) {
+      console.error('WebGL not supported, falling back on experimental-webgl');
+      gl = canvas.getContext('experimental-webgl');
+    }
+    if (!gl) {
+      alert('Your browser does not support WebGL');
+    }
+
+    // shader glsl
+    const vertexSource = `
+      attribute vec2 a_position;
+      attribute vec3 a_color;
+      varying vec3 v_color;
+      void main() {
+        v_color = a_color;
+        gl_Position = vec4(a_position, 0.0, 1.0);
+        gl_PointSize = 10.0;
+      }
+    `;
+
+    const fragmentSource = `
+      precision mediump float;
+      varying vec3 v_color;
+      void main() {
+        gl_FragColor = vec4(v_color, 1.0);
+      }
+    `;
+
+    // 初始化着色器
+    function initShaders(gl, vertexSource, fragmentSource) {
+      const vertexShader = gl.createShader(gl.VERTEX_SHADER);
+      gl.shaderSource(vertexShader, vertexSource);
+      gl.compileShader(vertexShader);
+      if (!gl.getShaderParameter(vertexShader, gl.COMPILE_STATUS)) {
+        console.error('Vertex shader compile failed with: ' + gl.getShaderInfoLog(vertexShader));
+        gl.deleteShader(vertexShader);
+        return null;
+      }
+
+      const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
+      gl.shaderSource(fragmentShader, fragmentSource);
+      gl.compileShader(fragmentShader);
+      if (!gl.getShaderParameter(fragmentShader, gl.COMPILE_STATUS)) {
+        console.error('Fragment shader compile failed with: ' + gl.getShaderInfoLog(fragmentShader));
+        gl.deleteShader(fragmentShader);
+        return null;
+      }
+
+      const program = gl.createProgram();
+      gl.attachShader(program, vertexShader);
+      gl.attachShader(program, fragmentShader);
+      gl.linkProgram(program);
+      if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+        console.error('Program link failed with: ' + gl.getProgramInfoLog(program));
+        gl.deleteProgram(program);
+        return null;
+      }
+      gl.useProgram(program);
+      return program;
+    }
+
+    const program = initShaders(gl, vertexSource, fragmentSource);
+    gl.program = program;
+
+    // 清空屏幕
+    gl.clearColor(0.0, 0.0, 0.0, 1.0);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+
+    // 顶点数据
+    const vertices = [
+      -0.5, 0.5, 1.0, 0.0, 0.0, // 顶点1
+      -0.5, -0.5, 0.0, 1.0, 0.0, // 顶点2
+      0.5, -0.5, 0.0, 0.0, 1.0, // 顶点3
+      0.5, 0.5, 1.0, 1.0, 0.0 // 顶点4
+    ];
+    const verticesArray = new Float32Array(vertices);
+    const F_SIZE = verticesArray.BYTES_PER_ELEMENT;
+
+    // 创建缓冲区
+    const buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, verticesArray, gl.STATIC_DRAW);
+
+    // 获取 attribute 位置
+    const a_position = gl.getAttribLocation(gl.program, "a_position");
+    const a_color = gl.getAttribLocation(gl.program, "a_color");
+
+    // 配置 attribute
+    gl.vertexAttribPointer(a_position, 2, gl.FLOAT, false, 5 * F_SIZE, 0);
+    gl.enableVertexAttribArray(a_position);
+
+    gl.vertexAttribPointer(a_color, 3, gl.FLOAT, false, 5 * F_SIZE, 2 * F_SIZE);
+    gl.enableVertexAttribArray(a_color);
+
+    // 绘制三角形
+    const n = 4; // 3 个顶点
+    // gl.drawArrays(gl.TRIANGLES, 0, n);
+
+    // gl.drawArrays(gl.TRIANGLES_STRIP, 0, n);
+  </script>
+</body>
+</html>

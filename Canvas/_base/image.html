@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>image</title>
+</head>
+<body>
+  <canvas id="myCanvas" width="600" height="600" style="border: 1px solid #ccc;"></canvas>
+  <script>
+    // 获取 Canvas 元素
+    const canvas = document.getElementById('myCanvas');
+    // 获取 2D 绘图上下文（核心对象，所有绘图操作通过 ctx 完成）
+    const ctx = canvas.getContext('2d');
+
+    const img = new Image();
+    img.src = 'https://picsum.photos/500/500';
+    img.crossOrigin = 'anonymous'; // 跨域图片需设置（服务器需允许跨域）
+
+    img.onload = function() {
+      // 1. 绘制整张图片（x,y：绘制位置；width,height：绘制尺寸）
+      ctx.drawImage(img, 50, 50, 200, 150);
+      
+      // 2. 裁剪图片（sx,sy,sw,sh：裁剪区域；dx,dy,dw,dh：绘制区域）
+      ctx.drawImage(img, 100, 100, 150, 150, 300, 50, 200, 200);
+    };
+  </script>
+</body>
+</html>

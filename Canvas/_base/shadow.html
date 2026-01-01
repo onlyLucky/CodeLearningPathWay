@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>shadow</title>
+</head>
+<body>
+  <canvas id="myCanvas" width="600" height="600" style="border: 1px solid #ccc;"></canvas>
+  <script>
+    // 获取 Canvas 元素
+    const canvas = document.getElementById('myCanvas');
+    // 获取 2D 绘图上下文（核心对象，所有绘图操作通过 ctx 完成）
+    const ctx = canvas.getContext('2d');
+    
+    // 设置阴影样式（对后续绘制的所有图形生效）
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.3)'; // 阴影颜色（必须设置，否则无效果）
+    ctx.shadowBlur = 10; // 阴影模糊度（数值越大越模糊）
+    ctx.shadowOffsetX = 5; // 水平偏移量
+    ctx.shadowOffsetY = 5; // 垂直偏移量
+
+    // 绘制带阴影的矩形
+    ctx.fillStyle = 'red';
+    ctx.fillRect(100, 100, 200, 100);
+
+    // 绘制带阴影的圆形
+    ctx.beginPath();
+    ctx.arc(400, 300, 50, 0, Math.PI * 2);
+    ctx.fillStyle = 'blue';
+    ctx.fill();
+
+    // 重置阴影（避免影响后续图形）
+    ctx.shadowColor = 'transparent';
+  </script>
+</body>
+</html>

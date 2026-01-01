@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>drag animate</title>
+</head>
+<body>
+  <canvas id="myCanvas" width="600" height="600" style="border: 1px solid #ccc;"></canvas>
+  <script>
+    // 获取 Canvas 元素
+    const canvas = document.getElementById('myCanvas');
+    // 获取 2D 绘图上下文（核心对象，所有绘图操作通过 ctx 完成）
+    const ctx = canvas.getContext('2d');
+
+    // 拖拽生成图形（鼠标按下开始，移动时生成路径，释放时完成图形）
+    let isDrawing = false;
+    let pathPoints = [];
+
+    canvas.addEventListener('mousedown', (e) => {
+      isDrawing = true;
+      const { x, y } = getCanvasCoordinates(e);
+      pathPoints = [{ x, y }]; // 初始化路径点
+    });
+
+    canvas.addEventListener('mousemove', (e) => {
+      if (!isDrawing) return;
+      const { x, y } = getCanvasCoordinates(e);
+      pathPoints.push({ x, y }); // 记录移动轨迹
+      
+      // 实时绘制路径
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.beginPath();
+      ctx.moveTo(pathPoints[0].x, pathPoints[0].y);
+      pathPoints.forEach(point => ctx.lineTo(point.x, point.y));
+      ctx.strokeStyle = 'red';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    });
+
+    canvas.addEventListener('mouseup', () => {
+      isDrawing = false;
+      // 路径闭合，填充图形
+      ctx.beginPath();
+      ctx.moveTo(pathPoints[0].x, pathPoints[0].y);
+      pathPoints.forEach(point => ctx.lineTo(point.x, point.y));
+      ctx.closePath();
+      ctx.fillStyle = 'rgba(255, 0, 0, 0.3)';
+      ctx.fill();
+    });
+    // 坐标转换工具函数
+    function getCanvasCoordinates(e) {
+      // 获取 Canvas 元素在屏幕中的位置信息（包含 left/top/width/height）
+      const rect = canvas.getBoundingClientRect();
+      // 计算相对坐标（减去元素偏移，考虑设备像素比）
+      return {
+        x: (e.clientX - rect.left) * (canvas.width / rect.width),
+        y: (e.clientY - rect.top) * (canvas.height / rect.height)
+      };
+    }
+    
+  </script>
+</body>
+</html>
