@@ -10,3 +10,4 @@
 - [003 3D鼠标环绕移动](./3DPointerMove.html)
 - [004 路径曲线变化](./CurveSwipe.html)
 - [005 卡牌切换](./CardStack.html)
+- [006 横向滚动文字](./HorizontalText.html)

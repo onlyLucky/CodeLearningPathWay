@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Horizontal Text</title>
+  <script src="../assets/libs/gsap3.13.0/gsap.min.js"></script>
+  <script src="../assets/libs/gsap3.13.0/SplitText.min.js"></script>
+  <script src="../assets/libs/gsap3.13.0/ScrollTrigger.min.js"></script>
+  <style>
+    body {
+      padding: 0;
+      margin: 0;
+      background-color: #232529;
+      color: #bbbaa6;
+    }
+    .Horizontal {
+      overflow: hidden;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+    }
+
+    .Horizontal__text {
+      display: flex;
+      width: max-content;
+      white-space: nowrap;
+      gap: 4vw;
+      padding-left: 100vw;
+    }
+
+    .heading-xl {
+      font-size: clamp(2rem, 10vw, 12rem);
+      font-weight: 600;
+      line-height: 1.1;
+    }
+  </style>
+</head>
+<body>
+  <section class="Horizontal">
+    <div class="container">
+      <h3 class="Horizontal__text heading-xl">
+        The containerAnimation property allows us to create ScrollTriggered animations within a container that's animated horizontally. It's like having nested ScrollTriggers!
+      </h3>
+    </div>
+  </section>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // 注册插件：文字拆分 + 滚动驱动
+      gsap.registerPlugin(SplitText, ScrollTrigger);
+
+      /* 1. 基础元素 ---------------------------------------------------- */
+      const wrapper = document.querySelector('.Horizontal');      // 最外层包裹，用于 pin
+      const text = document.querySelector('.Horizontal__text'); // 要水平移动的文字节点
+
+      /* 2. 拆分文字为字符 & 单词，方便单字动画 ------------------------ */
+      const split = SplitText.create('.Horizontal__text', { type: 'chars, words' });
+
+      /* 3. 水平滚动场景：文字整体向左移动 100% 宽度 ------------------- */
+      const scrollTween = gsap.to(text, {
+        xPercent: -100,   // 完全移出屏幕左侧
+        ease: 'none',     // 线性，跟随滚动条
+        scrollTrigger: {
+          trigger: wrapper,   // 触发元素
+          pin: true,          // 滚动时固定 wrapper 在视口
+          end: '+=6000px',    // 延长滚动距离（可自由调整）
+          scrub: true         // 平滑跟随滚动
+        }
+      });
+
+      /* 4. 每个字符的“入场”动画：随机 Y 轴偏移 + 旋转 ----------------- */
+      split.chars.forEach((char) => {
+        gsap.from(char, {
+          yPercent: 'random(-200, 200)', // 随机上下跳动
+          rotation: 'random(-20, 20)',   // 随机倾斜
+          ease: 'back.out(1.2)',         // 弹性回弹
+          scrollTrigger: {
+            trigger: char,               // 单个字符当触发器
+            containerAnimation: scrollTween, // 指定“水平滚动”时间线，字符位置基于它计算
+            start: 'left 100%',          // 字符左边缘进入视口右侧时开始
+            end: 'left 30%',             // 字符左边缘到达视口 30% 时结束
+            scrub: 1                     // 1 秒缓冲，动画更柔和
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>
