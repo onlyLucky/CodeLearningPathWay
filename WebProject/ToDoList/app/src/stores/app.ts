@@ -20,11 +20,25 @@ export const useAppStore = defineStore('app', () => {
   function updateSettings(newSettings: Partial<AppSettings>) {
     settings.value = { ...settings.value, ...newSettings }
     localStorage.setItem('appSettings', JSON.stringify(settings.value))
+    applyTheme()
   }
 
   function toggleTheme() {
     const newTheme = settings.value.theme === 'light' ? 'dark' : 'light'
-    updateSettings({ theme: newTheme })
+    console.log('Toggling theme from', settings.value.theme, 'to', newTheme)
+    settings.value.theme = newTheme
+    localStorage.setItem('appSettings', JSON.stringify(settings.value))
+    applyTheme()
+  }
+
+  function applyTheme() {
+    console.log('Applying theme:', settings.value.theme)
+    if (settings.value.theme === 'dark') {
+      document.documentElement.classList.add('dark')
+    } else {
+      document.documentElement.classList.remove('dark')
+    }
+    console.log('Current dark class:', document.documentElement.classList.contains('dark'))
   }
 
   function toggleSidebar() {
@@ -47,7 +61,10 @@ export const useAppStore = defineStore('app', () => {
     if (saved) {
       settings.value = JSON.parse(saved)
     }
+    applyTheme()
   }
+
+  loadSettings()
 
   return {
     settings,

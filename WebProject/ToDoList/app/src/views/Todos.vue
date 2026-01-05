@@ -32,10 +32,10 @@ function deleteTodo(id: number) {
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-50 py-8">
+  <div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-8 transition-colors duration-300">
     <div class="container mx-auto px-4 max-w-2xl">
       <div class="card mb-6">
-        <h1 class="text-3xl font-bold mb-6 text-gray-900">待办事项</h1>
+        <h1 class="text-3xl font-bold mb-6 text-gray-900 dark:text-white">待办事项</h1>
         
         <div class="flex gap-2 mb-6">
           <input
@@ -50,11 +50,11 @@ function deleteTodo(id: number) {
           </button>
         </div>
 
-        <div class="mb-4 text-sm text-gray-600">
+        <div class="mb-4 text-sm text-gray-600 dark:text-gray-400">
           已完成: {{ completedCount }} / {{ totalCount }}
         </div>
 
-        <div v-if="todos.length === 0" class="text-center py-8 text-gray-500">
+        <div v-if="todos.length === 0" class="text-center py-8 text-gray-500 dark:text-gray-400">
           暂无待办事项
         </div>
 
@@ -62,7 +62,7 @@ function deleteTodo(id: number) {
           <li
             v-for="todo in todos"
             :key="todo.id"
-            class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+            class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
           >
             <input
               type="checkbox"
@@ -73,7 +73,7 @@ function deleteTodo(id: number) {
             <span
               :class="[
                 'flex-1',
-                todo.completed ? 'line-through text-gray-400' : 'text-gray-900'
+                todo.completed ? 'line-through text-gray-400' : 'text-gray-900 dark:text-white'
               ]"
             >
               {{ todo.title }}
@@ -88,7 +88,7 @@ function deleteTodo(id: number) {
         </ul>
       </div>
 
-      <div class="text-center text-sm text-gray-500">
+      <div class="text-center text-sm text-gray-500 dark:text-gray-400">
         使用 Pinia 进行状态管理，数据持久化到 localStorage
       </div>
     </div>

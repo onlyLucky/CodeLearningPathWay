@@ -38,16 +38,16 @@ const handleConfirm = () => {
 <template>
   <div class="space-y-6">
     <div class="card">
-      <h2 class="text-xl font-semibold mb-4 text-primary-600">Element Plus UI 组件示例</h2>
+      <h2 class="text-xl font-semibold mb-4 text-primary-600 dark:text-primary-400">Element Plus UI 组件示例</h2>
       
       <div class="space-y-4">
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">输入框</label>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">输入框</label>
           <el-input v-model="input" placeholder="请输入内容" />
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">选择器</label>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">选择器</label>
           <el-select v-model="selectValue" placeholder="请选择" style="width: 100%">
             <el-option
               v-for="item in options"
@@ -59,7 +59,7 @@ const handleConfirm = () => {
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">单选框</label>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">单选框</label>
           <el-radio-group v-model="radioValue">
             <el-radio value="1">选项一</el-radio>
             <el-radio value="2">选项二</el-radio>
@@ -68,7 +68,7 @@ const handleConfirm = () => {
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">复选框</label>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">复选框</label>
           <el-checkbox v-model="checkboxValue">单个复选框</el-checkbox>
           <el-checkbox-group v-model="checkboxGroup" class="mt-2">
             <el-checkbox value="A">选项 A</el-checkbox>
@@ -78,12 +78,12 @@ const handleConfirm = () => {
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">开关</label>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">开关</label>
           <el-switch v-model="switchValue" />
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">日期选择器</label>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">日期选择器</label>
           <el-date-picker
             v-model="dateValue"
             type="date"
@@ -93,12 +93,12 @@ const handleConfirm = () => {
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">评分</label>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">评分</label>
           <el-rate v-model="rateValue" />
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">滑块</label>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">滑块</label>
           <el-slider v-model="sliderValue" />
         </div>
 
@@ -118,7 +118,7 @@ const handleConfirm = () => {
       width="30%"
       @close="handleClose"
     >
-      <p>这是一个 Element Plus 对话框示例</p>
+      <p class="text-gray-700 dark:text-gray-300">这是一个 Element Plus 对话框示例</p>
       <template #footer>
         <span class="dialog-footer">
           <el-button @click="handleClose">取消</el-button>

@@ -84,7 +84,7 @@ const deleteTodo = async (id: number) => {
 <template>
   <div class="space-y-6">
     <div class="card">
-      <h2 class="text-xl font-semibold mb-4 text-primary-600">Axios API 请求示例</h2>
+      <h2 class="text-xl font-semibold mb-4 text-primary-600 dark:text-primary-400">Axios API 请求示例</h2>
       
       <div class="space-y-4">
         <div class="flex gap-2 flex-wrap">
@@ -99,22 +99,22 @@ const deleteTodo = async (id: number) => {
           </el-button>
         </div>
 
-        <div v-if="userInfo" class="p-4 bg-gray-50 rounded-lg">
-          <h3 class="font-semibold mb-2">用户信息:</h3>
-          <pre class="text-sm overflow-x-auto">{{ JSON.stringify(userInfo, null, 2) }}</pre>
+        <div v-if="userInfo" class="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+          <h3 class="font-semibold mb-2 text-gray-900 dark:text-white">用户信息:</h3>
+          <pre class="text-sm overflow-x-auto text-gray-700 dark:text-gray-300">{{ JSON.stringify(userInfo, null, 2) }}</pre>
         </div>
 
         <div v-if="todoList.length > 0">
-          <h3 class="font-semibold mb-2">待办列表:</h3>
+          <h3 class="font-semibold mb-2 text-gray-900 dark:text-white">待办列表:</h3>
           <div class="space-y-2">
             <div
               v-for="todo in todoList"
               :key="todo.id"
-              class="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+              class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"
             >
               <div>
-                <div class="font-medium">{{ todo.title }}</div>
-                <div class="text-sm text-gray-500">优先级: {{ todo.priority }}</div>
+                <div class="font-medium text-gray-900 dark:text-white">{{ todo.title }}</div>
+                <div class="text-sm text-gray-500 dark:text-gray-400">优先级: {{ todo.priority }}</div>
               </div>
               <div class="flex gap-2">
                 <el-button size="small" @click="updateTodo(todo.id)">更新</el-button>
@@ -129,8 +129,8 @@ const deleteTodo = async (id: number) => {
     </div>
 
     <div class="card">
-      <h3 class="text-lg font-semibold mb-3 text-gray-900">API 说明</h3>
-      <div class="space-y-2 text-sm text-gray-600">
+      <h3 class="text-lg font-semibold mb-3 text-gray-900 dark:text-white">API 说明</h3>
+      <div class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
         <p>• 使用 Axios 封装的 request 工具类进行 HTTP 请求</p>
         <p>• 自动添加 Authorization 请求头（从 localStorage 获取 token）</p>
         <p>• 统一的请求/响应拦截器处理错误</p>

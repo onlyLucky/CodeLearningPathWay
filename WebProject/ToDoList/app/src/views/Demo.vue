@@ -30,36 +30,36 @@ const showMessage = (msg: string) => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-50 py-8">
+  <div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-8 transition-colors duration-300">
     <div class="container mx-auto px-4 max-w-4xl">
-      <h1 class="text-3xl font-bold mb-8 text-center text-gray-900">功能演示</h1>
+      <h1 class="text-3xl font-bold mb-8 text-center text-gray-900 dark:text-white">功能演示</h1>
 
       <div class="grid md:grid-cols-2 gap-6">
         <div class="card">
-          <h2 class="text-xl font-semibold mb-4 text-primary-600">VueUse - useMouse</h2>
+          <h2 class="text-xl font-semibold mb-4 text-primary-600 dark:text-primary-400">VueUse - useMouse</h2>
           <div class="space-y-2">
-            <div class="text-gray-600">鼠标位置:</div>
-            <div class="font-mono text-lg">
+            <div class="text-gray-600 dark:text-gray-400">鼠标位置:</div>
+            <div class="font-mono text-lg text-gray-900 dark:text-white">
               X: {{ Math.round(x) }}, Y: {{ Math.round(y) }}
             </div>
           </div>
         </div>
 
         <div class="card">
-          <h2 class="text-xl font-semibold mb-4 text-secondary-600">VueUse - useWindowSize</h2>
+          <h2 class="text-xl font-semibold mb-4 text-secondary-600 dark:text-secondary-400">VueUse - useWindowSize</h2>
           <div class="space-y-2">
-            <div class="text-gray-600">窗口尺寸:</div>
-            <div class="font-mono text-lg">
+            <div class="text-gray-600 dark:text-gray-400">窗口尺寸:</div>
+            <div class="font-mono text-lg text-gray-900 dark:text-white">
               宽: {{ width }}px, 高: {{ height }}px
             </div>
           </div>
         </div>
 
         <div class="card">
-          <h2 class="text-xl font-semibold mb-4 text-primary-600">VueUse - useStorage</h2>
+          <h2 class="text-xl font-semibold mb-4 text-primary-600 dark:text-primary-400">VueUse - useStorage</h2>
           <div class="space-y-4">
-            <div class="text-gray-600">计数器 (持久化到 localStorage):</div>
-            <div class="text-4xl font-bold text-center">{{ count }}</div>
+            <div class="text-gray-600 dark:text-gray-400">计数器 (持久化到 localStorage):</div>
+            <div class="text-4xl font-bold text-center text-gray-900 dark:text-white">{{ count }}</div>
             <div class="flex gap-2 justify-center">
               <button class="btn-secondary" @click="decrement">-</button>
               <button class="btn-primary" @click="increment">+</button>
@@ -69,9 +69,9 @@ const showMessage = (msg: string) => {
         </div>
 
         <div class="card">
-          <h2 class="text-xl font-semibold mb-4 text-secondary-600">VueUse - useToggle</h2>
+          <h2 class="text-xl font-semibold mb-4 text-secondary-600 dark:text-secondary-400">VueUse - useToggle</h2>
           <div class="space-y-4">
-            <div class="text-gray-600">暗黑模式切换:</div>
+            <div class="text-gray-600 dark:text-gray-400">暗黑模式切换:</div>
             <button
               class="btn-primary w-full"
               :class="{ 'bg-gray-800': darkMode }"
@@ -79,14 +79,14 @@ const showMessage = (msg: string) => {
             >
               {{ darkMode ? '关闭暗黑模式' : '开启暗黑模式' }}
             </button>
-            <div v-if="darkMode" class="text-center text-sm text-gray-500">
+            <div v-if="darkMode" class="text-center text-sm text-gray-500 dark:text-gray-400">
               当前处于暗黑模式
             </div>
           </div>
         </div>
 
         <div class="card md:col-span-2">
-          <h2 class="text-xl font-semibold mb-4 text-primary-600">通知系统</h2>
+          <h2 class="text-xl font-semibold mb-4 text-primary-600 dark:text-primary-400">通知系统</h2>
           <div class="space-y-4">
             <div class="flex gap-2 flex-wrap">
               <button class="btn-primary" @click="showMessage('操作成功！')">
@@ -97,9 +97,9 @@ const showMessage = (msg: string) => {
               </button>
             </div>
             <div v-if="appStore.notification" class="p-4 rounded-lg" :class="{
-              'bg-green-100 text-green-800': appStore.notification.type === 'success',
-              'bg-blue-100 text-blue-800': appStore.notification.type === 'info',
-              'bg-red-100 text-red-800': appStore.notification.type === 'error',
+              'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100': appStore.notification.type === 'success',
+              'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100': appStore.notification.type === 'info',
+              'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100': appStore.notification.type === 'error',
             }">
               {{ appStore.notification.message }}
             </div>
@@ -107,7 +107,7 @@ const showMessage = (msg: string) => {
         </div>
       </div>
 
-      <div class="mt-8 text-center text-sm text-gray-500">
+      <div class="mt-8 text-center text-sm text-gray-500 dark:text-gray-400">
         以上演示了 VueUse 库中常用的组合式 API
       </div>
 

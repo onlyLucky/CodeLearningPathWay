@@ -13,21 +13,21 @@ const goToDemo = () => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-50">
+  <div class="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-50 dark:from-gray-900 dark:to-gray-800 transition-colors duration-300">
     <div class="container mx-auto px-4 py-16">
       <div class="text-center mb-12">
-        <h1 class="text-5xl font-bold text-gray-900 mb-4">
+        <h1 class="text-5xl font-bold text-gray-900 dark:text-white mb-4">
           欢迎使用 Vue3 + TypeScript
         </h1>
-        <p class="text-xl text-gray-600">
+        <p class="text-xl text-gray-600 dark:text-gray-300">
           集成了 Pinia、Vue Router、Element Plus、VueUse、Axios 和 Tailwind CSS
         </p>
       </div>
 
       <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
         <div class="card hover:shadow-lg transition-shadow">
-          <h2 class="text-2xl font-semibold mb-4 text-primary-600">待办事项</h2>
-          <p class="text-gray-600 mb-6">
+          <h2 class="text-2xl font-semibold mb-4 text-primary-600 dark:text-primary-400">待办事项</h2>
+          <p class="text-gray-600 dark:text-gray-400 mb-6">
             使用 Pinia 状态管理实现的待办事项功能，支持添加、删除、完成状态切换
           </p>
           <button class="btn-primary w-full" @click="goToTodos">
@@ -36,8 +36,8 @@ const goToDemo = () => {
         </div>
 
         <div class="card hover:shadow-lg transition-shadow">
-          <h2 class="text-2xl font-semibold mb-4 text-secondary-600">功能演示</h2>
-          <p class="text-gray-600 mb-6">
+          <h2 class="text-2xl font-semibold mb-4 text-secondary-600 dark:text-secondary-400">功能演示</h2>
+          <p class="text-gray-600 dark:text-gray-400 mb-6">
             展示 VueUse、Element Plus、Axios 等各种功能的使用示例
           </p>
           <button class="btn-secondary w-full" @click="goToDemo">
@@ -49,20 +49,20 @@ const goToDemo = () => {
       <div class="mt-16 text-center">
         <div class="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-3xl mx-auto">
           <div class="p-4">
-            <div class="text-3xl font-bold text-primary-600">Pinia</div>
-            <div class="text-sm text-gray-500">状态管理</div>
+            <div class="text-3xl font-bold text-primary-600 dark:text-primary-400">Pinia</div>
+            <div class="text-sm text-gray-500 dark:text-gray-400">状态管理</div>
           </div>
           <div class="p-4">
-            <div class="text-3xl font-bold text-secondary-600">Router</div>
-            <div class="text-sm text-gray-500">路由管理</div>
+            <div class="text-3xl font-bold text-secondary-600 dark:text-secondary-400">Router</div>
+            <div class="text-sm text-gray-500 dark:text-gray-400">路由管理</div>
           </div>
           <div class="p-4">
-            <div class="text-3xl font-bold text-primary-600">VueUse</div>
-            <div class="text-sm text-gray-500">组合式工具</div>
+            <div class="text-3xl font-bold text-primary-600 dark:text-primary-400">VueUse</div>
+            <div class="text-sm text-gray-500 dark:text-gray-400">组合式工具</div>
           </div>
           <div class="p-4">
-            <div class="text-3xl font-bold text-secondary-600">Axios</div>
-            <div class="text-sm text-gray-500">HTTP 请求</div>
+            <div class="text-3xl font-bold text-secondary-600 dark:text-secondary-400">Axios</div>
+            <div class="text-sm text-gray-500 dark:text-gray-400">HTTP 请求</div>
           </div>
         </div>
       </div>
