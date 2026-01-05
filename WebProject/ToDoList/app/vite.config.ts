@@ -11,10 +11,22 @@ export default defineConfig({
     AutoImport({
       resolvers: [
         ElementPlusResolver({
-          importStyle: false,
+          importStyle: 'css',
         })
       ],
-      imports: ['vue', 'vue-router', 'pinia'],
+      imports: [
+        'vue',
+        'vue-router',
+        'pinia',
+        {
+          'element-plus': [
+            'ElMessage',
+            'ElMessageBox',
+            'ElNotification',
+            'ElLoading',
+          ],
+        },
+      ],
       dts: 'src/auto-imports.d.ts',
     }),
     Components({

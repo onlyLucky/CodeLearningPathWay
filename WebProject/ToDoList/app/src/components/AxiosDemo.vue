@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { ElMessage } from 'element-plus'
 import { userApi, todoApi } from '@/api'
 
 const loading = ref(false)
