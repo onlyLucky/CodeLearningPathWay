@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Call Apply Bind</title>
+</head>
+<body>
+  <script>
+    Function.prototype.myCall = function (context) {
+      // 1. 处理context默认值：非严格模式→window
+      context = context ? Object(context) : window;
+      // 2. 临时方法（Symbol避免属性名冲突）
+      const fnKey = Symbol("tempFn");
+      context[fnKey] = this; // this是调用myCall的原函数
+      // 3. 提取参数（排除第一个context）
+      const args = [...arguments].slice(1);
+      // 4. 执行并获取结果
+      const result = context[fnKey](...args);
+      // 5. 清理临时方法
+      delete context[fnKey];
+      // 6. 返回结果
+      return result;
+    };
+
+    // 测试
+    const obj = { a: 1 };
+    function test(x, y) {
+      console.log(this.a, x + y);
+    }
+    test.myCall(obj, 2, 3); // 输出：1 5
+
+    Function.prototype.myApply = function (context, argsArray) {
+      context = context ? Object(context) : window;
+      const fnKey = Symbol("tempFn");
+      context[fnKey] = this;
+      // 处理参数：没传则为空数组
+      argsArray = argsArray || [];
+      const result = context[fnKey](...argsArray);
+      delete context[fnKey];
+      return result;
+    };
+
+    // 测试
+    test.myApply(obj, [2, 3]); // 输出：1 5
+    
+    Function.prototype.myBind = function (context) {
+      const fn = this; // 保存原函数
+      const bindArgs = [...arguments].slice(1); // 绑定阶段的参数
+
+      // 返回新函数
+      const boundFn = function () {
+        const callArgs = [...arguments]; // 调用阶段的参数
+        // 特殊处理：如果新函数被new调用，this指向实例而非context
+        return fn.apply(this instanceof boundFn ? this : context, [...bindArgs, ...callArgs]);
+      };
+
+      // 继承原函数原型（完善性）
+      boundFn.prototype = Object.create(fn.prototype);
+      return boundFn;
+    };
+
+    // 测试
+    const boundTest = test.myBind(obj, 2);
+    boundTest(3); // 输出：1 5
+  </script>
+</body>
+</html>

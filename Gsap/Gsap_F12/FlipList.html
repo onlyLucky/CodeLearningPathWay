@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flip List</title>
+  <script src="../assets/libs/gsap3.13.0/gsap.min.js"></script>
+  <script src="../assets/libs/gsap3.13.0/Flip.min.js"></script>
+  <style>
+    body {
+      padding: 0;
+      margin: 0;
+      background-color: #232529;
+    }
+    .panel {
+      min-height: 100vh;
+      padding-left: 0.6rem;
+      padding-right: 0.6rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .text-center{
+      text-align: center;
+    }
+    .button {
+      user-select: none;
+      outline: none;
+      border: solid 2px #fffce1;
+      color: #fffce1;
+      background: #232529;
+      text-decoration: none;
+      border-radius: 99px;
+      padding: 12px 25px;
+      cursor: pointer;
+      line-height: 1;
+      font-size: 0.9rem;
+      transition: opacity 0.2s ease-out;
+      margin: 1rem 0.5rem;
+    }
+    .container {  
+      display: flex;
+      flex-direction: column;
+      flex-wrap: wrap;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      gap: 0.5rem;
+    }
+    .item {
+      padding: 0.5rem 1rem;
+      border: solid 2px #fffce1;
+      border-radius: 10px; 
+      background-color: #232529;
+      color: #fffce1;
+      cursor: pointer;
+    }
+    .item.exiting,.item.exited {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="panel center">
+    <div class="text-center">
+      <div>
+        <button id="add-button" class="button">Add Box</button>
+        <button id="shuffle-button" class="button">Shuffle</button>
+      </div>
+      <ul class="container">
+        <li class="item">Item</li>
+        <li class="item">Item</li>
+        <li class="item">Item</li>
+        <li class="item">Item</li>
+        <li class="item">Item</li>
+      </ul>
+    </div>
+  </div>
+  <script>
+    gsap.registerPlugin(Flip);
+
+    let addButton = document.getElementById('add-button');
+    let shuffleButton = document.getElementById('shuffle-button');
+    let container = document.querySelector('.container');
+    let state;
+
+    function createItem(){
+      let item = document.createElement('li');
+      item.classList.add('item');
+      item.textContent = 'Item';
+      return item;
+    }
+
+    function removeExited(exited){
+      gsap.utils.toArray(".item").forEach(item => {
+        if(item.classList.contains('exited')){
+          item.remove();
+        }
+      })
+    }
+
+    function animate(){
+      let exiting = gsap.utils.toArray(".item.exiting");
+      let timeline = Flip.from(state,{
+        absolute: true,
+        ease: "power1.inOut",
+        targets: ".item, .button",
+        scale: true,
+        simple: true,
+        onEnter(elements){
+          return gsap.fromTo(elements,
+            {
+              opacity: 0,
+              scale: 0,
+              xPercent: -100,
+            },
+            {
+              opacity: 1,
+              scale: 1,
+              xPercent: 0,
+              delay: 0.2,
+              duration: 0.3,
+            }
+          )
+        },
+        onLeave(elements){
+          return gsap.to(elements,
+            {
+              opacity: 0,
+              scale: 0.6,
+              rotation: 10,
+              xPercent: 50,
+              yPercent: -20,
+              ease: "expo.out",
+            }
+          )
+        },
+      })
+
+      timeline.add(()=>removeExited(exiting));
+    }
+
+    function setState(action){
+      state = Flip.getState(".item, .button");
+      action();
+      animate();
+    }
+
+    addButton.addEventListener('click',()=>{
+      setState(()=>{
+        container.prepend(createItem());
+      })
+    })
+
+    shuffleButton.addEventListener('click',()=>{
+      setState(()=>{
+        gsap.utils.shuffle(gsap.utils.toArray(".item")).forEach(item => {
+          container.append(item);
+        })
+      })
+    })
+
+    container.addEventListener('click',(e)=>{
+      if(e.target.classList.contains('item')){
+        setState(()=>{
+          e.target.classList.add('exiting');
+        })
+      }
+    })
+
+
+
+  </script>
+</body>
+</html>
