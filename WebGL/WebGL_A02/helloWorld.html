@@ -29,5 +29,16 @@
       gl_FragColor = vec4(1, 0, 0.5, 1); // 返回“瑞迪施紫色”
     }
   </script>
+  <script>
+    var canvas = document.getElementById("c")
+    var gl = canvas.getContext("webgl");
+    if (!gl) {
+      return
+    }
+    // 创建着色器方法，输入参数：渲染上下文，着色器类型，数据源
+    function createShader(gl, type, source){
+      var shader = gl.createShader()
+    }
+  </script>
 </body>
 </html>
