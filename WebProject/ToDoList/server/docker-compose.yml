@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: todolist-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: todolist
+      MYSQL_USER: app_user
+      MYSQL_PASSWORD: secure_password_change_in_production
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - todolist-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: todolist-api
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USERNAME: app_user
+      DB_PASSWORD: secure_password_change_in_production
+      DB_DATABASE: todolist
+      DB_SYNCHRONIZE: false
+      DB_LOGGING: false
+      DB_POOL_SIZE: 20
+      DB_MAX_QUERY_TIME: 1000
+      JWT_SECRET: change-this-to-a-very-secure-random-string
+      JWT_EXPIRES_IN: 24h
+      LOG_LEVEL: info
+      LOG_MAX_SIZE: 20m
+      LOG_MAX_FILES: 30d
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - todolist-network
+    volumes:
+      - app_logs:/app/logs
+
+volumes:
+  mysql_data:
+  app_logs:
+
+networks:
+  todolist-network:
+    driver: bridge
