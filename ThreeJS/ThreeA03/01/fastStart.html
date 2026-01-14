@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>Three.js 基础示例 - 旋转立方体</title>
+    <!-- 设置视口，确保在移动端正确显示 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { 
+            margin: 0; /* 去除默认边距 */
+            overflow: hidden; /* 隐藏滚动条，使画布满屏 */
+        }
+        /* 这个div就是我们的3D画布容器，它将占满整个浏览器窗口 */
+        #canvas-container {
+            width: 100vw;
+            height: 100vh;
+        }
+    </style>
+</head>
+<body>
+    <!-- Step 1: 在页面上定义一个容器，three.js的canvas将会被放入这里 -->
+    <div id="canvas-container"></div>
+
+    <!-- Step 2: 从CDN引入three.js核心库 -->
+    <script src="https://cdn.staticfile.net/three.js/0.160.0/three.min.js"></script>
+
+    <script>
+        // Step 3: 当网页完全加载后，执行我们的3D代码
+        window.addEventListener('DOMContentLoaded', () => {
+
+            // ========== 1. 获取容器引用 ==========
+            const container = document.getElementById('canvas-container');
+
+            // ========== 2. 创建场景（舞台） ==========
+            // Scene是所有物体、灯光、相机的总容器
+            const scene = new THREE.Scene();
+
+            // ========== 3. 创建相机（眼睛） ==========
+            // 使用透视相机 PerspectiveCamera(fov, aspect, near, far)
+            // fov: 垂直视野角度，单位是度。75是一个常用值，视野较宽。
+            // aspect: 画布的宽高比。我们先设置为容器宽高比，后续会动态更新。
+            // near: 近裁截面。比这个距离近的物体不会被渲染。
+            // far: 远裁截面。比这个距离远的物体不会被渲染。
+            const camera = new THREE.PerspectiveCamera(
+                75,
+                container.clientWidth / container.clientHeight,
+                0.1,
+                1000
+            );
+            // 将相机从默认位置(0,0,0)向后移动一些，否则我们会处于立方体内部
+            camera.position.z = 5;
+
+            // ========== 4. 创建渲染器（画家） ==========
+            // WebGLRenderer 是最常用的渲染器
+            const renderer = new THREE.WebGLRenderer({ 
+                antialias: true // 开启抗锯齿，让边缘更平滑
+            });
+            // 设置渲染器输出canvas的尺寸，这里让它铺满我们准备好的容器
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            // 将渲染器自动生成的canvas元素，添加到我们的容器中
+            container.appendChild(renderer.domElement);
+
+            // ========== 5. 创建立方体对象 ==========
+            // 几何体：定义形状。BoxGeometry是立方体，参数为宽、高、深。
+            const geometry = new THREE.BoxGeometry(2, 2, 2);
+            // 材质：定义外观。MeshBasicMaterial是最基础的材质，不受光照影响。
+            const material = new THREE.MeshBasicMaterial({ 
+                color: 0x00aaff // 颜色，使用16进制RGB值，这是青色
+            });
+            // 网格：将几何体和材质结合，形成一个完整的、可加入场景的物体。
+            const cube = new THREE.Mesh(geometry, material);
+            // 将立方体网格添加到场景中
+            scene.add(cube);
+
+            // ========== 6. 窗口大小变化响应 ==========
+            // 当浏览器窗口大小改变时，更新相机比例和渲染器尺寸
+            const onWindowResize = () => {
+                // 更新相机宽高比
+                camera.aspect = container.clientWidth / container.clientHeight;
+                camera.updateProjectionMatrix(); // 相机参数改变后，必须调用此方法
+                // 更新渲染器尺寸
+                renderer.setSize(container.clientWidth, container.clientHeight);
+            };
+            // 监听窗口的“resize”事件
+            window.addEventListener('resize', onWindowResize);
+
+            // ========== 7. 创建动画循环 ==========
+            // 定义一个渲染函数，它将被循环调用
+            const animate = () => {
+                // 使用 requestAnimationFrame 来请求下一帧动画，形成循环
+                // 这个API比setInterval更优，它能保证与浏览器刷新率同步
+                requestAnimationFrame(animate);
+
+                // ---- 在每一帧中执行的更新操作 ----
+                // 让立方体绕x轴和y轴缓慢旋转
+                cube.rotation.x += 0.01;
+                cube.rotation.y += 0.005;
+
+                // 使用渲染器，从相机的视角，将场景渲染出来
+                renderer.render(scene, camera);
+            };
+
+            // 启动动画循环
+            animate();
+        });
+    </script>
+</body>
+</html>
