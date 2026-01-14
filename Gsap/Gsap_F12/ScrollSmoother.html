@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>ScrollSmoother 实战案例</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    /* 核心滚动容器样式 */
+    .smooth-wrapper {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      overflow: hidden;
+    }
+    .smooth-content {
+      width: 100%; height: auto;
+      position: relative;
+    }
+    /* 页面样式 */
+    section {
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+    }
+    .bg {
+      background: #f0f0f0;
+      height: 120vh;
+      margin: 50px 0;
+    }
+    /* 视差图片 */
+    .parallax-img {
+      width: 80%;
+      margin: 0 auto;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div class="smooth-wrapper">
+    <div class="smooth-content">
+      <section>首页</section>
+      <div class="bg">
+        <img src="https://picsum.photos/1200/600" class="parallax-img" 
+             data-speed="0.3" data-lag="0.5" data-opacity="0.2" data-scale="0.9">
+      </div>
+      <section id="section2">第二区块</section>
+      <div class="bg"></div>
+      <section class="footer">底部</section>
+    </div>
+  </div>
+  <!-- 引入插件 -->
+  <script src="https://cdn.bootcdn.net/ajax/libs/gsap/3.13.0/gsap.min.js"></script>
+  <script src="https://cdn.bootcdn.net/ajax/libs/gsap/3.13.0/ScrollTrigger.min.js"></script>
+  <script src="https://cdn.bootcdn.net/ajax/libs/gsap/3.13.0/ScrollSmoother.min.js"></script>
+  <script>
+    // 初始化ScrollSmoother
+    const smoother = ScrollSmoother.create({
+      wrapper: ".smooth-wrapper",
+      content: ".smooth-content",
+      smooth: 2,
+      smoothTouch: 0.3,
+      rebound: 0.2,
+      ease: "power2.out"
+    });
+
+    // 点击页面滚动到第二区块
+    document.addEventListener("click", () => {
+      smoother.scrollTo("#section2", { duration: 1, ease: "power3.out" });
+    });
+
+    // 窗口resize刷新
+    window.addEventListener("resize", () => smoother.refresh());
+  </script>
+</body>
+</html>

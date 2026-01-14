@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Horizontal Scrolling Gallery</title>
+  <script src="https://cdn.bootcdn.net/ajax/libs/gsap/3.13.0/gsap.min.js"></script>
+  <script src="https://cdn.bootcdn.net/ajax/libs/gsap/3.13.0/ScrollTrigger.min.js"></script>
+  <script src="https://cdn.bootcdn.net/ajax/libs/gsap/3.13.0/ScrollSmoother.min.js"></script>
+  <style>
+    :root {
+      --background: #232529;
+    }
+    body {
+      padding: 0;
+      margin: 0;
+      background-color: var(--background);
+      overflow-x: hidden;
+    }
+    .panel {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      min-height: 100vh;
+      padding-left: 2rem;
+      padding-right: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 1rem;
+      background-color: var(--background);
+      box-sizing: border-box;
+      z-index: 1;
+    }
+    .panel h3 {
+      font-size: 2rem;
+      font-weight: 400;
+      color: #fff;
+      text-align: center;
+    }
+    section{width: 100%;}
+    .container-fluid{
+      width: 100%;
+      padding-right: 0;
+      padding-left: 0;
+      margin-right: auto;
+      margin-left: auto;
+    }
+    .horiz-gallery-strip,
+    .horiz-gallery-wrapper {
+      display: flex;
+      flex-wrap: nowrap;
+      will-change: transform;
+      position: relative;
+      width: 100%;
+    }
+    .project-wrap {
+      width: 33%;
+      flex-shrink: 0;
+      padding: 2rem;
+      box-sizing: content-box;
+    }
+    .project-wrap img {
+      width: 100%;
+      aspect-ratio: 1/1;
+      object-fit: cover;
+    }
+  </style>
+</head>
+<body>
+  <div id="smooth-wrapper">
+    <div id="smooth-content">
+
+      <section class="panel plain">
+        <h3>Scroll down for the Gallery</h3>
+      </section>
+
+      <section id="portfolio">
+        <div class="container-fluid">
+          <div class="horiz-gallery-wrapper">
+            <div class="horiz-gallery-strip">
+              <div class="project-wrap">
+                <img src="https://picsum.photos/600/600" alt="" />
+              </div>
+              <div class="project-wrap">
+                <img src="https://picsum.photos/600/600" alt="" />
+              </div>
+              <div class="project-wrap">
+                <img src="https://picsum.photos/600/600" alt="" />
+              </div>
+              <div class="project-wrap">
+                <img src="https://picsum.photos/600/600" alt="" />
+              </div>
+              <div class="project-wrap">
+                <img src="https://picsum.photos/600/600" alt="" />
+              </div>
+              <div class="project-wrap">
+                <img src="https://picsum.photos/600/600" alt="" />
+              </div>
+              <div class="project-wrap">
+                <img src="https://picsum.photos/600/600" alt="" />
+              </div>
+              <div class="project-wrap">
+                <img src="https://picsum.photos/600/600" alt="" />
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <section class="panel plain">
+        <h3>That's it!</h3>
+      </section>
+
+      <section id="portfolio">
+        <div class="container-fluid">
+          <div class="horiz-gallery-wrapper">
+            <div class="horiz-gallery-strip">
+              <div class="project-wrap">
+                <img src="https://picsum.photos/600/600" alt="" />
+              </div>
+              <div class="project-wrap">
+                <img src="https://picsum.photos/600/600" alt="" />
+              </div>
+              <div class="project-wrap">
+                <img src="https://picsum.photos/600/600" alt="" />
+              </div>
+              <div class="project-wrap">
+                <img src="https://picsum.photos/600/600" alt="" />
+              </div>
+              <div class="project-wrap">
+                <img src="https://picsum.photos/600/600" alt="" />
+              </div>
+              <div class="project-wrap">
+                <img src="https://picsum.photos/600/600" alt="" />
+              </div>
+              <div class="project-wrap">
+                <img src="https://picsum.photos/600/600" alt="" />
+              </div>
+              <div class="project-wrap">
+                <img src="https://picsum.photos/600/600" alt="" />
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <section class="panel plain">
+        <h3>That's it!</h3>
+      </section>
+
+    </div>
+  </div>
+  <script>
+    gsap.registerPlugin(ScrollTrigger, ScrollSmoother);
+    const smoother = ScrollSmoother.create({
+      wrapper: "#smooth-wrapper", // 滚动容器
+      content: "#smooth-content", // 滚动内容
+      smooth: 2,  // 0-10 页面滚动的平滑度。值越大越顺滑
+      effects: true, // 是否开启Data-滚动特效
+      normalizeScroll: true, // 统一滚轮/触摸/键盘的滚动速度，不同设备滚动体验一致
+      ignoreMobileResize: true, // 移动端窗口缩放时不重新计算滚动，提升性能
+      preventDefault: true // 防止多个元素的滚动特效重叠冲突，优化性能
+    });
+
+    if(document.getElementById('portfolio')){
+
+      const horizontalSection = gsap.utils.toArray('.horiz-gallery-wrapper');
+      horizontalSection.forEach(function(sec, i){
+        
+        const pinWrap = sec.querySelector(".horiz-gallery-strip");
+        console.log(sec,pinWrap.scrollWidth);
+        let pinWrapWidth;
+        let horizontalScrollLength;
+
+        function refresh() {
+          pinWrapWidth = pinWrap.scrollWidth;
+          horizontalScrollLength = pinWrapWidth - window.innerWidth;
+        }
+
+        refresh();
+        // Pinning and horizontal scrolling
+        gsap.to(pinWrap, {
+          scrollTrigger: {
+            scrub: true, // 动画进度与滚动进度完全同步
+            trigger: sec, // 滚动时以这个元素的位置作为触发
+            pin: sec, // 固定dom，动画结束
+            start: "center center",
+            end: () => `+=${pinWrapWidth}`, // 滚动结束
+            invalidateOnRefresh: true // 窗口resize时，是否重新计算所有滚动相关参数
+          },
+          x: () => -horizontalScrollLength,  // 初始化移动距离
+          ease: "none"
+        });
+
+        ScrollTrigger.addEventListener("refreshInit", refresh);
+      })
+    }
+  </script>
+</body>
+</html>
