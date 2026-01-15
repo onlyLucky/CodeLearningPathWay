@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>responsive</title>
+  <style>
+    html, body {
+      margin: 0;
+      height: 100%;
+    }
+    #c {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="c"></canvas>
+  <script type="module">
+    import * as THREE from '../../assets/libs/three_r134/three.module.min.js';
+    function main(){
+      const canvas = document.querySelector( '#c' );
+      const renderer = new THREE.WebGLRenderer({antialias:true, canvas});
+
+      const fov = 75;
+      const aspect = 2; // the canvas default
+      const near = 0.1;
+      const far = 5;
+      const camera = new THREE.PerspectiveCamera( fov, aspect, near, far );
+      camera.position.z = 2;
+
+      const scene = new THREE.Scene();
+
+      {
+
+        const color = 0xFFFFFF; // 光的颜色，白色
+        const intensity = 1; // 光的强度，1表示标准强度
+        const light = new THREE.DirectionalLight( color, intensity );
+        light.position.set( - 1, 2, 4 ); // 光源位置，x=-1, y=2, z=4
+        scene.add( light );
+
+      }
+
+      const boxWidth = 1;
+      const boxHeight = 1;
+      const boxDepth = 1;
+      const geometry = new THREE.BoxGeometry( boxWidth, boxHeight, boxDepth );
+
+      function makeInstance(geometry, color, x){
+        const material = new THREE.MeshPhongMaterial( { color } ); // greenish blue
+        const cube = new THREE.Mesh( geometry, material );
+        scene.add( cube );
+
+        cube.position.x = x;
+        return cube;
+      }
+
+      const cubes = [
+        makeInstance(geometry, 0x44aa88,  0),
+        makeInstance(geometry, 0x8844aa, -2),
+        makeInstance(geometry, 0xaa8844,  2),
+      ];
+
+      // 判断渲染器的尺寸是否需要更新，并支持高DPI显示
+      // @param {THREE.WebGLRenderer} renderer - Three.js渲染器实例
+      // @returns {boolean} - 如果渲染器尺寸被调整返回true，否则返回false
+      function resizeRendererToDisplaySize(renderer) {
+        // 获取渲染器绑定的canvas元素
+        const canvas = renderer.domElement;
+        // 获取设备的像素比，用于支持高DPI显示（如Retina屏幕）
+        const pixelRatio = window.devicePixelRatio;
+        // 计算canvas在屏幕上实际显示的宽度，乘以像素比以确保在高DPI屏幕上清晰显示
+        const width = Math.floor( canvas.clientWidth * pixelRatio );
+        // 计算canvas在屏幕上实际显示的高度，乘以像素比以确保在高DPI屏幕上清晰显示
+        const height = Math.floor( canvas.clientHeight * pixelRatio );
+        // 检查canvas当前的内部渲染尺寸是否与计算出的尺寸不同
+        const needResize = canvas.width !== width || canvas.height !== height;
+        // 如果尺寸需要调整，则更新渲染器的尺寸
+        // 第三个参数false表示不更新canvas的CSS样式，只更新内部渲染尺寸
+        if (needResize) {
+          renderer.setSize(width, height, false);
+        }
+        // 返回是否进行了尺寸调整
+        return needResize;
+      }
+
+
+      // 动画实现
+      function render(time){
+        time *= 0.001; // convert time to seconds
+
+        // 重新渲染 canvas 不变形
+        if(resizeRendererToDisplaySize(renderer)){
+          let canvas = renderer.domElement;
+          camera.aspect = canvas.clientWidth / canvas.clientHeight;
+          camera.updateProjectionMatrix();
+        }
+
+        cubes.forEach((cube,index) => {
+          const speed = 1 + index * .1;
+          const rot = time * speed;
+          cube.rotation.x = rot;
+          cube.rotation.y = rot;
+        });
+
+        renderer.render( scene, camera );
+
+        requestAnimationFrame(render);
+      }
+      requestAnimationFrame(render);
+
+      // renderer.render( scene, camera );
+    }
+    main();
+  </script>
+</body>
+</html>
