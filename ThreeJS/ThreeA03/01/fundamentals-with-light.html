@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ThreeJS Start</title>
+  <title>ThreeJS Start with Light</title>
 </head>
 <body>
   <canvas id="c"></canvas>
@@ -29,17 +29,40 @@
 
       const scene = new THREE.Scene();
 
+      {
+
+        const color = 0xFFFFFF; // 光的颜色，白色
+        const intensity = 0.6; // 光的强度，1表示标准强度
+        const light = new THREE.DirectionalLight( color, intensity );
+        light.position.set( - 1, 2, 4 ); // 光源位置，x=-1, y=2, z=4
+        scene.add( light );
+
+      }
+
       const boxWidth = 1;
       const boxHeight = 1;
       const boxDepth = 1;
       const geometry = new THREE.BoxGeometry( boxWidth, boxHeight, boxDepth );
 
-      const material = new THREE.MeshBasicMaterial( { color: 0x44aa88 } ); // greenish blue
+      const material = new THREE.MeshPhongMaterial( { color: 0x44aa88 } ); // greenish blue
 
       const cube = new THREE.Mesh( geometry, material );
       scene.add( cube );
 
-      renderer.render( scene, camera );
+      // 动画实现
+      function render(time){
+        time *= 0.001; // convert time to seconds
+
+        cube.rotation.x = time;
+        cube.rotation.y = time;
+
+        renderer.render( scene, camera );
+
+        requestAnimationFrame(render);
+      }
+      requestAnimationFrame(render);
+
+      // renderer.render( scene, camera );
     }
     main();
   </script>

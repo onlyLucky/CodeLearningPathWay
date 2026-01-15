@@ -2,6 +2,8 @@
 
 ## 一、快速开始
 
+- 最开始的时候优先按照Demo代码实现，后续再加上自己的想法
+
 ### Start
 
 **【目标】** 聚焦于最核心的几个组件的创建、组装和显示，让用户能快速看到效果，建立初步认知。帮助开发者从零开始，在浏览器中构建并运行起第一个 3D 场景。
@@ -15,7 +17,22 @@
 
 **【代码示例】**
 - [fastStart](./01/fastStart.html)
+- [静态初始化使用场景](./01/fundamentals.html)
+- [动画初始化使用](./01/fundamentals-with-animation.html)
+- [光照初始化使用](./01/fundamentals-with-light.html)
+- [多个立方体](./01/fundamentals-3-cubes.html)
 
+
+### 响应式设计
+
+1. 核心问题：当浏览器窗口大小改变时，3D画布（Canvas）会被拉伸或留白，导致画面变形或显示不全。
+2. 解决方案：监听窗口的 resize 事件。
+3. 关键步骤：
+  - 更新渲染器尺寸：renderer.setSize(newWidth, newHeight)
+  - 更新相机参数：对于PerspectiveCamera，需要更新其 aspect（纵横比）并调用 camera.updateProjectionMatrix()。
+  - 可选：处理像素比（window.devicePixelRatio）以适应高清屏。
+
+**【代码示例】**
 
 ## 二、基础
 
@@ -28,3 +45,11 @@
 ## 六、使用解决方案
 
 ## 七、WebXR
+
+## 其他
+### VS code 文件差异对比
+  1、按下 Cmd + Shift + P（Windows/Linux为 Ctrl + Shift + P）打开命令面板。
+  2、输入 "File: Compare Active File With..." 并回车。
+  3、在弹出的文件选择列表中，点击目标对比文件。
+
+## 参考资料
