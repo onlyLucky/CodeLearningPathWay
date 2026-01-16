@@ -19,22 +19,75 @@
 <body>
   <canvas id="c"></canvas>
   <script type="module">
+    /**
+     * Three.js 程序创建流程总结：
+     * 1. 准备 HTML 容器：创建 <canvas> 元素作为渲染目标。
+     * 2. 引入 Three.js：通过 ES Module 或 script 标签加载 three.module.min.js。
+     * 3. 创建 WebGLRenderer：实例化 THREE.WebGLRenderer，关联 canvas，可配置抗锯齿、透明、深度缓冲等参数。
+     * 4. 创建 Scene：实例化 THREE.Scene，作为所有 3D 对象（网格、灯光、相机）的容器。
+     * 5. 创建 Camera：常用 THREE.PerspectiveCamera，设置 fov、aspect、near、far，调整相机位置。
+     * 6. 添加灯光：如 THREE.DirectionalLight，设置颜色、强度、位置，并加入场景。
+     * 7. 创建几何体与材质：使用 THREE.BoxGeometry 等几何体，搭配 THREE.MeshPhongMaterial 等材质。
+     * 8. 创建 Mesh：将几何体与材质组合成 THREE.Mesh，设置位置后加入场景；可批量生成多个实例。
+     * 9. 响应式处理：监听画布尺寸变化，调用 renderer.setSize 与 camera.updateProjectionMatrix 防止画面变形。
+     *10. 动画循环：在 requestAnimationFrame 回调中更新对象属性（如旋转），每帧调用 renderer.render(scene, camera)。
+    *11. 启动渲染：首次调用 requestAnimationFrame 进入循环，完成初始化。
+    */
     import * as THREE from '../../assets/libs/three0.182.0/three.module.min.js';
     function main(){
       const canvas = document.querySelector( '#c' );
+      /**
+       * WebGLRenderer - WebGL渲染器，用于渲染3D场景
+       * 参数选项：
+       * - antialias: 是否开启抗锯齿，默认false
+       * - canvas: 指定canvas元素
+       * - alpha: 是否允许透明背景，默认false
+       * - depth: 是否启用深度缓冲区，默认true
+       * - stencil: 是否启用模板缓冲区，默认false
+       * - logarithmicDepthBuffer: 是否使用对数深度缓冲区，默认false
+       * - preserveDrawingBuffer: 是否保留绘图缓冲区，默认false
+       */
       const renderer = new THREE.WebGLRenderer({antialias:true, canvas});
 
+      /**
+       * PerspectiveCamera - 透视相机，模拟人眼的透视效果
+       * 参数：
+       * - fov: 视场角（Field of View），垂直方向的可视角度，默认50，单位度
+       * - aspect: 宽高比，渲染区域的宽度除以高度，默认1
+       * - near: 近裁剪面距离，默认0.1
+       * - far: 远裁剪面距离，默认2000
+       * 只有在near和far之间的物体才会被渲染
+       */
       const fov = 75;
       const aspect = 2; // the canvas default
       const near = 0.1;
       const far = 5;
       const camera = new THREE.PerspectiveCamera( fov, aspect, near, far );
-      camera.position.z = 2;
+      camera.position.z = 2; // 相机在Z轴的位置
 
+      /**
+       * Scene - 场景，所有3D对象的容器
+       * 场景可以包含：
+       * - 网格对象
+       * - 灯光
+       * - 相机
+       * - 其他场景对象
+       */
       const scene = new THREE.Scene();
 
       {
 
+        /**
+         * DirectionalLight - 平行光，模拟来自远处的光源（如太阳）
+         * 参数：
+         * - color: 光的颜色，默认0xffffff（白色）
+         * - intensity: 光的强度，默认1
+         * 其他属性：
+         * - position: 光源位置（Vector3）
+         * - target: 光照目标（默认为原点）
+         * - castShadow: 是否投射阴影，默认false
+         * - shadow: 阴影配置对象
+         */
         const color = 0xFFFFFF; // 光的颜色，白色
         const intensity = 1; // 光的强度，1表示标准强度
         const light = new THREE.DirectionalLight( color, intensity );
@@ -43,17 +96,50 @@
 
       }
 
+      /**
+       * BoxGeometry - 盒子几何体，创建一个长方体
+       * 参数：
+       * - width: 宽度，默认1
+       * - height: 高度，默认1
+       * - depth: 深度，默认1
+       * - widthSegments: 宽度分段数，默认1
+       * - heightSegments: 高度分段数，默认1
+       * - depthSegments: 深度分段数，默认1
+       * 分段数越高，几何体越精细，但性能开销越大
+       */
       const boxWidth = 1;
       const boxHeight = 1;
       const boxDepth = 1;
       const geometry = new THREE.BoxGeometry( boxWidth, boxHeight, boxDepth );
 
       function makeInstance(geometry, color, x){
+        /**
+         * MeshPhongMaterial - Phong材质，基于Phong光照模型的材质
+         * 参数：
+         * - color: 材质颜色，默认0xffffff
+         * - emissive: 自发光颜色，默认0x000000
+         * - specular: 高光颜色，默认0x111111
+         * - shininess: 高光亮度，默认30
+         * - flatShading: 是否使用平面着色，默认false
+         * - side: 渲染面，默认THREE.FrontSide
+         *   - THREE.FrontSide: 只渲染正面
+         *   - THREE.BackSide: 只渲染背面
+         *   - THREE.DoubleSide: 渲染双面
+         * - transparent: 是否透明，默认false
+         * - opacity: 透明度，默认1
+         * - wireframe: 是否以线框模式渲染，默认false
+         */
         const material = new THREE.MeshPhongMaterial( { color } ); // greenish blue
+        /**
+         * Mesh - 网格对象，由几何体和材质组合成的3D对象
+         * 参数：
+         * - geometry: 几何体对象
+         * - material: 材质对象或材质数组
+         */
         const cube = new THREE.Mesh( geometry, material );
         scene.add( cube );
 
-        cube.position.x = x;
+        cube.position.x = x; // 设置立方体在X轴的位置
         return cube;
       }
 
@@ -63,7 +149,11 @@
         makeInstance(geometry, 0xaa8844,  2),
       ];
 
-      // 判断渲染器的尺寸是否需要更新
+      /**
+       * 判断渲染器的尺寸是否需要更新
+       * @param {THREE.WebGLRenderer} renderer - WebGL渲染器对象
+       * @returns {boolean} 是否需要调整尺寸
+       */
       function resizeRendererToDisplaySize(renderer) {
         const canvas = renderer.domElement;
         const width = canvas.clientWidth;
@@ -71,32 +161,67 @@
         // 检查渲染器的尺寸是否与画布的尺寸不同
         const needResize = canvas.width !== width || canvas.height !== height;
         if (needResize) {
+          /**
+           * renderer.setSize() - 设置渲染器的尺寸
+           * 参数：
+           * - width: 宽度
+           * - height: 高度
+           * - updateStyle: 是否更新canvas的CSS样式，默认true
+           */
           renderer.setSize(width, height, false);
         }
         return needResize;
       }
 
 
-      // 动画实现
+      /**
+       * 动画渲染函数
+       * @param {number} time - 时间戳（毫秒）
+       */
       function render(time){
         time *= 0.001; // convert time to seconds
 
         // 重新渲染 canvas 不变形
         if(resizeRendererToDisplaySize(renderer)){
           let canvas = renderer.domElement;
+          /**
+           * camera.aspect - 相机的宽高比
+           * 需要根据canvas的实际宽高比进行调整，否则物体会变形
+           */
           camera.aspect = canvas.clientWidth / canvas.clientHeight;
+          /**
+           * camera.updateProjectionMatrix() - 更新相机的投影矩阵
+           * 当相机的参数（如aspect、fov、near、far）改变后需要调用此方法
+           */
           camera.updateProjectionMatrix();
         }
 
         cubes.forEach((cube,index) => {
           const speed = 1 + index * .1;
           const rot = time * speed;
+          /**
+           * cube.rotation - 网格的旋转角度（Euler对象）
+           * - x: 绕X轴旋转角度（弧度）
+           * - y: 绕Y轴旋转角度（弧度）
+           * - z: 绕Z轴旋转角度（弧度）
+           */
           cube.rotation.x = rot;
           cube.rotation.y = rot;
         });
 
+        /**
+         * renderer.render() - 渲染场景
+         * 参数：
+         * - scene: 要渲染的场景
+         * - camera: 用于渲染的相机
+         */
         renderer.render( scene, camera );
 
+        /**
+         * requestAnimationFrame() - 请求下一帧动画
+         * 浏览器会在下一次重绘之前调用指定的回调函数
+         * 通常用于创建平滑的动画效果
+         */
         requestAnimationFrame(render);
       }
       requestAnimationFrame(render);

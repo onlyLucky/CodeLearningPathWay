@@ -28,52 +28,421 @@
   </script>
   <script type="module">
     import * as THREE from 'three';
-    import { FontLoader } from 'three/addons/loaders/FontLoader.js';
-    import { ParametricGeometry } from 'three/addons/geometries/ParametricGeometry.js';
-    import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
+    import { FontLoader } from 'three/addons/loaders/FontLoader.js'; // 字体加载器，用于加载字体文件
+    import { ParametricGeometry } from 'three/addons/geometries/ParametricGeometry.js'; // 参数化几何体，用于创建自定义形状
+    import { TextGeometry } from 'three/addons/geometries/TextGeometry.js'; // 文本几何体，用于创建3D文字
 
     function main(){
       const canvas = document.querySelector( '#c' );
       const renderer = new THREE.WebGLRenderer({antialias:true, canvas});
 
-      const fov = 75;
+      const fov = 40;
       const aspect = 2; // the canvas default
       const near = 0.1;
-      const far = 5;
+      const far = 1000;
       const camera = new THREE.PerspectiveCamera( fov, aspect, near, far );
-      camera.position.z = 2;
+      camera.position.z = 120;
 
       const scene = new THREE.Scene();
+      scene.background = new THREE.Color(0xAAAAAA)
 
       {
 
         const color = 0xFFFFFF; // 光的颜色，白色
-        const intensity = 1; // 光的强度，1表示标准强度
+        const intensity = 3; // 光的强度，1表示标准强度
         const light = new THREE.DirectionalLight( color, intensity );
         light.position.set( - 1, 2, 4 ); // 光源位置，x=-1, y=2, z=4
         scene.add( light );
 
       }
 
-      const boxWidth = 1;
-      const boxHeight = 1;
-      const boxDepth = 1;
-      const geometry = new THREE.BoxGeometry( boxWidth, boxHeight, boxDepth );
+      {
 
-      function makeInstance(geometry, color, x){
-        const material = new THREE.MeshPhongMaterial( { color } ); // greenish blue
-        const cube = new THREE.Mesh( geometry, material );
-        scene.add( cube );
+        const color = 0xFFFFFF;
+        const intensity = 3;
+        const light = new THREE.DirectionalLight( color, intensity );
+        light.position.set( 1, - 2, - 4 );
+        scene.add( light );
 
-        cube.position.x = x;
-        return cube;
       }
 
-      const cubes = [
-        makeInstance(geometry, 0x44aa88,  0),
-        makeInstance(geometry, 0x8844aa, -2),
-        makeInstance(geometry, 0xaa8844,  2),
-      ];
+      const objects = [];
+	    const spread = 15;
+
+      function addObject(x, y, obj){
+        obj.position.x = x * spread;
+        obj.position.y = y * spread;
+        scene.add(obj);
+        objects.push(obj);
+      }
+
+      function createMaterial(){
+        
+        const material = new THREE.MeshPhongMaterial({
+          /* side 参数可选值：
+          - THREE.FrontSide: 只渲染正面（默认）
+          - THREE.BackSide: 只渲染背面
+          - THREE.DoubleSide: 渲染双面 */
+          side: THREE.DoubleSide, // 渲染双面，使几何体的正面和背面都可见
+        });
+
+        const hue = Math.random(); // hue:        色相，范围 0–1，随机生成，决定颜色种类
+        const saturation = 1; // saturation: 饱和度，固定为 1，颜色最鲜艳
+        const luminance = .5; // luminance:  亮度，固定为 0.5，明暗适中
+        // 将材质颜色设置为随机 HSL 值,使用 setHSL 可动态生成丰富且不重复的彩色外观
+        material.color.setHSL(hue, saturation, luminance);
+
+        return material;
+      }
+
+      function addSolidGeometry(x, y, geometry){
+        const obj = new THREE.Mesh(geometry, createMaterial());
+        addObject(x, y, obj);
+      }
+
+      function addLineGeometry(x, y, geometry){
+        const material = new THREE.LineBasicMaterial({
+          color: 0x000000, // 线的颜色，黑色
+        });
+        const mesh = new THREE.LineSegments(geometry, material);
+        addObject(x, y, mesh);
+      }
+
+      /* 几何体 - 立方体 BoxGeometry */
+      {
+        const width = 8; // 宽度
+        const height = 8; // 高度
+        const depth = 8; // 深度
+        const widthSegments = 2; // 宽度分段数
+        const heightSegments = 2; // 高度分段数
+        const depthSegments = 2; // 深度分段数
+        addSolidGeometry( - 2, 2, new THREE.BoxGeometry( width, height, depth, widthSegments, heightSegments, depthSegments ) );
+      }
+
+      /* 平面圆 CircleGeometry */
+      {
+        const radius = 7; // 半径
+        const segments = 24; // 分段数
+        const thetaStart = Math.PI * 0.25; // 起始角度，默认0
+        const thetaLength = Math.PI * 1.5; // 角度范围，默认2π，覆盖360度
+        addSolidGeometry( - 1, 2, new THREE.CircleGeometry( radius, segments, thetaStart, thetaLength ) );
+      }
+
+      /* 锥形 ConeGeometry */
+      {
+        const radius = 7; // 半径
+        const height = 12; // 高度
+        const radialSegments = 24; // 径向分段数
+        const heightSegments = 1; // 高度分段数
+        const openEnded = false; // 是否开口，默认false
+        const thetaStart = 0; // 起始角度，默认0
+        const thetaLength = Math.PI * 2; // 角度范围，默认2π，覆盖360度
+        addSolidGeometry( 0, 2, new THREE.ConeGeometry( radius, height, radialSegments, heightSegments, openEnded, thetaStart, thetaLength ) );
+      }
+
+      /* 圆柱 CylinderGeometry */
+      {
+        const radiusTop = 4; // 顶部半径
+        const radiusBottom = 4; // 底部半径
+        const height = 8; // 高度
+        const radialSegments = 12; // 径向分段数
+        const heightSegments = 1; // 高度分段数
+        const openEnded = false; // 是否开口，默认false
+        const thetaStart = 0; // 起始角度，默认0
+        const thetaLength = Math.PI * 2; // 角度范围，默认2π，覆盖360度
+        addSolidGeometry( 1, 2, new THREE.CylinderGeometry( radiusTop, radiusBottom, height, radialSegments, heightSegments, openEnded, thetaStart, thetaLength ) );
+      }
+
+      /* 十二面体 DodecahedronGeometry */
+      {
+        const radius = 7; // 半径
+        const detail = 0; // 细节等级，默认0，无细分
+        addSolidGeometry( 2, 2, new THREE.DodecahedronGeometry( radius, detail ) );
+      }
+      
+      /* 挤压（拉伸）2D 轮廓生成 3D 几何体 - ExtrudeGeometry */
+      {
+        // 创建二维心形轮廓（Shape）
+        const shape = new THREE.Shape();
+        const x = - 2.5; // 基准 x 坐标，整体水平偏移
+        const y = - 5; // 基准 y 坐标，整体垂直偏移
+        // 以下通过多段贝塞尔曲线绘制心形左侧轮廓
+        shape.moveTo( x + 2.5, y + 2.5 ); // 起点：心形顶部凹陷处
+        shape.bezierCurveTo( x + 2.5, y + 2.5, x + 2, y, x, y ); // 左侧下降曲线
+        shape.bezierCurveTo( x - 3, y, x - 3, y + 3.5, x - 3, y + 3.5 ); // 左下外扩
+        shape.bezierCurveTo( x - 3, y + 5.5, x - 1.5, y + 7.7, x + 2.5, y + 9.5 ); // 左下弧线过渡到心尖
+        shape.bezierCurveTo( x + 6, y + 7.7, x + 8, y + 4.5, x + 8, y + 3.5 ); // 右侧对称弧线
+        shape.bezierCurveTo( x + 8, y + 3.5, x + 8, y, x + 5, y ); // 右侧上升
+        shape.bezierCurveTo( x + 3.5, y, x + 2.5, y + 2.5, x + 2.5, y + 2.5 ); // 回到起点，闭合心形
+
+        // 挤压参数：定义 2D 轮廓如何被“拉伸”成 3D 几何体
+        const extrudeSettings = {
+          steps: 2, // 拉伸方向的分段数，影响侧面曲线光滑度
+          depth: 2, // 拉伸深度，即心形厚度
+          bevelEnabled: true, // 启用倒角，使边缘更圆润
+          bevelThickness: 1, // 倒角厚度
+          bevelSize: 1, // 倒角宽度
+          bevelSegments: 2, // 倒角分段数，数值越高倒角越光滑
+        };
+        // 生成并添加到场景，位于第 -2 列、第 1 行
+        addSolidGeometry( - 2, 1, new THREE.ExtrudeGeometry( shape, extrudeSettings ) );
+      }
+
+      /* 二十面体 IcosahedronGeometry */
+      {
+        const radius = 7; // 半径
+        const detail = 0; // 细节等级，默认0，无细分
+        addSolidGeometry( -1, 1, new THREE.IcosahedronGeometry( radius, detail ) );
+      }
+
+      /* 绕着一条线旋转形成的形状 LatheGeometry */
+      {
+        const segments = 10; // 分段数
+        const points = []; // 定义旋转路径上的点
+        for (let i = 0; i <= 10; i++) {
+          // 计算当前点在 x 轴（半径方向）上的值：先让正弦函数随 i 缓慢变化，振幅 3，整体向右平移 3，形成波浪起伏的轮廓
+          const radius = Math.sin(i * 0.2) * 3 + 3;
+          // 计算当前点在 y 轴（高度方向）上的值：i 从 0 到 10，减去 5 后范围 -5~5，再乘以 0.8 让高度间隔均匀
+          const height = (i - 5) * 0.8;
+          // 将二维点 (radius, height) 加入数组，后续 LatheGeometry 会绕 y 轴旋转这些点生成花瓶状几何体
+          points.push(new THREE.Vector2(radius, height));
+        }
+        const phiStart = 0; // 起始角度，默认0
+        const phiLength = Math.PI * 2; // 角度范围，默认2π，覆盖360度
+        addSolidGeometry( 0, 1, new THREE.LatheGeometry( points, segments, phiStart, phiLength ) );
+      }
+
+      /* 八面体 OctahedronGeometry */
+      {
+        const radius = 7; // 半径
+        const detail = 0; // 细节等级，默认0，无细分
+        addSolidGeometry( 1, 1, new THREE.OctahedronGeometry( radius, detail ) );
+      }
+
+      /* 基于参数函数生成的 3D 几何体 - ParametricGeometry */
+      {
+        // 参数化克莱因瓶几何体：通过数学函数生成一个自相交的“瓶”状曲面
+        const slices = 25;  // u 方向分段数，决定曲面横向精细度
+        const stacks = 25; // v 方向分段数，决定曲面纵向精细度
+
+        // 克莱因瓶参数方程，u、v ∈ [0,1]，target 为输出的三维点
+        // from: https://github.com/mrdoob/three.js/blob/b8d8a8625465bd634aa68e5846354d69f34d2ff5/examples/js/ParametricGeometries.js
+        function klein(v, u, target) {
+          u *= Math.PI;      // 将 u 映射到 [0,π]
+          v *= 2 * Math.PI;  // 将 v 映射到 [0,2π]
+          u = u * 2;         // 再放大 2 倍，使 u ∈ [0,2π]
+
+          let x, z;
+          if (u < Math.PI) {
+            // 前半段：构造“瓶身”与“瓶颈”的平滑过渡
+            x = 3 * Math.cos(u) * (1 + Math.sin(u)) +
+                (2 * (1 - Math.cos(u) / 2)) * Math.cos(u) * Math.cos(v);
+            z = -8 * Math.sin(u) -
+                2 * (1 - Math.cos(u) / 2) * Math.sin(u) * Math.cos(v);
+          } else {
+            // 后半段：让曲面自相交，形成克莱因瓶特有的“扭转”
+            x = 3 * Math.cos(u) * (1 + Math.sin(u)) +
+                (2 * (1 - Math.cos(u) / 2)) * Math.cos(v + Math.PI);
+            z = -8 * Math.sin(u);
+          }
+          const y = -2 * (1 - Math.cos(u) / 2) * Math.sin(v);
+
+          // 整体缩放 0.75，使模型大小适配场景
+          target.set(x, y, z).multiplyScalar(0.75);
+        }
+
+        // 使用 ParametricGeometry 将函数曲面离散为三角网格，并添加到场景
+        addSolidGeometry(2, 1, new ParametricGeometry(klein, slices, stacks));
+      }
+
+      /* 2D 平面 PlaneGeometry */
+      {
+        const width = 9; // 宽度
+        const height = 9; // 高度
+        const widthSegments = 2; // 宽度分段数，默认1
+        const heightSegments = 2; // 高度分段数，默认1
+        addSolidGeometry( -2, 0, new THREE.PlaneGeometry( width, height, widthSegments, heightSegments ) );
+      }
+
+      /* PolyhedronGeometry 多面体几何体 */
+      {
+        const radius = 7; // 半径
+        const detail = 0; // 细节等级，默认0，无细分 2
+        const verticesOfCube = [
+          - 1, - 1, - 1, 1, - 1, - 1, 1, 1, - 1, - 1, 1, - 1,
+          - 1, - 1, 1, 1, - 1, 1, 1, 1, 1, - 1, 1, 1,
+        ]; // 立方体的顶点坐标数组，每个顶点有3个坐标值（x,y,z）
+        const indicesOfFaces = [
+          2, 1, 0, 0, 3, 2,
+          0, 4, 7, 7, 3, 0,
+          0, 1, 5, 5, 4, 0,
+          1, 2, 6, 6, 5, 1,
+          2, 3, 7, 7, 6, 2,
+          4, 5, 6, 6, 7, 4,
+        ]; // 立方体的面索引数组，每个面由3个顶点索引组成
+        addSolidGeometry( -1, 0, new THREE.PolyhedronGeometry( verticesOfCube, indicesOfFaces, radius, detail ) );
+      }
+
+      /* 环形几何体 RingGeometry */
+      {
+        const innerRadius = 2; // 内半径
+        const outerRadius = 7; // 外半径
+        const thetaSegments = 18; // 角度分段数，默认0，无细分
+        const thetaStart = 0; // 起始角度，默认0
+        const thetaLength = Math.PI * 2; // 角度范围，默认2π，覆盖360度
+        addSolidGeometry( 0, 0, new THREE.RingGeometry( innerRadius, outerRadius, thetaSegments, thetaStart, thetaLength ) );
+      }
+
+      /* ShapeGeometry 形状几何体 */
+      {
+        // 创建二维心形轮廓（Shape）
+        const shape = new THREE.Shape();
+        const x = - 2.5; // 基准 x 坐标，整体水平偏移
+        const y = - 5; // 基准 y 坐标，整体垂直偏移
+        // 以下通过多段贝塞尔曲线绘制心形左侧轮廓
+        shape.moveTo( x + 2.5, y + 2.5 ); // 起点：心形顶部凹陷处
+        shape.bezierCurveTo( x + 2.5, y + 2.5, x + 2, y, x, y ); // 左侧下降曲线
+        shape.bezierCurveTo( x - 3, y, x - 3, y + 3.5, x - 3, y + 3.5 ); // 左下外扩
+        shape.bezierCurveTo( x - 3, y + 5.5, x - 1.5, y + 7.7, x + 2.5, y + 9.5 ); // 左下弧线过渡到心尖
+        shape.bezierCurveTo( x + 6, y + 7.7, x + 8, y + 4.5, x + 8, y + 3.5 ); // 右侧对称弧线
+        shape.bezierCurveTo( x + 8, y + 3.5, x + 8, y, x + 5, y ); // 右侧上升
+        shape.bezierCurveTo( x + 3.5, y, x + 2.5, y + 2.5, x + 2.5, y + 2.5 ); // 回到起点，闭合心形
+        let curveSegments = 5; // 曲线分段数，默认12，平滑度
+
+        addSolidGeometry( 1, 0, new THREE.ShapeGeometry( shape, curveSegments ) );
+      }
+
+      /* SphereGeometry 球体几何体 */
+      {
+        const radius = 7; // 半径
+        const widthSegments = 12; // 水平分段数，默认8
+        const heightSegments = 8; // 垂直分段数，默认6
+        const phiStart = 0; // 起始φ角度，默认0
+        const phiLength = Math.PI * 2; // φ角度范围，默认2π，覆盖360度
+        const thetaStart = 0; // 起始θ角度，默认0
+        const thetaLength = Math.PI * 2; // θ角度范围，默认2π，覆盖360度
+        addSolidGeometry( 2, 0, new THREE.SphereGeometry( radius, widthSegments, heightSegments, phiStart, phiLength, thetaStart, thetaLength ) );
+      }
+
+      /* TetrahedronGeometry 四面体几何体 */
+      {
+        const radius = 7; // 半径
+        const detail = 0; // 细节等级，默认0，无细分 2
+        addSolidGeometry( -2, -1, new THREE.TetrahedronGeometry( radius, detail ) );
+      }
+
+      /* TextGeometry 文本几何体 */
+      {
+        const loader = new FontLoader();
+        // 将字体加载过程封装为 Promise，方便使用 async/await
+        function loadFont( url ) {
+          return new Promise( ( resolve, reject ) => {
+            loader.load( url, resolve, undefined, reject );
+          } );
+        }
+        // 异步创建 3D 文字并加入场景
+        async function doit() {
+          // 加载 Helvetiker 常规字体文件
+          const font = await loadFont( '../../assets/libs/three0.182.0/fonts/helvetiker_regular.typeface.json' ); /* threejs.org: url */
+          // 创建 TextGeometry：显示文字“three.js”，并设置尺寸、厚度、倒角等参数
+          const geometry = new TextGeometry( 'three.js', {
+            font: font,            // 所用字体
+            size: 3.0,             // 字体大小
+            depth: .2,             // 拉伸厚度
+            curveSegments: 12,     // 曲线分段数，越高越平滑
+            bevelEnabled: true,    // 启用倒角
+            bevelThickness: 0.15,  // 倒角厚度
+            bevelSize: .3,         // 倒角宽度
+            bevelSegments: 5,      // 倒角分段数
+          } );
+          // 用随机颜色材质包裹文字
+          const mesh = new THREE.Mesh( geometry, createMaterial() );
+          // 计算文字边界框并居中：将几何体中心移到原点，使文字自身居中
+          geometry.computeBoundingBox();
+          geometry.boundingBox.getCenter( mesh.position ).multiplyScalar( - 1 );
+
+          // 新建一个父级 Object3D，用于整体控制文字
+          const parent = new THREE.Object3D();
+          parent.add( mesh );
+          // 将文字整体放置到场景网格的 (-1, -1) 位置
+          addObject( - 1, - 1, parent );
+        }
+        // 执行异步函数，完成文字创建与添加
+        doit();
+      }
+
+      /* TorusGeometry 圆环几何体 */
+      {
+        const radius = 5; // 半径
+        const tubeRadius = 2; // 管半径
+        const radialSegments = 8; // 径向分段数，默认8
+        const tubularSegments = 24; // 管分段数，默认8
+        const arc = Math.PI * 2; // 旋转角度，默认2π，覆盖360度
+        addSolidGeometry( 0, -1, new THREE.TorusGeometry( radius, tubeRadius, radialSegments, tubularSegments, arc ) );
+      }
+
+      /* TorusKnotGeometry 圆环扭结几何体 */
+      {
+        const radius = 3.5; // 半径
+        const tubeRadius = 1.5; // 管半径
+        const tubularSegments = 64; // 管分段数，默认8
+        const radialSegments = 8; // 径向分段数，默认8
+        const p = 2; // 扭结参数p，默认2
+        const q = 3; // 扭结参数q，默认3
+        const arc = Math.PI * 2; // 旋转角度，默认2π，覆盖360度
+        addSolidGeometry( 1, -1, new THREE.TorusKnotGeometry( radius, tubeRadius,  tubularSegments,radialSegments, p, q, arc ) );
+      }
+
+      /* TubeGeometry 管几何体 */
+      {
+        /* 自定义正弦曲线路径，继承自 THREE.Curve，用于 TubeGeometry 的拉伸路径 */
+        class CustomSinCurve extends THREE.Curve {
+          constructor( scale ) {
+            super();
+            this.scale = scale; // 整体缩放系数，控制路径大小
+          }
+          /* 根据参数 t ∈ [0,1] 返回曲线上对应点的三维坐标 */
+          getPoint( t ) {
+            const tx = t * 3 - 1.5;           // x 方向：线性映射到 [-1.5, 1.5]
+            const ty = Math.sin( 2 * Math.PI * t ); // y 方向：生成一个完整正弦周期
+            const tz = 0;                    // z 方向：保持为 0，使曲线位于 XY 平面
+            return new THREE.Vector3( tx, ty, tz ).multiplyScalar( this.scale ); // 按传入比例缩放后返回
+          }
+        }
+
+        const path = new CustomSinCurve( 4 );
+        const tubularSegments = 64; // 管分段数，默认8
+        const radius = 1; // 半径
+        const radialSegments = 8; // 径向分段数，默认8
+        const closed = false; // 是否闭合，默认false
+        const geometry = new THREE.TubeGeometry( path, tubularSegments, radius, radialSegments, closed );
+        addSolidGeometry( 2, -1, geometry );
+      }
+
+      /* EdgesGeometry 边缘几何体 */
+      {
+        const width = 8;
+        const height = 8;
+        const depth = 8;
+        const thresholdAngle = Math.PI / 4; // 阈值角度，默认π/4
+        const geometry = new THREE.BoxGeometry(width, height, depth);
+        const lineGeometry = new THREE.EdgesGeometry(geometry, thresholdAngle);
+        addLineGeometry(-1, -2, lineGeometry);
+      }
+
+      /* WireframeGeometry 线框几何体 */
+      {
+        const width = 8;
+        const height = 8;
+        const depth = 8;
+        const widthSegments = 2;
+        const heightSegments = 2;
+        const depthSegments = 2;
+        const geometry = new THREE.BoxGeometry(width, height, depth,widthSegments,heightSegments,depthSegments);
+        const lineGeometry = new THREE.WireframeGeometry(geometry);
+        addLineGeometry(1, -2, lineGeometry);
+      }
+
 
       // 判断渲染器的尺寸是否需要更新
       function resizeRendererToDisplaySize(renderer) {
@@ -100,11 +469,11 @@
           camera.updateProjectionMatrix();
         }
 
-        cubes.forEach((cube,index) => {
-          const speed = 1 + index * .1;
+        objects.forEach((obj,index) => {
+          const speed = .1 + index * .05;
           const rot = time * speed;
-          cube.rotation.x = rot;
-          cube.rotation.y = rot;
+          obj.rotation.x = rot;
+          obj.rotation.y = rot;
         });
 
         renderer.render( scene, camera );
@@ -112,8 +481,6 @@
         requestAnimationFrame(render);
       }
       requestAnimationFrame(render);
-
-      // renderer.render( scene, camera );
     }
     main();
   </script>
