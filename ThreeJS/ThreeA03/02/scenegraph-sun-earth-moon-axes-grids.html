@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>scenegraph-sun-earth-moon</title>
+  <style>
+    html, body {
+      margin: 0;
+      height: 100%;
+    }
+    #c {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="c"></canvas>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "../../assets/libs/three0.182.0/three.module.min.js",
+        "three/addons/": "../../assets/libs/three0.182.0/jsm/"
+      }
+    }
+  </script>
+  <script type="module">
+    import * as THREE from 'three';
+    import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
+
+    function main(){
+      const canvas = document.querySelector( '#c' );
+      const renderer = new THREE.WebGLRenderer({antialias:true, canvas});
+      const gui = new GUI();
+
+      const fov = 40;
+      const aspect = 2; // the canvas default
+      const near = 0.1;
+      const far = 1000;
+      const camera = new THREE.PerspectiveCamera( fov, aspect, near, far );
+      camera.position.set( 0, 50, 0 );
+      camera.up.set( 0, 0, 1);
+      camera.lookAt( 0, 0, 0 );
+
+      const scene = new THREE.Scene();
+
+      {
+
+        const color = 0xFFFFFF; // 光的颜色，白色
+        const intensity = 500; // 光的强度，1表示标准强度
+        const light = new THREE.PointLight( color, intensity );
+        scene.add( light );
+
+      }
+
+      let objects = [];
+
+      let radius = 1;
+      let widthSegments = 6;
+      let heightSegments = 6;
+      let sphereGeometry = new THREE.SphereGeometry( radius, widthSegments, heightSegments );
+      
+      // 新增：太阳系场景对象
+      // 创建太阳系根节点，所有天体都挂在这个节点下
+      const solarSystem = new THREE.Object3D();
+      scene.add( solarSystem );
+      objects.push( solarSystem );
+
+      // 创建太阳材质并设置自发光颜色为黄色，然后生成太阳网格
+      let sunMaterial = new THREE.MeshPhongMaterial( { emissive: 0xFFFF00  } );
+      let sunMesh = new THREE.Mesh( sphereGeometry, sunMaterial );
+      sunMesh.scale.set( 5, 5, 5 ); // 太阳放大5倍
+      solarSystem.add( sunMesh );
+      objects.push( sunMesh );
+
+      // 新增：地球月球轨道对象
+      const earthOrbit = new THREE.Object3D(); // 地球公转轨道节点
+      earthOrbit.position.x = 10; // 地球轨道距离太阳10个单位
+      solarSystem.add( earthOrbit );
+      objects.push( earthOrbit );
+
+      // 创建地球材质并设置颜色与微弱自发光，然后生成地球网格
+      let earthMaterial = new THREE.MeshPhongMaterial( { color: 0x2233FF, emissive: 0x112244 } );
+      let earthMesh = new THREE.Mesh( sphereGeometry, earthMaterial );
+      earthOrbit.add( earthMesh );
+      objects.push( earthMesh );
+
+      // 创建月球轨道节点，挂在地球轨道节点下，实现地月系统
+      const moonOrbit = new THREE.Object3D();
+      moonOrbit.position.x = 2; // 月球轨道距离地球2个单位
+      earthOrbit.add( moonOrbit );
+
+      // 创建月球材质并设置颜色与微弱自发光，然后生成月球网格
+      const moonMaterial = new THREE.MeshPhongMaterial( { color: 0x888888, emissive: 0x222222 } );
+      const moonMesh = new THREE.Mesh( sphereGeometry, moonMaterial );
+      moonMesh.scale.set( .5, .5, .5 ); // 月球缩小为原来的一半
+      moonOrbit.add( moonMesh );
+      objects.push( moonMesh );
+
+      // 坐标轴与网格辅助类：为传入的节点添加本地坐标轴和网格
+      class AxisGridHelper {
+        constructor( node, units = 10 ) {
+          // 创建坐标轴辅助对象，红绿蓝分别代表X/Y/Z轴
+          const axes = new THREE.AxesHelper();
+          axes.material.depthTest = false; // 禁用深度测试，始终显示在最前
+          axes.renderOrder = 2; // 渲染顺序：在网格之后绘制
+          node.add( axes );
+
+          // 创建网格辅助对象，默认10x10单位大小
+          const grid = new THREE.GridHelper( units, units );
+          grid.material.depthTest = false; // 禁用深度测试
+          grid.renderOrder = 1; // 渲染顺序：在坐标轴之前绘制
+          node.add( grid );
+
+          // 保存引用并初始化可见性
+          this.grid = grid;
+          this.axes = axes;
+          this.visible = false; // 默认不显示
+        }
+
+        // 可见性 getter
+        get visible() {
+          return this._visible;
+        }
+
+        // 可见性 setter：同时控制网格和坐标轴的显示/隐藏
+        set visible( v ) {
+          this._visible = v;
+          this.grid.visible = v;
+          this.axes.visible = v;
+        }
+      }
+
+      // 快速为指定节点添加带 GUI 控制的坐标轴与网格
+      function makeAxisGrid( node, label, units ) {
+        const helper = new AxisGridHelper( node, units );
+        // 将可见性属性挂到 GUI 上，方便勾选切换
+        gui.add( helper, 'visible' ).name( label );
+      }
+      makeAxisGrid( solarSystem, 'solarSystem', 26 );
+      makeAxisGrid( sunMesh, 'sunMesh' );
+      makeAxisGrid( earthOrbit, 'earthOrbit' );
+      makeAxisGrid( earthMesh, 'earthMesh' );
+      makeAxisGrid( moonOrbit, 'moonOrbit' );
+      makeAxisGrid( moonMesh, 'moonMesh' );
+
+      // 判断渲染器的尺寸是否需要更新
+      function resizeRendererToDisplaySize(renderer) {
+        const canvas = renderer.domElement;
+        const width = canvas.clientWidth;
+        const height = canvas.clientHeight;
+        // 检查渲染器的尺寸是否与画布的尺寸不同
+        const needResize = canvas.width !== width || canvas.height !== height;
+        if (needResize) {
+          renderer.setSize(width, height, false);
+        }
+        return needResize;
+      }
+
+
+      // 动画实现
+      function render(time){
+        time *= 0.001; // convert time to seconds
+
+        // 重新渲染 canvas 不变形
+        if(resizeRendererToDisplaySize(renderer)){
+          let canvas = renderer.domElement;
+          camera.aspect = canvas.clientWidth / canvas.clientHeight;
+          camera.updateProjectionMatrix();
+        }
+
+        objects.forEach((obj,index) => {
+          obj.rotation.y = time;
+        });
+
+        renderer.render( scene, camera );
+
+        requestAnimationFrame(render);
+      }
+      requestAnimationFrame(render);
+    }
+    main();
+  </script>
+</body>
+</html>

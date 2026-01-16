@@ -21,14 +21,12 @@
   <script type="importmap">
     {
       "imports": {
-        "three": "../../assets/libs/three0.182.0/three.module.min.js",
+        "three": "../../assets/libs/three0.182.0/three.module.min.js"
       }
     }
   </script>
   <script type="module">
     import * as THREE from 'three';
-    import { FontLoader } from 'three/addons/loaders/FontLoader.js'; // 字体加载器，用于加载字体文件
-    import { TextGeometry } from 'three/addons/geometries/TextGeometry.js'; // 文本几何体，用于创建3D文字
 
     function main(){
       const canvas = document.querySelector( '#c' );
@@ -39,115 +37,32 @@
       const near = 0.1;
       const far = 1000;
       const camera = new THREE.PerspectiveCamera( fov, aspect, near, far );
-      camera.position.z = 40;
+      camera.position.set( 0, 50, 0 );
+      camera.up.set( 0, 0, 1 );
+      camera.lookAt( 0, 0, 0 );
 
       const scene = new THREE.Scene();
-      scene.background = new THREE.Color(0xAAAAAA)
 
       {
 
         const color = 0xFFFFFF; // 光的颜色，白色
-        const intensity = 3; // 光的强度，1表示标准强度
-        const light = new THREE.DirectionalLight( color, intensity );
-        light.position.set( - 1, 2, 4 ); // 光源位置，x=-1, y=2, z=4
+        const intensity = 500; // 光的强度，1表示标准强度
+        const light = new THREE.PointLight( color, intensity );
         scene.add( light );
 
       }
 
-      {
+      let objects = [];
 
-        const color = 0xFFFFFF;
-        const intensity = 3;
-        const light = new THREE.DirectionalLight( color, intensity );
-        light.position.set( 1, - 2, - 4 );
-        scene.add( light );
-
-      }
-
-      const objects = [];
-	    const spread = 15;
-
-      function addObject(x, y, obj){
-        obj.position.x = x * spread;
-        obj.position.y = y * spread;
-        scene.add(obj);
-        objects.push(obj);
-      }
-
-      function createMaterial(){
-        
-        const material = new THREE.MeshPhongMaterial({
-          /* side 参数可选值：
-          - THREE.FrontSide: 只渲染正面（默认）
-          - THREE.BackSide: 只渲染背面
-          - THREE.DoubleSide: 渲染双面 */
-          side: THREE.DoubleSide, // 渲染双面，使几何体的正面和背面都可见
-        });
-
-        const hue = Math.random(); // hue:        色相，范围 0–1，随机生成，决定颜色种类
-        const saturation = 1; // saturation: 饱和度，固定为 1，颜色最鲜艳
-        const luminance = .5; // luminance:  亮度，固定为 0.5，明暗适中
-        // 将材质颜色设置为随机 HSL 值,使用 setHSL 可动态生成丰富且不重复的彩色外观
-        material.color.setHSL(hue, saturation, luminance);
-
-        return material;
-      }
-
-      function addSolidGeometry(x, y, geometry){
-        const obj = new THREE.Mesh(geometry, createMaterial());
-        addObject(x, y, obj);
-      }
-
-      function addLineGeometry(x, y, geometry){
-        const material = new THREE.LineBasicMaterial({
-          color: 0x000000, // 线的颜色，黑色
-        });
-        const mesh = new THREE.LineSegments(geometry, material);
-        addObject(x, y, mesh);
-      }
-
-      /* TextGeometry 文本几何体 */
-      {
-        const loader = new FontLoader();
-        // 将字体加载过程封装为 Promise，方便使用 async/await
-        function loadFont( url ) {
-          return new Promise( ( resolve, reject ) => {
-            loader.load( url, resolve, undefined, reject );
-          } );
-        }
-        // 异步创建 3D 文字并加入场景
-        async function doit() {
-          // 加载 Helvetiker 常规字体文件
-          const font = await loadFont( '../../assets/libs/three0.182.0/fonts/helvetiker_regular.typeface.json' ); /* threejs.org: url */
-          // 创建 TextGeometry：显示文字“three.js”，并设置尺寸、厚度、倒角等参数
-          const geometry = new TextGeometry( 'three.js', {
-            font: font,            // 所用字体
-            size: 3.0,             // 字体大小
-            depth: .2,             // 拉伸厚度
-            curveSegments: 12,     // 曲线分段数，越高越平滑
-            bevelEnabled: true,    // 启用倒角
-            bevelThickness: 0.15,  // 倒角厚度
-            bevelSize: .3,         // 倒角宽度
-            bevelSegments: 5,      // 倒角分段数
-          } );
-
-          addSolidGeometry( - .5, 0, geometry );
-
-          // 用随机颜色材质包裹文字
-          const mesh = new THREE.Mesh( geometry, createMaterial() );
-          // 计算文字边界框并居中：将几何体中心移到原点，使文字自身居中
-          geometry.computeBoundingBox();
-          geometry.boundingBox.getCenter( mesh.position ).multiplyScalar( - 1 );
-
-          // 新建一个父级 Object3D，用于整体控制文字
-          const parent = new THREE.Object3D();
-          parent.add( mesh );
-          // 将文字整体放置到场景网格的 (-1, -1) 位置
-          addObject( .5, 0, parent );
-        }
-        // 执行异步函数，完成文字创建与添加
-        doit();
-      }
+      let radius = 1;
+      let widthSegments = 6;
+      let heightSegments = 6;
+      let sphereGeometry = new THREE.SphereGeometry( radius, widthSegments, heightSegments );
+      let sunMaterial = new THREE.MeshPhongMaterial( { emissive: 0xFFFF00  } );
+      let sunMesh = new THREE.Mesh( sphereGeometry, sunMaterial );
+      sunMesh.scale.set( 5, 5, 5 );
+      scene.add( sunMesh );
+      objects.push( sunMesh );
 
 
       // 判断渲染器的尺寸是否需要更新
@@ -176,10 +91,7 @@
         }
 
         objects.forEach((obj,index) => {
-          const speed = .1 + index * .05;
-          const rot = time * speed;
-          obj.rotation.x = rot;
-          obj.rotation.y = rot;
+          obj.rotation.y = time;
         });
 
         renderer.render( scene, camera );

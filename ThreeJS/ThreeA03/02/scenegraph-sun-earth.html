@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>scenegraph-sun-earth</title>
+  <style>
+    html, body {
+      margin: 0;
+      height: 100%;
+    }
+    #c {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="c"></canvas>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "../../assets/libs/three0.182.0/three.module.min.js"
+      }
+    }
+  </script>
+  <script type="module">
+    import * as THREE from 'three';
+
+    function main(){
+      const canvas = document.querySelector( '#c' );
+      const renderer = new THREE.WebGLRenderer({antialias:true, canvas});
+
+      const fov = 40;
+      const aspect = 2; // the canvas default
+      const near = 0.1;
+      const far = 1000;
+      const camera = new THREE.PerspectiveCamera( fov, aspect, near, far );
+      camera.position.set( 0, 50, 0 );
+      camera.up.set( 0, 0, 1);
+      camera.lookAt( 0, 0, 0 );
+
+      const scene = new THREE.Scene();
+
+      {
+
+        const color = 0xFFFFFF; // 光的颜色，白色
+        const intensity = 500; // 光的强度，1表示标准强度
+        const light = new THREE.PointLight( color, intensity );
+        scene.add( light );
+
+      }
+
+      let objects = [];
+
+      let radius = 1;
+      let widthSegments = 6;
+      let heightSegments = 6;
+      let sphereGeometry = new THREE.SphereGeometry( radius, widthSegments, heightSegments );
+      let sunMaterial = new THREE.MeshPhongMaterial( { emissive: 0xFFFF00  } );
+      let sunMesh = new THREE.Mesh( sphereGeometry, sunMaterial );
+      sunMesh.scale.set( 5, 5, 5 );
+      scene.add( sunMesh );
+      objects.push( sunMesh );
+
+      let earthMaterial = new THREE.MeshPhongMaterial( { color: 0x2233FF, emissive: 0x112244 } );
+      let earthMesh = new THREE.Mesh( sphereGeometry, earthMaterial );
+      earthMesh.position.x = 10;
+      scene.add( earthMesh );
+      objects.push( earthMesh );
+
+
+      // 判断渲染器的尺寸是否需要更新
+      function resizeRendererToDisplaySize(renderer) {
+        const canvas = renderer.domElement;
+        const width = canvas.clientWidth;
+        const height = canvas.clientHeight;
+        // 检查渲染器的尺寸是否与画布的尺寸不同
+        const needResize = canvas.width !== width || canvas.height !== height;
+        if (needResize) {
+          renderer.setSize(width, height, false);
+        }
+        return needResize;
+      }
+
+
+      // 动画实现
+      function render(time){
+        time *= 0.001; // convert time to seconds
+
+        // 重新渲染 canvas 不变形
+        if(resizeRendererToDisplaySize(renderer)){
+          let canvas = renderer.domElement;
+          camera.aspect = canvas.clientWidth / canvas.clientHeight;
+          camera.updateProjectionMatrix();
+        }
+
+        objects.forEach((obj,index) => {
+          obj.rotation.y = time;
+        });
+
+        renderer.render( scene, camera );
+
+        requestAnimationFrame(render);
+      }
+      requestAnimationFrame(render);
+    }
+    main();
+  </script>
+</body>
+</html>
