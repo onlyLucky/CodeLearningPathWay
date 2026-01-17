@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>base material</title>
+  <style>
+    html, body {
+      margin: 0;
+      height: 100%;
+    }
+    #c {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="c"></canvas>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "../../assets/libs/three0.182.0/three.module.min.js",
+        "three/addons/": "../../assets/libs/three0.182.0/jsm/"
+      }
+    }
+  </script>
+  <script type="module">
+    import * as THREE from 'three';
+    import { FontLoader } from 'three/addons/loaders/FontLoader.js'; // 字体加载器，用于加载字体文件
+    import { ParametricGeometry } from 'three/addons/geometries/ParametricGeometry.js'; // 参数化几何体，用于创建自定义形状
+    import { TextGeometry } from 'three/addons/geometries/TextGeometry.js'; // 文本几何体，用于创建3D文字
+
+    function main(){
+      const canvas = document.querySelector( '#c' );
+      const renderer = new THREE.WebGLRenderer({antialias:true, canvas});
+
+      const fov = 40;
+      const aspect = 2; // the canvas default
+      const near = 0.1;
+      const far = 1000;
+      const camera = new THREE.PerspectiveCamera( fov, aspect, near, far );
+      camera.position.z = 120;
+
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color(0xAAAAAA)
+
+      {
+
+        const color = 0xFFFFFF; // 光的颜色，白色
+        const intensity = 3; // 光的强度，1表示标准强度
+        const light = new THREE.DirectionalLight( color, intensity );
+        light.position.set( - 1, 2, 4 ); // 光源位置，x=-1, y=2, z=4
+        scene.add( light );
+
+      }
+
+      {
+
+        const color = 0xFFFFFF;
+        const intensity = 3;
+        const light = new THREE.DirectionalLight( color, intensity );
+        light.position.set( 1, - 2, - 4 );
+        scene.add( light );
+
+      }
+
+      const objects = [];
+	    const spread = 15;
+
+      function addObject(x, y, obj){
+        obj.position.x = x * spread;
+        obj.position.y = y * spread;
+        scene.add(obj);
+        objects.push(obj);
+      }
+
+      function addSolidGeometry(x, y, geometry, material){
+        const obj = new THREE.Mesh(geometry, material);
+        addObject(x, y, obj);
+      }
+
+      const radius = 7; // 半径
+      const widthSegments = 40; // 水平分段数，默认8
+      const heightSegments = 40; // 垂直分段数，默认6
+      const phiStart = 0; // 起始φ角度，默认0
+      const phiLength = Math.PI * 2; // φ角度范围，默认2π，覆盖360度
+      const thetaStart = 0; // 起始θ角度，默认0
+      const thetaLength = Math.PI * 2; // θ角度范围，默认2π，覆盖360度
+      const sphereGeometry = new THREE.SphereGeometry( radius, widthSegments, heightSegments, phiStart, phiLength, thetaStart, thetaLength );
+
+      /* 
+        MeshBasicMaterial 不受光照的影响。
+        MeshLambertMaterial 只在顶点计算光照
+        MeshPhongMaterial 则在每个像素计算光照。还支持镜面高光。
+      */
+      // MeshBasicMaterial 它的渲染效果是简单的颜色，不考虑光照效果。
+      // 通常用于需要快速渲染的场景，如调试、简单的场景等。
+      {
+        const material = new THREE.MeshBasicMaterial({color: 0xFF0000});
+
+        addSolidGeometry( -2, 1, sphereGeometry, material);
+      }
+
+      // MeshLambertMaterial 只在顶点计算光照，不考虑光照方向。
+      // 通常用于需要快速渲染的场景，如简单的场景等。
+      {
+        const material = new THREE.MeshLambertMaterial({color: 0xFF0000});
+        addSolidGeometry( -1, 1, sphereGeometry, material);
+      }
+
+      // MeshPhongMaterial 则在每个像素计算光照。还支持镜面高光。
+      // 通常用于需要考虑光照效果的场景，如真实世界的渲染等。
+      {
+        const material = new THREE.MeshPhongMaterial();
+        material.color.setHSL(0, 1, .5);  // 红色
+        material.flatShading = true; // 平面着色，默认false，使用平滑着色；true: 平面着色，不使用平滑着色
+        material.side = THREE.DoubleSide; // 双面渲染，默认THREE.FrontSide，只渲染正面; THREE.DoubleSide: 双面渲染，渲染正面和反面; THREE.BackSide: 只渲染反面；
+        material.shininess = 100; // 高光反射度，默认30
+        addSolidGeometry( 0, 1, sphereGeometry, material);
+      }
+
+      {
+        const material = new THREE.MeshPhongMaterial({
+          color: 'black', // 颜色
+          emissive: 'red', // 自发光颜色，默认0
+          shininess: 0, // 高光反射度，默认30
+        });
+
+        addSolidGeometry( 1, 1, sphereGeometry, material);
+      }
+
+      // MeshToonMaterial 是一种卡通渲染材质，它的渲染效果类似于卡通风格的图形。
+      // 通常用于需要创建卡通风格的场景，如游戏、动画等。
+      {
+        const material = new THREE.MeshToonMaterial({
+          color: 0xFF0000, // 颜色
+          // flatShading: true, // 平面着色，默认false，使用平滑着色
+        });
+
+        addSolidGeometry( 2, 1, sphereGeometry, material);
+      }
+
+      // MeshPhysicalMaterial 是一种物理材质，它模拟了真实世界中的物理效果，如反射、折射、阴影等。
+      // 通常用于需要考虑物理效果的场景，如真实世界的渲染等。
+      {
+        const material = new THREE.MeshPhysicalMaterial({
+          color: 0xFF0000, // 颜色
+          metalness: 0.5, // 金属度，默认0，非金属
+          roughness: 0.5, // 粗糙度，默认0.5，光滑
+          clearcoat: 0.5, // 清漆层，默认0，无清漆层
+          clearcoatRoughness: 0.5, // 清漆层粗糙度，默认0.5，光滑
+        });
+
+        addSolidGeometry( -2, 0, sphereGeometry, material);
+      }
+      // MeshDepthMaterial 是一种深度材质，它根据物体的深度信息来渲染物体。
+      // 通常用于创建深度效果，如水波纹、烟雾等。
+      {
+        const material = new THREE.MeshDepthMaterial({
+          depthPacking: THREE.BasicDepthPacking, // 深度打包模式，默认 BasicDepthPacking
+          // 可选项：THREE.RGBADepthPacking 或 THREE.BasicDepthPacking
+        });
+
+        addSolidGeometry( -1, 0, sphereGeometry, material);
+      }
+      
+      // ShaderMaterial 是一种自定义材质，它允许你使用 WebGL 着色器来自定义渲染效果。
+      // 你可以使用 ShaderMaterial 来实现各种复杂的渲染效果，如物理模拟、实时渲染等。
+      {
+        const material = new THREE.ShaderMaterial({
+          uniforms: {
+            color: { value: new THREE.Color(0xFF0000) },
+          },
+          vertexShader: `
+            void main() {
+              gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            }
+          `,
+          fragmentShader: `
+            precision mediump float;
+            uniform vec3 color;
+            void main() {
+              gl_FragColor = vec4(color, 1.0);
+            }
+          `,
+        });
+
+        addSolidGeometry( 0, 0, sphereGeometry, material);
+      }
+
+      // RawShaderMaterial 是一种原始的着色器材质，它允许你直接使用 WebGL 着色器来渲染物体。
+      // 与 ShaderMaterial 不同，RawShaderMaterial 不会自动提供 Three.js 的内置 uniform 变量，需要手动声明。
+      // 你可以使用 RawShaderMaterial 来实现各种复杂的渲染效果，如自定义的渲染管线等。
+      {
+        const material = new THREE.RawShaderMaterial({
+          vertexShader: `
+            precision highp float;
+            uniform mat4 projectionMatrix;
+            uniform mat4 modelViewMatrix;
+            attribute vec3 position;
+            void main() {
+              gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            }`,
+          fragmentShader: `
+            precision highp float;
+            void main() {
+              gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0); // 红色
+            }`,
+        });
+
+        addSolidGeometry( 1, 0, sphereGeometry, material);
+      }
+      
+      
+
+      // 判断渲染器的尺寸是否需要更新
+      function resizeRendererToDisplaySize(renderer) {
+        const canvas = renderer.domElement;
+        const width = canvas.clientWidth;
+        const height = canvas.clientHeight;
+        // 检查渲染器的尺寸是否与画布的尺寸不同
+        const needResize = canvas.width !== width || canvas.height !== height;
+        if (needResize) {
+          renderer.setSize(width, height, false);
+        }
+        return needResize;
+      }
+
+
+      // 动画实现
+      function render(time){
+        time *= 0.001; // convert time to seconds
+
+        // 重新渲染 canvas 不变形
+        if(resizeRendererToDisplaySize(renderer)){
+          let canvas = renderer.domElement;
+          camera.aspect = canvas.clientWidth / canvas.clientHeight;
+          camera.updateProjectionMatrix();
+        }
+
+        objects.forEach((obj,index) => {
+          const speed = .1 + index * .05;
+          const rot = time * speed;
+          obj.rotation.x = rot;
+          obj.rotation.y = rot;
+        });
+
+        renderer.render( scene, camera );
+
+        requestAnimationFrame(render);
+      }
+      requestAnimationFrame(render);
+    }
+    main();
+  </script>
+</body>
+</html>
