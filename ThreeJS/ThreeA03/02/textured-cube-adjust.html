@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Textured Cube</title>
+  <style>
+    html, body {
+      margin: 0;
+      height: 100%;
+    }
+    #c {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="c"></canvas>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "../../assets/libs/three0.182.0/three.module.min.js",
+        "three/addons/": "../../assets/libs/three0.182.0/jsm/"
+      }
+    }
+  </script>
+  <script type="module">
+    import * as THREE from 'three';
+    import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
+
+    function main(){
+      const canvas = document.querySelector( '#c' );
+      const renderer = new THREE.WebGLRenderer({antialias:true, canvas});
+
+      const fov = 75;
+      const aspect = 2; // the canvas default
+      const near = 0.1;
+      const far = 5;
+      const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
+      camera.position.z = 2;
+
+      const scene = new THREE.Scene();
+
+      const boxWidth = 1;
+      const boxHeight = 1;
+      const boxDepth = 1;
+      const geometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
+
+      // 创建数组用于存放所有立方体对象
+      const cubes = []
+      // 初始化纹理加载器
+      const loader = new THREE.TextureLoader();
+
+      // 加载外部纹理图片并设置颜色空间为 sRGB
+      const texture = loader.load( '../../assets/statics/images/wall.jpg' );
+      texture.colorSpace = THREE.SRGBColorSpace;
+
+      // 使用纹理创建基础材质
+      const material = new THREE.MeshBasicMaterial( { map: texture } );
+      // 创建带纹理的立方体网格并加入场景
+      const cube = new THREE.Mesh( geometry, material );
+      scene.add(cube);
+      // 将立方体加入数组以便后续动画控制
+      cubes.push(cube);
+
+      // 将弧度与角度相互转换的辅助类，用于 GUI 中直接以角度操作
+      class DegRadHelper {
+        constructor(obj, prop) {
+          this.obj = obj;
+          this.prop = prop;
+        }
+        get value() {
+          return THREE.MathUtils.radToDeg(this.obj[this.prop]);
+        }
+        set value(v) {
+          this.obj[this.prop] = THREE.MathUtils.degToRad(v);
+        }
+      }
+
+      // 将字符串转换为数字的辅助类，用于 GUI 下拉框绑定数值属性
+      class StringToNumberHelper {
+        constructor(obj, prop) {
+          this.obj = obj;
+          this.prop = prop;
+        }
+        get value() {
+          return this.obj[this.prop];
+        }
+        set value(v) {
+          this.obj[this.prop] = parseFloat(v);
+        }
+      }
+
+      const wrapModes = {
+        'ClampToEdgeWrapping': THREE.ClampToEdgeWrapping,
+        'RepeatWrapping': THREE.RepeatWrapping,
+        'MirroredRepeatWrapping': THREE.MirroredRepeatWrapping,
+      };
+      
+      function updateTexture() {
+        texture.needsUpdate = true;
+      }
+      
+      const gui = new GUI();
+      gui.add(new StringToNumberHelper(texture, 'wrapS'), 'value', wrapModes)
+        .name('texture.wrapS')
+        .onChange(updateTexture);
+      gui.add(new StringToNumberHelper(texture, 'wrapT'), 'value', wrapModes)
+        .name('texture.wrapT')
+        .onChange(updateTexture);
+      gui.add(texture.repeat, 'x', 0, 5, .01).name('texture.repeat.x');
+      gui.add(texture.repeat, 'y', 0, 5, .01).name('texture.repeat.y');
+      gui.add(texture.offset, 'x', -2, 2, .01).name('texture.offset.x');
+      gui.add(texture.offset, 'y', -2, 2, .01).name('texture.offset.y');
+      gui.add(texture.center, 'x', -.5, 1.5, .01).name('texture.center.x');
+      gui.add(texture.center, 'y', -.5, 1.5, .01).name('texture.center.y');
+      gui.add(new DegRadHelper(texture, 'rotation'), 'value', -360, 360)
+        .name('texture.rotation');
+
+      // 判断渲染器的尺寸是否需要更新
+      function resizeRendererToDisplaySize(renderer) {
+        const canvas = renderer.domElement;
+        const width = canvas.clientWidth;
+        const height = canvas.clientHeight;
+        // 检查渲染器的尺寸是否与画布的尺寸不同
+        const needResize = canvas.width !== width || canvas.height !== height;
+        if (needResize) {
+          renderer.setSize(width, height, false);
+        }
+        return needResize;
+      }
+
+
+      // 动画实现
+      function render(time){
+        time *= 0.001; // convert time to seconds
+
+        // 重新渲染 canvas 不变形
+        if(resizeRendererToDisplaySize(renderer)){
+          let canvas = renderer.domElement;
+          camera.aspect = canvas.clientWidth / canvas.clientHeight;
+          camera.updateProjectionMatrix();
+        }
+
+        cubes.forEach((cube,index) => {
+          const speed = .2 + index * .1;
+          const rot = time * speed;
+          cube.rotation.x = rot;
+          cube.rotation.y = rot;
+        });
+
+        renderer.render( scene, camera );
+
+        requestAnimationFrame(render);
+      }
+      requestAnimationFrame(render);
+    }
+
+    main();
+  </script>
+</body>
+</html>
