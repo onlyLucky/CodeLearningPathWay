@@ -34,6 +34,7 @@
     function main(){
       const canvas = document.querySelector( '#c' );
       const renderer = new THREE.WebGLRenderer({antialias:true, canvas});
+      renderer.shadowMap.enabled = true;// 开启阴影映射
 
       const fov = 45;
       const aspect = 2; // the canvas default
@@ -80,6 +81,8 @@
         });
         // 创建地面网格
         const mesh = new THREE.Mesh(planeGeo, planeMat);
+        // 开启阴影接收
+        mesh.receiveShadow = true;
         // 将平面旋转至水平（绕 X 轴旋转 -90 度）
         mesh.rotation.x = Math.PI * -.5;
         // 将地面添加到场景
@@ -91,6 +94,10 @@
         const cubeGeo = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize);
         const cubeMat = new THREE.MeshPhongMaterial({color: '#8AC'});
         const mesh = new THREE.Mesh(cubeGeo, cubeMat);
+        // 开启阴影投射
+        mesh.castShadow = true;
+        // 开启阴影接收
+        mesh.receiveShadow = true;
         mesh.position.set(cubeSize + 1, cubeSize / 2, 0);
         scene.add(mesh);
       }
@@ -101,6 +108,10 @@
         const sphereGeo = new THREE.SphereGeometry(sphereRadius, sphereWidthDivisions, sphereHeightDivisions);
         const sphereMat = new THREE.MeshPhongMaterial({color: '#CA8'});
         const mesh = new THREE.Mesh(sphereGeo, sphereMat);
+        // 开启阴影投射
+        mesh.castShadow = true;
+        // 开启阴影接收
+        mesh.receiveShadow = true;
         mesh.position.set(-sphereRadius - 1, sphereRadius + 2, 0);
         scene.add(mesh);
       }
@@ -145,6 +156,8 @@
         const intensity = 1; // 强度 
         // DirectionalLight 方向光，模拟无限远处光源（如太阳）的平行光线
         const light = new THREE.DirectionalLight( color, intensity );
+        // 开启阴影映射
+        light.castShadow = true;
         // 光源位置
         light.position.set(0, 10, 0);
         // 光源目标位置

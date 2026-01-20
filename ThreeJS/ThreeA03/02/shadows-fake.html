@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shadows Fake</title>
+  <style>
+    html, body {
+      margin: 0;
+      height: 100%;
+    }
+    #c {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="c"></canvas>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "../../assets/libs/three0.182.0/three.module.min.js",
+        "three/addons/": "../../assets/libs/three0.182.0/jsm/"
+      }
+    }
+  </script>
+  <script type="module">
+    import * as THREE from 'three';
+
+    function main(){
+      const canvas = document.querySelector( '#c' );
+      const renderer = new THREE.WebGLRenderer({antialias:true, canvas});
+
+      const fov = 45;
+      const aspect = 2; // the canvas default
+      const near = 0.1;
+      const far = 100;
+      // PerspectiveCamera 透视相机 可以提供一个近大远小的3D视觉效果。
+      const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
+      camera.position.set(0, 10, 20);
+      // 相机看向场景中心
+      camera.lookAt(0, 0, 0);
+
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color( 'white' );
+
+      const loader = new THREE.TextureLoader();
+
+      {
+        // 定义地面尺寸
+        const planeSize = 40;
+ 
+        // 创建纹理加载器并加载棋盘格纹理
+        const loader = new THREE.TextureLoader();
+        const texture = loader.load('../../assets/statics/images/checker.png');
+        // 设置纹理在 S 方向（水平）重复
+        texture.wrapS = THREE.RepeatWrapping;
+        // 设置纹理在 T 方向（垂直）重复
+        texture.wrapT = THREE.RepeatWrapping;
+        // 使用最近邻过滤，避免纹理放大时模糊
+        texture.magFilter = THREE.NearestFilter;
+        // 设置纹理颜色空间为 sRGB
+        texture.colorSpace = THREE.SRGBColorSpace;
+        // 计算纹理重复次数，使每个格子大小为 2 单位
+        const repeats = planeSize / 2;
+        texture.repeat.set(repeats, repeats);
+
+        // 创建平面几何体
+        const planeGeo = new THREE.PlaneGeometry(planeSize, planeSize);
+        // 创建带纹理的 Phong 材质，双面渲染
+        const planeMat = new THREE.MeshPhongMaterial({
+          map: texture,
+          side: THREE.DoubleSide,
+        });
+        planeMat.color.setRGB( 1.5, 1.5, 1.5 );
+        // 创建地面网格
+        const mesh = new THREE.Mesh(planeGeo, planeMat);
+        // 将平面旋转至水平（绕 X 轴旋转 -90 度）
+        mesh.rotation.x = Math.PI * -.5;
+        // 将地面添加到场景
+        scene.add(mesh);
+      }
+
+      // 加载圆形阴影纹理
+      const shadowTexture = loader.load('../../assets/statics/images/roundshadow.png');
+      // 用于保存所有球体及其阴影的数组
+      const sphereShadowBases = [];
+      {
+        // 球体半径
+        const sphereRadius = 1;
+        // 球体宽度分段数
+        const sphereWidthDivisions = 32;
+        // 球体高度分段数
+        const sphereHeightDivisions = 16;
+        // 创建球体几何体
+        const sphereGeo = new THREE.SphereGeometry(sphereRadius, sphereWidthDivisions, sphereHeightDivisions);
+
+        // 阴影平面尺寸
+        const planeSize = 1;
+        // 创建阴影平面几何体
+        const shadowGeo = new THREE.PlaneGeometry(planeSize, planeSize);
+
+        // 球体总数
+        const numSpheres = 15;
+        // 循环创建球体及其阴影
+        for (let i = 0; i < numSpheres; ++i) {
+          // 创建一个基础对象，用于统一管理球体和阴影
+          const base = new THREE.Object3D();
+          scene.add(base);
+
+          // 创建阴影材质，使用纹理并开启透明，避免深度写入
+          const shadowMat = new THREE.MeshBasicMaterial({
+            map: shadowTexture,
+            transparent: true, // 透明以显示地面
+            depthWrite: false, // 避免深度排序问题
+          });
+          // 创建阴影网格
+          const shadowMesh = new THREE.Mesh(shadowGeo, shadowMat);
+          shadowMesh.position.y = 0.001; // 稍微抬高以避免与地面重叠
+          shadowMesh.rotation.x = Math.PI * -0.5; // 旋转至水平
+          const shadowSize = sphereRadius * 4; // 阴影大小为球体半径的4倍
+          shadowMesh.scale.set(shadowSize, shadowSize, shadowSize);
+          base.add(shadowMesh);
+
+          // 计算当前球体的颜色参数（0到1）
+          const u = i / numSpheres;
+          // 创建球体材质并设置颜色
+          const sphereMat = new THREE.MeshPhongMaterial();
+          sphereMat.color.setHSL(u, 1, 0.75);
+          // 创建球体网格
+          const sphereMesh = new THREE.Mesh(sphereGeo, sphereMat);
+          sphereMesh.position.set(0, sphereRadius + 2, 0); // 球体初始高度
+          base.add(sphereMesh);
+
+          // 保存球体、阴影、基础对象及球体初始高度
+          sphereShadowBases.push({
+            base,
+            sphereMesh,
+            shadowMesh,
+            y: sphereMesh.position.y,
+          });
+        }
+      }
+
+      // 添加半球光（环境光）
+      {
+        const skyColor = 0xB1E1FF; // 天光颜色（浅蓝）
+        const groundColor = 0xB97A20; // 地面颜色（棕橙）
+        const intensity = 2; // 光照强度
+        // HemisphereLight 半球光 可以模拟环境光的效果，包括天空和地面的颜色。
+        const light = new THREE.HemisphereLight(skyColor, groundColor, intensity);
+        scene.add(light);
+      }
+
+      {
+        
+        const color = 0xFFFFFF; // 光颜色
+        const intensity = 2.5; // 强度 
+        const light = new THREE.DirectionalLight( color, intensity );
+        // 光源位置
+        light.position.set(0, 10, 5);
+        // 光源目标位置
+        light.target.position.set(-5, 0, 0);
+        scene.add( light );
+        scene.add(light.target);
+      }
+
+
+      // 判断渲染器的尺寸是否需要更新
+      function resizeRendererToDisplaySize(renderer) {
+        const canvas = renderer.domElement;
+        const width = canvas.clientWidth;
+        const height = canvas.clientHeight;
+        // 检查渲染器的尺寸是否与画布的尺寸不同
+        const needResize = canvas.width !== width || canvas.height !== height;
+        if (needResize) {
+          renderer.setSize(width, height, false);
+        }
+        return needResize;
+      }
+
+
+      // 动画实现
+      function render(time){
+        time *= 0.001; // convert time to seconds
+
+        // 重新渲染 canvas 不变形
+        if(resizeRendererToDisplaySize(renderer)){
+          let canvas = renderer.domElement;
+          camera.aspect = canvas.clientWidth / canvas.clientHeight;
+          camera.updateProjectionMatrix();
+        }
+
+        // 遍历所有球体及其阴影的数组
+        sphereShadowBases.forEach((sphereShadowBase, ndx) => {
+          // 解构获取当前球体、阴影、基础对象和初始高度
+          const {base, sphereMesh, shadowMesh, y} = sphereShadowBase;
+      
+          // u 是当前球体索引归一化到 0~1 的值
+          const u = ndx / sphereShadowBases.length;
+      
+          // 计算基础对象在地面上的圆形运动轨迹
+          const speed = time * .2;                                // 整体运动速度
+          const angle = speed + u * Math.PI * 2 * (ndx % 1 ? 1 : -1); // 每个球体相位不同，交替正反方向
+          const radius = Math.sin(speed - ndx) * 10;              // 半径随时间波动
+          base.position.set(Math.cos(angle) * radius, 0, Math.sin(angle) * radius);
+      
+          // yOff 是 0~1 的弹跳系数，用于控制球体上下浮动
+          const yOff = Math.abs(Math.sin(time * 2 + ndx));
+          // 根据 yOff 插值球体高度，实现上下弹跳效果
+          sphereMesh.position.y = y + THREE.MathUtils.lerp(-2, 2, yOff);
+          // 球体越高，阴影透明度越低，模拟阴影变淡
+          shadowMesh.material.opacity = THREE.MathUtils.lerp(1, .25, yOff);
+        });
+
+        renderer.render( scene, camera );
+
+        requestAnimationFrame(render);
+      }
+      requestAnimationFrame(render);
+    }
+
+    main();
+  </script>
+</body>
+</html>
