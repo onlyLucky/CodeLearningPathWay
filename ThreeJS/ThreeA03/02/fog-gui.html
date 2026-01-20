@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>fog</title>
+  <style>
+    html, body {
+      margin: 0;
+      height: 100%;
+    }
+    #c {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="c"></canvas>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "../../assets/libs/three0.182.0/three.module.min.js",
+        "three/addons/": "../../assets/libs/three0.182.0/jsm/"
+      }
+    }
+  </script>
+  <script type="module">
+    import * as THREE from 'three';
+    import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
+    function main(){
+      const canvas = document.querySelector( '#c' );
+      const renderer = new THREE.WebGLRenderer({antialias:true, canvas});
+      const gui = new GUI();
+
+      const fov = 75;
+      const aspect = 2; // the canvas default
+      const near = 0.1;
+      const far = 5;
+      const camera = new THREE.PerspectiveCamera( fov, aspect, near, far );
+      camera.position.z = 2; // 相机在Z轴的位置
+
+      const scene = new THREE.Scene();
+
+      // 雾效GUI辅助类：用于在GUI中绑定并同步雾效参数与背景色
+      class FogGUIHelper {
+        /**
+         * @param {THREE.Fog} fog - 场景中的雾效对象
+         * @param {THREE.Color} backgroundColor - 场景背景色对象
+         */
+        constructor(fog, backgroundColor) {
+          this.fog = fog;               // 保存雾效引用
+          this.backgroundColor = backgroundColor; // 保存背景色引用
+        }
+
+        // 获取雾效近裁剪面距离
+        get near() {
+          return this.fog.near;
+        }
+
+        // 设置雾效近裁剪面距离，并确保近 ≤ 远
+        set near(v) {
+          this.fog.near = v;
+          this.fog.far = Math.max(this.fog.far, v);
+        }
+
+        // 获取雾效远裁剪面距离
+        get far() {
+          return this.fog.far;
+        }
+
+        // 设置雾效远裁剪面距离，并确保远 ≥ 近
+        set far(v) {
+          this.fog.far = v;
+          this.fog.near = Math.min(this.fog.near, v);
+        }
+
+        // 获取雾效颜色（十六进制字符串）
+        get color() {
+          return `#${this.fog.color.getHexString()}`;
+        }
+
+        // 设置雾效颜色，并同步到背景色
+        set color(hexString) {
+          this.fog.color.set(hexString);
+          this.backgroundColor.set(hexString);
+        }
+      }
+
+      {
+        // 设置雾效参数：近裁剪面距离、远裁剪面距离、雾颜色
+        const near = 1;
+        const far = 2;
+        const color = 'lightblue';
+        // 为场景添加雾效并设置背景色
+        scene.fog = new THREE.Fog(color, near, far);
+        scene.background = new THREE.Color(color);
+
+        // 创建雾效GUI辅助对象，用于在面板中调整参数
+        const fogGUIHelper = new FogGUIHelper(scene.fog, scene.background);
+        gui.add(fogGUIHelper, 'near', near, far).listen(); // 近裁剪面滑块
+        gui.add(fogGUIHelper, 'far', near, far).listen(); // 远裁剪面滑块
+        gui.addColor(fogGUIHelper, 'color'); // 雾颜色选择器
+      }
+
+      {
+        const color = 0xFFFFFF; // 光的颜色，白色
+        const intensity = 3; // 光的强度，1表示标准强度
+        const light = new THREE.DirectionalLight( color, intensity );
+        light.position.set( - 1, 2, 4 ); // 光源位置，x=-1, y=2, z=4
+        scene.add( light );
+      }
+
+      const boxWidth = 1;
+      const boxHeight = 1;
+      const boxDepth = 1;
+      const geometry = new THREE.BoxGeometry( boxWidth, boxHeight, boxDepth );
+
+      function makeInstance(geometry, color, x){
+        const material = new THREE.MeshPhongMaterial( { color } );
+        const cube = new THREE.Mesh( geometry, material );
+        scene.add( cube );
+
+        cube.position.x = x; // 设置立方体在X轴的位置
+        return cube;
+      }
+
+      const cubes = [
+        makeInstance(geometry, 0x44aa88,  0),
+        makeInstance(geometry, 0x8844aa, -2),
+        makeInstance(geometry, 0xaa8844,  2),
+      ];
+
+      /**
+       * 判断渲染器的尺寸是否需要更新
+       * @param {THREE.WebGLRenderer} renderer - WebGL渲染器对象
+       * @returns {boolean} 是否需要调整尺寸
+       */
+      function resizeRendererToDisplaySize(renderer) {
+        const canvas = renderer.domElement;
+        const width = canvas.clientWidth;
+        const height = canvas.clientHeight;
+        // 检查渲染器的尺寸是否与画布的尺寸不同
+        const needResize = canvas.width !== width || canvas.height !== height;
+        if (needResize) {
+          renderer.setSize(width, height, false);
+        }
+        return needResize;
+      }
+
+
+      /**
+       * 动画渲染函数
+       * @param {number} time - 时间戳（毫秒）
+       */
+      function render(time){
+        time *= 0.001; // convert time to seconds
+
+        // 重新渲染 canvas 不变形
+        if(resizeRendererToDisplaySize(renderer)){
+          let canvas = renderer.domElement;
+          camera.aspect = canvas.clientWidth / canvas.clientHeight;
+          camera.updateProjectionMatrix();
+        }
+
+        cubes.forEach((cube,index) => {
+          const speed = 1 + index * .1;
+          const rot = time * speed;
+          cube.rotation.x = rot;
+          cube.rotation.y = rot;
+        });
+
+        renderer.render( scene, camera );
+
+        requestAnimationFrame(render);
+      }
+      requestAnimationFrame(render);
+
+    }
+    main();
+  </script>
+</body>
+</html>
