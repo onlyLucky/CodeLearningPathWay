@@ -1,38 +1,77 @@
 {
-  "name": "app",
-  "private": true,
-  "version": "0.0.0",
-  "type": "module",
+  "name": "ToDoList",
+  "version": "1.0.0",
+  "description": "待办事项",
   "scripts": {
-    "dev": "vite",
-    "build": "vue-tsc -b && vite build",
-    "preview": "vite preview"
+    "dev:h5": "uni",
+    "dev:mp-weixin": "uni -p mp-weixin",
+    "build:h5": "uni build",
+    "build:mp-weixin": "uni build -p mp-weixin",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest --coverage",
+    "type-check": "vue-tsc --noEmit",
+    "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix",
+    "format": "prettier --write \"src/**/*.{vue,ts,tsx,js,jsx,json,css,scss,md}\""
   },
   "dependencies": {
-    "@element-plus/icons-vue": "^2.3.2",
-    "@vueuse/core": "^14.1.0",
+    "@dcloudio/uni-app": "3.0.0-4020920240930001",
+    "@dcloudio/uni-app-plus": "3.0.0-4020920240930001",
+    "@dcloudio/uni-components": "3.0.0-4020920240930001",
+    "@dcloudio/uni-h5": "3.0.0-4020920240930001",
+    "@dcloudio/uni-mp-alipay": "3.0.0-4020920240930001",
+    "@dcloudio/uni-mp-baidu": "3.0.0-4020920240930001",
+    "@dcloudio/uni-mp-jd": "3.0.0-4020920240930001",
+    "@dcloudio/uni-mp-kuaishou": "3.0.0-4020920240930001",
+    "@dcloudio/uni-mp-lark": "3.0.0-4020920240930001",
+    "@dcloudio/uni-mp-qq": "3.0.0-4020920240930001",
+    "@dcloudio/uni-mp-toutiao": "3.0.0-4020920240930001",
+    "@dcloudio/uni-mp-weixin": "3.0.0-4020920240930001",
+    "@dcloudio/uni-mp-xhs": "3.0.0-4020920240930001",
+    "@dcloudio/uni-quickapp-webview": "3.0.0-4020920240930001",
     "axios": "^1.13.2",
-    "element-plus": "^2.13.0",
-    "pinia": "^3.0.4",
-    "vue": "^3.5.24",
-    "vue-router": "^4.6.4"
+    "pinia": "^2.1.7",
+    "vue": "^3.4.21"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4.1.18",
-    "@tailwindcss/vite": "^4.1.18",
-    "@types/node": "^24.10.1",
-    "@vitejs/plugin-vue": "^6.0.1",
-    "@vue/tsconfig": "^0.8.1",
-    "autoprefixer": "^10.4.23",
-    "postcss": "^8.5.6",
-    "tailwindcss": "^4.1.18",
-    "typescript": "~5.9.3",
-    "unplugin-auto-import": "^20.3.0",
-    "unplugin-vue-components": "^30.0.0",
-    "vite": "npm:rolldown-vite@7.2.5",
-    "vue-tsc": "^3.1.4"
+    "@dcloudio/types": "^3.4.8",
+    "@dcloudio/uni-automator": "3.0.0-4020920240930001",
+    "@dcloudio/uni-cli-shared": "3.0.0-4020920240930001",
+    "@dcloudio/vite-plugin-uni": "3.0.0-4020920240930001",
+    "@rushstack/eslint-patch": "^1.10.3",
+    "@types/node": "^20.11.30",
+    "@types/uni-app": "^1.4.8",
+    "@typescript-eslint/eslint-plugin": "^7.4.0",
+    "@typescript-eslint/parser": "^7.4.0",
+    "@vitest/coverage-v8": "^4.0.16",
+    "@vitest/ui": "^4.0.16",
+    "@vue/eslint-config-prettier": "^9.0.0",
+    "@vue/eslint-config-typescript": "^13.0.0",
+    "eslint": "^8.57.0",
+    "eslint-plugin-vue": "^9.24.0",
+    "husky": "^9.0.11",
+    "jsdom": "22.1.0",
+    "lint-staged": "^15.2.2",
+    "postcss": "^8.4.38",
+    "prettier": "^3.2.5",
+    "sass": "^1.75.0",
+    "typescript": "^5.4.3",
+    "vite": "5.2.8",
+    "vitest": "^4.0.16",
+    "vue-tsc": "^2.0.13",
+    "vuex": "^4.1.0"
   },
-  "overrides": {
-    "vite": "npm:rolldown-vite@7.2.5"
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  },
+  "lint-staged": {
+    "*.{vue,js,jsx,cjs,mjs,ts,tsx,cts,mts}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,css,scss,md}": [
+      "prettier --write"
+    ]
   }
 }

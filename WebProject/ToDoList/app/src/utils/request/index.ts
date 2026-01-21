@@ -1,136 +1,134 @@
-import axios, { type AxiosInstance, type AxiosRequestConfig, type AxiosResponse, type AxiosError } from 'axios'
-import type { RequestConfig, ResponseData, RequestError } from './types'
+import axios, {
+  CreateAxiosDefaults,
+  type AxiosInstance,
+  type InternalAxiosRequestConfig,
+} from 'axios'
+import type { RequestConfig, RequestConfigWithInterceptors, RequestInstance } from './types'
+import config from './config'
+import {
+  requestInterceptor,
+  requestInterceptorCatch,
+  responseInterceptor,
+  responseInterceptorCatch,
+  clearPending,
+} from './interceptors'
 
 class Request {
-  private instance: AxiosInstance
-  private baseURL: string
-  private timeout: number
+  instance: AxiosInstance
+  interceptors?: RequestConfigWithInterceptors['interceptors']
+  showLoading?: boolean
+  showError?: boolean
 
-  constructor(config: { baseURL: string; timeout?: number }) {
-    this.baseURL = config.baseURL
-    this.timeout = config.timeout || 10000
-
-    this.instance = axios.create({
-      baseURL: this.baseURL,
-      timeout: this.timeout,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    })
+  constructor(options: RequestConfigWithInterceptors) {
+    this.instance = axios.create(options as CreateAxiosDefaults<any>)
+    this.interceptors = options.interceptors
+    this.showLoading = options.showLoading
+    this.showError = options.showError
 
     this.setupInterceptors()
   }
 
-  private setupInterceptors() {
+  setupInterceptors() {
     this.instance.interceptors.request.use(
       (config) => {
-        const token = localStorage.getItem('token')
-        if (token && config.headers) {
-          config.headers.Authorization = `Bearer ${token}`
-        }
-        return config
+        const interceptors = this.interceptors?.requestInterceptor
+        const result = interceptors ? interceptors(config) : config
+        return requestInterceptor(result as InternalAxiosRequestConfig)
       },
-      (error: AxiosError) => {
-        console.error('Request error:', error)
-        return Promise.reject(error)
+      (error) => {
+        const interceptorsCatch = this.interceptors?.requestInterceptorCatch
+        const result = interceptorsCatch ? interceptorsCatch(error) : error
+        return requestInterceptorCatch(result)
       }
     )
 
     this.instance.interceptors.response.use(
-      (response: AxiosResponse<ResponseData>) => {
-        const { code, message, data } = response.data
-
-        if (code === 200 || code === 0) {
-          return data
-        } else {
-          const error: RequestError = {
-            message: message || '请求失败',
-            code,
-            response: response.data,
-          }
-          return Promise.reject(error)
-        }
+      (response) => {
+        const interceptors = this.interceptors?.responseInterceptor
+        const result = interceptors ? interceptors(response) : response
+        return responseInterceptor(result)
       },
-      (error: AxiosError) => {
-        let errorMessage = '网络错误，请稍后重试'
-
-        if (error.response) {
-          const { status, data } = error.response
-
-          switch (status) {
-            case 400:
-              errorMessage = '请求参数错误'
-              break
-            case 401:
-              errorMessage = '未授权，请重新登录'
-              localStorage.removeItem('token')
-              window.location.href = '/'
-              break
-            case 403:
-              errorMessage = '拒绝访问'
-              break
-            case 404:
-              errorMessage = '请求资源不存在'
-              break
-            case 500:
-              errorMessage = '服务器内部错误'
-              break
-            case 502:
-              errorMessage = '网关错误'
-              break
-            case 503:
-              errorMessage = '服务不可用'
-              break
-            case 504:
-              errorMessage = '网关超时'
-              break
-            default:
-              errorMessage = (data as any)?.message || '请求失败'
-          }
-        } else if (error.request) {
-          errorMessage = '网络连接失败，请检查网络'
-        }
-
-        const requestError: RequestError = {
-          message: errorMessage,
-          code: error.response?.status,
-          response: error.response?.data,
-        }
-
-        console.error('Response error:', requestError)
-        return Promise.reject(requestError)
+      (error) => {
+        const interceptorsCatch = this.interceptors?.responseInterceptorCatch
+        const result = interceptorsCatch ? interceptorsCatch(error) : error
+        return responseInterceptorCatch(result)
       }
     )
   }
 
-  public request<T = any>(config: RequestConfig): Promise<T> {
-    return this.instance.request(config)
+  request<T = any>(config: RequestConfig): Promise<T> {
+    return new Promise((resolve, reject) => {
+      this.instance
+        .request<any, T>(config as any)
+        .then((res) => {
+          resolve(res)
+        })
+        .catch((err) => {
+          reject(err)
+        })
+    })
   }
 
-  public get<T = any>(url: string, params?: any, config?: AxiosRequestConfig): Promise<T> {
-    return this.instance.get(url, { params, ...config })
+  get<T = any>(url: string, config?: RequestConfig): Promise<T> {
+    return this.request<T>({ ...config, method: 'GET', url })
   }
 
-  public post<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
-    return this.instance.post(url, data, config)
+  post<T = any>(url: string, data?: any, config?: RequestConfig): Promise<T> {
+    return this.request<T>({ ...config, method: 'POST', url, data })
   }
 
-  public put<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
-    return this.instance.put(url, data, config)
+  postForm<T = any>(url: string, data?: any, config?: RequestConfig): Promise<T> {
+    const headerForm = {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    }
+    const tempConfig = { ...config, ...headerForm }
+    return this.request<T>({ ...tempConfig, method: 'POST', url, data })
   }
 
-  public delete<T = any>(url: string, params?: any, config?: AxiosRequestConfig): Promise<T> {
-    return this.instance.delete(url, { params, ...config })
+  put<T = any>(url: string, data?: any, config?: RequestConfig): Promise<T> {
+    return this.request<T>({ ...config, method: 'PUT', url, data })
   }
 
-  public patch<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
-    return this.instance.patch(url, data, config)
+  delete<T = any>(url: string, config?: RequestConfig): Promise<T> {
+    return this.request<T>({ ...config, method: 'DELETE', url })
+  }
+
+  patch<T = any>(url: string, data?: any, config?: RequestConfig): Promise<T> {
+    return this.request<T>({ ...config, method: 'PATCH', url, data })
+  }
+
+  cancelRequest(url: string) {
+    const pendingMap = (this.instance.defaults as any).pendingMap
+    if (pendingMap && pendingMap.has(url)) {
+      const controller = pendingMap.get(url)
+      controller?.abort()
+      pendingMap.delete(url)
+    }
+  }
+
+  cancelAllRequest() {
+    clearPending()
   }
 }
 
 const request = new Request({
-  baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
-  timeout: 10000,
-})
+  ...config,
+  interceptors: {
+    requestInterceptor: (config) => {
+      return config
+    },
+    requestInterceptorCatch: (error) => {
+      return error
+    },
+    responseInterceptor: (response) => {
+      return response
+    },
+    responseInterceptorCatch: (error) => {
+      return error
+    },
+  },
+}) as RequestInstance
 
 export default request

@@ -1,13 +1,15 @@
-import { createApp } from 'vue'
+import { createSSRApp } from 'vue'
 import { createPinia } from 'pinia'
-import router from './router'
-import './assets/tailwind.css'
 import App from './App.vue'
 
-const app = createApp(App)
-const pinia = createPinia()
+export function createApp() {
+  const app = createSSRApp(App)
+  const pinia = createPinia()
 
-app.use(pinia)
-app.use(router)
+  app.use(pinia)
 
-app.mount('#app')
+  return {
+    app,
+    pinia,
+  }
+}

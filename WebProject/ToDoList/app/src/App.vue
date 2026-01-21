@@ -1,46 +1,34 @@
 <script setup lang="ts">
-import NavBar from './components/NavBar.vue'
-import { useAppStore } from './stores'
-import { storeToRefs } from 'pinia'
+import { onLaunch, onShow, onHide } from '@dcloudio/uni-app'
 
-const appStore = useAppStore()
-const { notification } = storeToRefs(appStore)
+onLaunch(() => {
+  console.log('App Launch')
+})
+
+onShow(() => {
+  console.log('App Show')
+})
+
+onHide(() => {
+  console.log('App Hide')
+})
 </script>
-
-<template>
-  <div class="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
-    <NavBar />
-    
-    <main>
-      <router-view />
-    </main>
-
-    <Transition name="notification">
-      <div
-        v-if="notification"
-        class="fixed top-20 right-4 z-50 p-4 rounded-lg shadow-lg max-w-sm"
-        :class="{
-          'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100': notification.type === 'success',
-          'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100': notification.type === 'info',
-          'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100': notification.type === 'error',
-        }"
-      >
-        {{ notification.message }}
-      </div>
-    </Transition>
-  </div>
-</template>
-
-<style>
-.notification-enter-active,
-.notification-leave-active {
-  transition: all 0.3s ease;
-}
-
-.notification-enter-from,
-.notification-leave-to {
-  opacity: 0;
-  transform: translateX(30px);
+<style lang="scss">
+page {
+  width: 100%;
+  height: 100%;
+  background-color: #f9fafb;
+  color: #1f2937;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  line-height: 1.6;
+  padding-top: constant(safe-area-inset-top);
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: constant(safe-area-inset-bottom);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: constant(safe-area-inset-left);
+  padding-left: env(safe-area-inset-left);
+  padding-right: constant(safe-area-inset-right);
+  padding-right: env(safe-area-inset-right);
 }
 </style>
-

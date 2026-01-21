@@ -8,6 +8,9 @@ node_modules/
 .yarn/unplugged/
 .yarn/build-state.yml
 .yarn/install-state.gz
+pnpm-lock.yaml
+package-lock.json
+
 
 # -------------------------- 2. 构建/打包产物（可通过命令重新生成）--------------------------
 # 通用构建输出目录（大部分前端工具默认/常用）
