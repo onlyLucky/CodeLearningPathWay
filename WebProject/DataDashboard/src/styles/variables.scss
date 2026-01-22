@@ -1,0 +1,35 @@
+:root{
+  --primary-color: #00d4ff;
+}
+// 设置主题变量
+.dark-theme{
+  --primary-color: #00ff88;
+}
+$primary-color: var(--primary-color);
+$secondary-color: #00ff88;
+$accent-color: #ff6b6b;
+$warning-color: #ffd93d;
+$info-color: #6b5b95;
+
+$bg-dark: #0a0e27;
+$bg-card: rgba(16, 28, 58, 0.8);
+$bg-hover: rgba(72, 126, 176, 0.3);
+
+$text-primary: #ffffff;
+$text-secondary: rgba(255, 255, 255, 0.7);
+$text-muted: rgba(255, 255, 255, 0.5);
+
+$border-color: rgba(72, 126, 176, 0.3);
+$border-radius: 0.08rem;
+
+$shadow-sm: 0 0.02rem 0.04rem rgba(0, 0, 0, 0.2);
+$shadow-md: 0 0.04rem 0.12rem rgba(0, 0, 0, 0.3);
+$shadow-lg: 0 0.08rem 0.24rem rgba(0, 0, 0, 0.4);
+
+$transition-base: all 0.3s ease;
+$transition-fast: all 0.15s ease;
+$transition-slow: all 0.5s ease;
+
+$font-family-base: 'Microsoft YaHei', Arial, sans-serif;
+$font-family-mono: 'DIN', 'Arial', monospace;
+

@@ -1,0 +1,46 @@
+{
+  "title": "数据大屏模拟数据",
+  "version": "1.0.0",
+  "lastUpdated": "2024-01-22",
+  "data": {
+    "totalSales": 1258900,
+    "totalOrders": 45678,
+    "totalUsers": 123456,
+    "conversionRate": 0.35,
+    "salesTrend": [
+      { "time": "00:00", "value": 820 },
+      { "time": "04:00", "value": 932 },
+      { "time": "08:00", "value": 901 },
+      { "time": "12:00", "value": 934 },
+      { "time": "16:00", "value": 1290 },
+      { "time": "20:00", "value": 1330 },
+      { "time": "24:00", "value": 1320 }
+    ],
+    "categoryDistribution": [
+      { "name": "电子产品", "value": 1048, "color": "#00d4ff" },
+      { "name": "服装", "value": 735, "color": "#00ff88" },
+      { "name": "食品", "value": 580, "color": "#ff6b6b" },
+      { "name": "家居", "value": 484, "color": "#ffd93d" },
+      { "name": "其他", "value": 300, "color": "#6b5b95" }
+    ],
+    "regionalData": [
+      { "name": "华北", "value": 630230 },
+      { "name": "华南", "value": 131744 },
+      { "name": "华东", "value": 104970 },
+      { "name": "东北", "value": 29034 },
+      { "name": "西北", "value": 23489 },
+      { "name": "西南", "value": 18203 }
+    ],
+    "realtimeData": {
+      "visits": [120, 132, 101, 134, 90, 230, 210, 182, 191, 234, 290, 330],
+      "orders": [220, 182, 191, 234, 290, 330, 310, 282, 291, 324, 390, 430]
+    },
+    "funnelData": [
+      { "name": "浏览", "value": 100, "color": "#00d4ff" },
+      { "name": "加购", "value": 80, "color": "#00ff88" },
+      { "name": "下单", "value": 60, "color": "#ffd93d" },
+      { "name": "支付", "value": 40, "color": "#ff6b6b" },
+      { "name": "完成", "value": 20, "color": "#6b5b95" }
+    ]
+  }
+}
