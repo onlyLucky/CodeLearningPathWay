@@ -30,10 +30,14 @@ export default [
         window: 'readonly',
         document: 'readonly',
         HTMLElement: 'readonly',
+        HTMLDivElement: 'readonly',
+        MouseEvent: 'readonly',
         console: 'readonly',
         setTimeout: 'readonly',
         clearTimeout: 'readonly',
-        getComputedStyle: 'readonly'
+        getComputedStyle: 'readonly',
+        requestAnimationFrame: 'readonly',
+        cancelAnimationFrame: 'readonly'
       }
     }
   },

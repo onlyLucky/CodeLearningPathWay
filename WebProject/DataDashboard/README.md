@@ -84,17 +84,11 @@ DataDashboard/
 - **App Store**: 应用全局状态（侧边栏、主题、刷新间隔）
 - **Dashboard Store**: 数据大屏状态（统计数据、加载状态、错误信息）
 
-### 3. 数据可视化
-- 销售趋势图（折线图）
-- 品类分布图（饼图）
-- 地区分布图（条形图）
-- 实时数据图（多折线图）
-- 转化漏斗图（漏斗图）
+### 3. THREE.js 3D 地图
 
-### 4. 组件化开发
-- **EChart**: 封装的 ECharts 组件，支持自动调整大小
-- **DataCard**: 数据卡片容器组件
-- **StatCard**: 统计卡片组件，支持趋势显示
+参考资料
+- [THREE.js 3D 地图实现](https://juejin.cn/post/7247027696822304827?searchId=2026012217085492DD1AF8287F06213E58)
+- [阿里云数据可视化地理信息数据](https://datav.aliyun.com/portal/school/atlas/area_selector)
 
 ## 快速开始
 
@@ -219,108 +213,6 @@ const pxValue = remToPx(1.92)
 
 项目已封装 Axios 请求库，接口定义在 `src/api/dashboard.ts`：
 
-- `getDashboardData()` - 获取数据大屏数据
-- `getRealtimeData()` - 获取实时数据
-- `getSalesTrend()` - 获取销售趋势
-- `getCategoryDistribution()` - 获取品类分布
-- `getRegionalData()` - 获取地区数据
-
-## 静态资源管理
-
-项目提供了完整的静态资源管理方案，所有静态资源存放在 `src/assets/` 目录下。
-
-### 资源目录结构
-
-```
-assets/
-├── data/              # 静态数据文件
-│   ├── mock/          # 模拟数据
-│   │   └── dashboard.json
-│   └── config/        # 配置数据
-│       └── app.json
-├── fonts/            # 字体文件
-│   └── custom/       # 自定义字体
-├── icons/            # SVG 图标
-│   └── components/   # 组件图标
-│       ├── IconDashboard.vue
-│       ├── IconHome.vue
-│       ├── IconSettings.vue
-│       └── ...
-├── images/           # 图片资源
-│   ├── common/       # 通用图片
-│   ├── icons/        # 图标图片
-│   └── backgrounds/  # 背景图片
-├── 3d/              # 3D 模型文件
-│   ├── models/       # 模型文件
-│   └── textures/    # 纹理贴图
-└── styles/          # 静态样式文件
-    └── themes/      # 主题样式
-```
-
-### SVG 图标使用
-
-项目提供了组件化的 SVG 图标，可以直接在 Vue 组件中使用：
-
-```vue
-<template>
-  <div class="header">
-    <IconDashboard />
-    <IconSettings />
-  </div>
-</template>
-
-<script setup lang="ts">
-import { IconDashboard, IconSettings } from '@/assets/icons/components'
-</script>
-```
-
-### 静态数据使用
-
-引入 JSON 格式的静态数据：
-
-```typescript
-import mockData from '@/assets/data/mock/dashboard.json'
-import appConfig from '@/assets/data/config/app.json'
-
-console.log(mockData.data)
-console.log(appConfig.theme)
-```
-
-### 图片资源使用
-
-在 Vue 组件中引用图片：
-
-```vue
-<template>
-  <img :src="logo" alt="Logo" />
-</template>
-
-<script setup lang="ts">
-import logo from '@/assets/images/common/logo.png'
-</script>
-```
-
-### 可用图标列表
-
-项目已预置以下 SVG 图标组件：
-
-- `IconDashboard` - 仪表盘图标
-- `IconHome` - 首页图标
-- `IconSettings` - 设置图标
-- `IconInfo` - 信息图标
-- `IconNotification` - 通知图标
-- `IconSearch` - 搜索图标
-- `IconChevronUp` - 向上箭头
-- `IconChevronDown` - 向下箭头
-- `IconClose` - 关闭图标
-- `IconTrendingUp` - 上升趋势图标
-- `IconTrendingDown` - 下降趋势图标
-- `IconEdit` - 编辑图标
-- `IconRefresh` - 刷新图标
-- `IconXSquare` - 方形关闭图标
-- `IconImage` - 图片图标
-
-更多图标使用说明请参考 [src/assets/README.md](file:///d:/@code/2026/CodeLearningPathWay/WebProject/DataDashboard/src/assets/README.md)
 
 ## 工具函数
 
@@ -379,5 +271,3 @@ import logo from '@/assets/images/common/logo.png'
 5. 状态管理使用 Pinia Composition API 风格
 
 ## License
-
-MIT

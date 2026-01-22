@@ -1,6 +1,6 @@
 export function setRem() {
   const baseSize = 100
-  const _designWidth = 1920
+  // const _designWidth = 1920
   const clientWidth = document.documentElement.clientWidth
   
   let fontSize: number

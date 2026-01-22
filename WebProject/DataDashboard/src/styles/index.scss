@@ -1,9 +1,9 @@
 @use "sass:math";
 
-$designWidth: 1920;
+$baseSize: 100;
 
 @function px2rem($px) {
-  @return math.div($px, $designWidth) * 10rem;
+  @return math.div($px, $baseSize) *1rem;
 }
 
 html, body {
@@ -13,6 +13,7 @@ html, body {
   height: 100%;
   overflow: hidden;
   font-family: 'Microsoft YaHei', Arial, sans-serif;
+  background-color: #0a0e27;
 }
 
 #app {
@@ -20,24 +21,3 @@ html, body {
   height: 100%;
 }
 
-* {
-  box-sizing: border-box;
-}
-
-.clearfix::after {
-  content: '';
-  display: block;
-  clear: both;
-}
-
-.flex-center {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.flex-between {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
