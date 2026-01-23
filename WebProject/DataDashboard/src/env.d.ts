@@ -23,3 +23,13 @@ declare module '*.vue' {
 declare module 'echarts' {
   export * from 'echarts/core'
 }
+
+declare module '*.geojson' {
+  const value: any
+  export default value
+}
+
+declare module '*.jpg' {
+  const value: any
+  export default value
+}

@@ -88,6 +88,7 @@ DataDashboard/
 
 参考资料
 - [THREE.js 3D 地图实现](https://juejin.cn/post/7247027696822304827?searchId=2026012217085492DD1AF8287F06213E58)
+- [THREE.js 3D 地图实现（2）](https://juejin.cn/post/7256047142540017720#heading-7)
 - [阿里云数据可视化地理信息数据](https://datav.aliyun.com/portal/school/atlas/area_selector)
 
 ## 快速开始
