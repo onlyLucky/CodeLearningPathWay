@@ -6,10 +6,9 @@
 
 <script setup lang="ts">
 // 导入地图地理数据
-import mapGeoFullData from '@/assets/data/map/330000_full.json'
+// import mapGeoData from '@/assets/data/map/330000_full.json'
 import mapGeoData from '@/assets/data/map/330000.json'
 import textJpg from "@/assets/images/pic.jpg"
-import textScreen from "@/assets/images/screen.png"
 // 导入Vue组合式API
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 // 导入Three.js核心库
@@ -94,142 +93,15 @@ const initControls = () => {
 const lngLatToVector3 = d3.geoMercator()
 
 const createMapGeometry = ()=>{
-  // 计算地图中心位置，用于居中显示
-  const centerPos = calculateGeoJsonCenter(mapGeoData as GeoJSON)
-  lngLatToVector3.center(centerPos).scale(360).translate([4, 3]);
-  // 主体
-  createMapGeometryShape({
-    depth: 1,
-    opacity: 0.3,
-    bgColor: 0x409eff,
-    positionZ: -1,
-  })
-  // 区域层
-  createMapGeometryInsideShape({
-    depth: 0.001,
-    positionZ: 2,
-  })
-  // 主体边框01
-  createMapGeometryShape({
-    depth: 0.001,
-    positionZ: -1,
-    opacity: 0,
-    borderColor: '#798089',
-  })
-  // 贴图
-  createMapGeometryShape({
-    depth: 0.001,
-    positionZ: 0,
-    opacity: 0,
-    borderColor: '',
-    texture: true,
-  })
-  // 边框
-  createMapGeometryShape({
-    depth: 0.001,
-    positionZ: 0,
-    opacity: 0,
-    borderColor: '#1a8ed6',
-    borderWidth: 4,
-  })
-  scene.rotation.x = -Math.PI / 2 // 旋转几何体（适配 Three.js 坐标系）
+  createMapGeometryShape(0.2)
 }
 
 /* 创建地图几何体*/
-interface MapGeometryOptions{
-  depth?: number, // 地图厚度（3D 高度）
-  bgColor?: number | string, // 地图背景颜色
-  opacity?: number, // 地图透明度
-  texture?: THREE.Texture | null | boolean,// 地图纹理
-  borderColor?: number | string,// 地图边框颜色
-  borderWidth?: number,// 地图边框宽度
-  insideLineColor?: number | string,// 地图内部线颜色
-  positionX?: number,// 地图X轴位置
-  positionY?: number,// 地图Y轴位置
-  positionZ?: number,// 地图Z轴位置
-}
-const createMapGeometryShape = (options: MapGeometryOptions = {
-  depth: 1,
-  opacity: 0,
-  positionX: 0,
-  positionY: 0,
-  positionZ: 0,
-  borderWidth: 1,
-  texture: null,
-}) =>{
-  // console.log(mapGeoData)   // 输出地图数据用于调试
-  const {depth,bgColor,opacity,borderColor,texture,borderWidth} = options as MapGeometryOptions
+const createMapGeometryShape = (depth: number = 1) =>{
+  console.log(mapGeoData)   // 输出地图数据用于调试
+  const centerPos = calculateGeoJsonCenter(mapGeoData as GeoJSON)
+  lngLatToVector3.center(centerPos).scale(360).translate([4, 3]);
   mapGeoData.features.forEach((feature: any) => {
-    const coordinates = feature.geometry.coordinates;
-    // 处理多级坐标（部分区域有子区域，如海岛）
-    const shapes:THREE.Shape[] = [];
-    coordinates.forEach((coord: any) => {
-      coord.forEach((subCoord: any) => {
-        const shape = new THREE.Shape();
-        subCoord.forEach((lonlat: [number, number], index: number) => {
-          const [x, y] = lngLatToVector3(lonlat) || [0, 0];
-          if (index === 0) {
-            shape.moveTo(x, y);
-          } else {
-            shape.lineTo(x, y);
-          }
-        });
-        
-        shapes.push(shape);
-      });
-    })
-    // 创建拉伸几何体（3D 高度）
-    const geometry = new THREE.ExtrudeGeometry(shapes, {
-      depth, // 地图厚度（3D 高度）
-      bevelEnabled: false // 关闭倒角（简化）
-    });
-
-    // 创建材质（可自定义不同区域的颜色）
-    const material = new THREE.MeshLambertMaterial({
-      color: bgColor, // 基础颜色（蓝色）
-      transparent: true,
-      opacity,
-    });
-
-    // 创建网格并添加到场景
-    const mesh = new THREE.Mesh(geometry, material);
-    mesh.userData = { name: feature.properties.name }; // 存储区域名称（用于交互）
-    // mesh.rotation.x = -Math.PI / 2; // 旋转几何体（适配 Three.js 坐标系）
-    mesh.position.set(options.positionX || 0, options.positionY || 0, options.positionZ || 0); // 确保几何体居中
-    scene.add(mesh);
-    mapMeshes.push(mesh);
-    if(texture){
-      createMapTexture(geometry)
-    }
-    if(borderColor){
-      createMapLine(geometry,mesh,borderColor,borderWidth)
-    }
-    
-    // 使用（在3D坐标上添加）
-    var point:[number,number] = lngLatToVector3([120.13279236,30.22054087]) || [0,0]
-    createMapMarkPlane(new THREE.Vector3(point[0], point[1],0.5), textJpg)
-
-    // scene.rotation.x = -Math.PI / 2 // 旋转几何体（适配 Three.js 坐标系）
-    // 添加鼠标交互（hover 高亮）
-    /* mesh.addEventListener('pointerenter', () => {
-      gsap.to(mesh.material, { opacity: 1, color: 0xff9500, duration: 0.3 });
-    });
-    mesh.addEventListener('pointerout', () => {
-      gsap.to(mesh.material, { opacity: 0.8, color: 0x409eff, duration: 0.3 });
-    }); */
-  })
-}
-
-const createMapGeometryInsideShape = (options: MapGeometryOptions = {
-  depth: 1,
-  opacity: 0,
-  positionX: 0,
-  positionY: 0,
-  positionZ: 0,
-}) =>{
-  // console.log(mapGeoFullData)   // 输出地图数据用于调试
-  const {depth,bgColor,opacity,borderColor} = options as MapGeometryOptions
-  mapGeoFullData.features.forEach((feature: any) => {
     const coordinates = feature.geometry.coordinates;
     // 处理多级坐标（部分区域有子区域，如海岛）
     const shapes:THREE.Shape[] = [];
@@ -261,10 +133,10 @@ const createMapGeometryInsideShape = (options: MapGeometryOptions = {
 
         // 3. 线对象与Shape填充Mesh同步旋转/偏移（关键！保证描边贴合）
         // shapeLine.rotation.x = -Math.PI / 2; // 与地图Mesh同步旋转
-        shapeLine.position.set(0, 0, -(depth ?? 0) / 2) // 偏移到地图中心下方，兜底处理 depth 为 undefined 的情况
+        shapeLine.position.set(0, 0, -depth/2) // 偏移到地图中心下方
 
         // 4. 添加到场景
-        scene.add(shapeLine);
+        // scene.add(shapeLine);
       });
     })
     // 创建拉伸几何体（3D 高度）
@@ -277,28 +149,25 @@ const createMapGeometryInsideShape = (options: MapGeometryOptions = {
     const material = new THREE.MeshLambertMaterial({
       color: 0x409eff, // 基础颜色（蓝色）
       transparent: true,
-      opacity: 0
+      opacity: 0.8
     });
 
     // 创建网格并添加到场景
     const mesh = new THREE.Mesh(geometry, material);
     mesh.userData = { name: feature.properties.name }; // 存储区域名称（用于交互）
     // mesh.rotation.x = -Math.PI / 2; // 旋转几何体（适配 Three.js 坐标系）
-    mesh.position.set(options.positionX || 0, options.positionY || 0, options.positionZ || 0); // 确保几何体居中
-    // scene.add(mesh);
-    // mapMeshes.push(mesh);
+    mesh.position.set(0, 0, 0); // 确保几何体居中
+    scene.add(mesh);
+    mapMeshes.push(mesh);
 
-    // createMapTexture(geometry)
-    if(borderColor){
-      createMapLine(geometry,mesh,borderColor)
-    }
-    
+    createMapTexture(geometry)
+    createMapLine(geometry,mesh)
 
     // 使用（在3D坐标上添加）
     var point:[number,number] = lngLatToVector3([120.13279236,30.22054087]) || [0,0]
     createMapMarkPlane(new THREE.Vector3(point[0], point[1],0.5), textJpg)
 
-    // scene.rotation.x = -Math.PI / 2 // 旋转几何体（适配 Three.js 坐标系）
+    scene.rotation.x = -Math.PI / 2 // 旋转几何体（适配 Three.js 坐标系）
     // 添加鼠标交互（hover 高亮）
     /* mesh.addEventListener('pointerenter', () => {
       gsap.to(mesh.material, { opacity: 1, color: 0xff9500, duration: 0.3 });
@@ -310,12 +179,12 @@ const createMapGeometryInsideShape = (options: MapGeometryOptions = {
 }
 
 /* 创建地图边缘线 */
-const createMapLine = (geometry: THREE.ExtrudeGeometry,mesh: THREE.Mesh,color: number|string =0xffffff,width: number = 1) =>{
+const createMapLine = (geometry: THREE.ExtrudeGeometry,mesh: THREE.Mesh) =>{
   // 添加边缘描边（关键步骤）
-  const edges = new THREE.EdgesGeometry(geometry) // 提取边缘 
+  const edges = new THREE.EdgesGeometry(geometry) // 提取边缘
   const lineMaterial = new THREE.LineBasicMaterial({ 
-    color,  // 描边颜色
-    linewidth: width      // 线宽（部分浏览器支持有限）
+    color: 0xffffff,  // 描边颜色
+    linewidth: 2      // 线宽（部分浏览器支持有限）
   })
 
   const wireframe = new THREE.LineSegments(edges, lineMaterial)
@@ -326,16 +195,12 @@ const createMapLine = (geometry: THREE.ExtrudeGeometry,mesh: THREE.Mesh,color: n
 const createMapTexture = (geometry: THREE.ExtrudeGeometry) => {
   // 加载地图纹理贴图
   const textureLoader = new THREE.TextureLoader()
-  const texture = textureLoader.load(textScreen, (texture) => {
+  const texture = textureLoader.load(textJpg, (texture) => {
     // 纹理加载完成回调
-    // texture.wrapS = THREE.RepeatWrapping
-    // texture.wrapT = THREE.RepeatWrapping
-    // texture.repeat.set(0, 0) // 设置重复次数
-    texture.wrapS = THREE.ClampToEdgeWrapping
-    texture.wrapT = THREE.ClampToEdgeWrapping
-    texture.repeat.set(1, 1)
+    texture.wrapS = THREE.RepeatWrapping
+    texture.wrapT = THREE.RepeatWrapping
+    texture.repeat.set(2, 2) // 设置重复次数
   })
-  texture.colorSpace = THREE.SRGBColorSpace
   // 3. 创建带纹理的材质
   const material = new THREE.MeshLambertMaterial({ 
     map: texture,  // 关键：添加贴图
