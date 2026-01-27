@@ -231,16 +231,68 @@ export const getGeoJsonBounds = (geoJson: GeoJSON): {
     })
   }
 
+  const processPolygonCoordinates = (coords: [number, number][][] | [number, number][][][]) => {
+    // console.log(coords)
+    coords.forEach(ring => {
+      // console.log(ring)
+      ring[0].forEach(coord => {
+        const [lng, lat] = coord as [number, number]
+        minLng = Math.min(minLng, lng)
+        minLat = Math.min(minLat, lat)
+        maxLng = Math.max(maxLng, lng)
+        maxLat = Math.max(maxLat, lat)
+      })
+    })
+  }
+
   const { type, features, geometry, coordinates } = geoJson
 
   if (type === 'FeatureCollection' && features) {
     features.forEach(feature => {
-      if (feature.geometry && feature.geometry.coordinates) {
-        processCoordinates(feature.geometry.coordinates as [number, number][])
+      if (!feature.geometry) return
+      
+      const geomType = feature.geometry.type
+      const geomCoords = feature.geometry.coordinates
+      
+      if (geomType === 'MultiPolygon') {
+        processPolygonCoordinates(geomCoords as [number, number][][][])
+      } else if (geomType === 'Polygon') {
+        processPolygonCoordinates(geomCoords as [number, number][][])
+      } else if (geomType === 'MultiLineString') {
+        processCoordinates(geomCoords)
+      } else if (geomType === 'LineString') {
+        processCoordinates(geomCoords as [number, number][])
+      } else if (geomType === 'MultiPoint') {
+        processCoordinates(geomCoords as [number, number][])
+      } else if (geomType === 'Point') {
+        const [lng, lat] = geomCoords as [number, number]
+        minLng = Math.min(minLng, lng)
+        minLat = Math.min(minLat, lat)
+        maxLng = Math.max(maxLng, lng)
+        maxLat = Math.max(maxLat, lat)
       }
     })
   } else if (geometry && geometry.coordinates) {
-    processCoordinates(geometry.coordinates as [number, number][])
+    const geomType = geometry.type
+    const geomCoords = geometry.coordinates
+    
+    if (geomType === 'MultiPolygon') {
+      processPolygonCoordinates(geomCoords as [number, number][][][])
+    } else if (geomType === 'Polygon') {
+      processPolygonCoordinates(geomCoords as [number, number][][])
+    } else if (geomType === 'MultiLineString') {
+      processCoordinates(geomCoords)
+    } else if (geomType === 'LineString') {
+      processCoordinates(geomCoords as [number, number][])
+    } else if (geomType === 'MultiPoint') {
+      processCoordinates(geomCoords as [number, number][])
+    } else if (geomType === 'Point') {
+      const [lng, lat] = geomCoords as [number, number]
+      minLng = Math.min(minLng, lng)
+      minLat = Math.min(minLat, lat)
+      maxLng = Math.max(maxLng, lng)
+      maxLat = Math.max(maxLat, lat)
+    }
   } else if (coordinates) {
     processCoordinates(coordinates as [number, number][])
   }
@@ -264,3 +316,75 @@ export const calculateBoundsCenter = (bounds: {
     (bounds.minLat + bounds.maxLat) / 2
   ]
 }
+
+/**
+ * 计算 GeoJSON 数据的边界尺寸
+ * @param geoJson GeoJSON 数据对象
+ * @returns 边界尺寸 { width, height, center, bounds }
+ * 
+ * @example
+ * const mapData = { type: 'FeatureCollection', features: [...] }
+ * const { width, height, center, bounds } = getGeoJsonDimensions(mapData)
+ * console.log(`地图宽度: ${width}度, 高度: ${height}度`)
+ * console.log(`地图中心: ${center}`)
+ */
+export const getGeoJsonDimensions = (geoJson: GeoJSON): {
+  width: number
+  height: number
+  center: [number, number]
+  bounds: {
+    minLng: number
+    minLat: number
+    maxLng: number
+    maxLat: number
+  }
+} => {
+  const bounds = getGeoJsonBounds(geoJson)
+  const width = bounds.maxLng - bounds.minLng
+  const height = bounds.maxLat - bounds.minLat
+  const center = calculateBoundsCenter(bounds)
+  
+  return {
+    width,
+    height,
+    center,
+    bounds
+  }
+}
+
+/**
+ * 计算 GeoJSON 数据的边界尺寸（带比例缩放）
+ * @param geoJson GeoJSON 数据对象
+ * @param scale 缩放比例（默认 1）
+ * @returns 缩放后的边界尺寸 { width, height, center, bounds }
+ * 
+ * @example
+ * const mapData = { type: 'FeatureCollection', features: [...] }
+ * const { width, height } = getGeoJsonDimensionsScaled(mapData, 1000)
+ * console.log(`缩放后宽度: ${width}米, 高度: ${height}米`)
+ */
+export const getGeoJsonDimensionsScaled = (
+  geoJson: GeoJSON,
+  scale: number = 1
+): {
+  width: number
+  height: number
+  center: [number, number]
+  bounds: {
+    minLng: number
+    minLat: number
+    maxLng: number
+    maxLat: number
+  }
+} => {
+  const dimensions = getGeoJsonDimensions(geoJson)
+  
+  return {
+    width: dimensions.width * scale,
+    height: dimensions.height * scale,
+    center: dimensions.center,
+    bounds: dimensions.bounds
+  }
+}
+
+

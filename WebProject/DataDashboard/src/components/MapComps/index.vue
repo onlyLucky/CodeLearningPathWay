@@ -20,7 +20,7 @@ import * as d3 from 'd3'
 import { gsap } from 'gsap'
 // 导入轨道控制器
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
-import { calculateGeoJsonCenter, type GeoJSON } from '@/utils/genJson'
+import { calculateGeoJsonCenter,getGeoJsonDimensionsScaled, type GeoJSON } from '@/utils/genJson'
 
 // 地图容器DOM引用
 const mapContainer = ref<HTMLDivElement>()
@@ -37,7 +37,7 @@ let animationId: number          // 动画帧ID
 // 初始化场景
 const initScene = () => {
   scene = new THREE.Scene()  // 创建场景对象
-  scene.background = new THREE.Color(0x0a0e27)  // 设置场景背景颜色为深蓝色
+  // scene.background = new THREE.Color(0x0a0e27)  // 设置场景背景颜色为深蓝色
   // scene.fog = new THREE.Fog(0x0a0e27, 10, 50)   // 添加雾效，增强深度感
   // 创建坐标轴，参数为轴的长度
   const axesHelper = new THREE.AxesHelper(30)
@@ -329,12 +329,12 @@ const createMapTexture = (geometry: THREE.ExtrudeGeometry) => {
   const texture = textureLoader.load(textScreen, (texture) => {
     // 纹理加载完成回调
     // texture.wrapS = THREE.RepeatWrapping
-    // texture.wrapT = THREE.RepeatWrapping
+    // texture.wrapT = THREE.RepeatWrapping 
     // texture.repeat.set(0, 0) // 设置重复次数
-    texture.wrapS = THREE.ClampToEdgeWrapping
-    texture.wrapT = THREE.ClampToEdgeWrapping
+    texture.wrapS = THREE.MirroredRepeatWrapping
+    texture.wrapT = THREE.MirroredRepeatWrapping
     texture.repeat.set(1, 1)
-  })
+  }) 
   texture.colorSpace = THREE.SRGBColorSpace
   // 3. 创建带纹理的材质
   const material = new THREE.MeshLambertMaterial({ 

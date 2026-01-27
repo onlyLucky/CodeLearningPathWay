@@ -91,6 +91,7 @@ DataDashboard/
 - [THREE.js 3D 地图实现（2）](https://juejin.cn/post/7256047142540017720#heading-7)
 - [THREE.js 3D 地图实现（3）](https://chemistwang.github.io/post/threejs/3dmap/)
 - [THREE.js 3D 地图实现（4）](https://juejin.cn/post/7369478484370374666)
+- [THREE.js 3D 地图实现（5）](https://www.cnblogs.com/geek1116/p/18627931)
 - [阿里云数据可视化地理信息数据](https://datav.aliyun.com/portal/school/atlas/area_selector)
 
 ## 快速开始
