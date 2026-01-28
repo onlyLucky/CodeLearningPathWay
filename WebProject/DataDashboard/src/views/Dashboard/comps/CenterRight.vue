@@ -29,7 +29,7 @@
           <div class="dataItem">
             <img src="@/assets/images/r2_1.png" alt="">
             <div class="dataInfo">
-              <p class="dataDesc">累计参战人数</p>
+              <p class="dataDesc">累计参战人数</p> 
               <p class="dataNum">4396<span class="numUnit">人</span></p>
             </div>
           </div>
@@ -55,14 +55,49 @@
             </div>
           </div>
         </div>
+        <div class="infoHeader">
+          <img src="@/assets/images/itemTitle.png" alt="">
+          <div class="titleName">
+            <p>攻防转换率</p>
+          </div>
+        </div>
+        <div class="formValue">
+          <div class="lineBar">
+            <GradientGridProgress 
+            :progress="65" 
+            start-color="#4992FF" 
+            end-color="#4FDFFF" 
+            bg-color="#1B2A40"
+            ></GradientGridProgress>
+          </div>
+          <div class="bar"></div>
+          <div class="dataValue">
+            <img class="topPoly" src="@/assets/images/polygon1.png" alt="">
+            <p class="dataNum">65%</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="bottomInfo">
+      <!-- 战场形势分析 -->
+      <div class="infoItem">
+        <div class="dashboardTitle">
+          <div class="titleName">战场形势分析</div>
+        </div>
+        <div class="scrollTab">
+          <div class="tabItem active">波动和走势</div>
+          <div class="tabItem">新增作战量和幅度</div>
+        </div>
+        <div class="charsCon"></div>
       </div>
     </div>
-    <div class="bottomInfo"></div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { defineComponent, ref } from 'vue';
+import GradientGridProgress from '@/components/GradientGridProgress.vue'
 
 const monitorList = ref([
   {
@@ -81,10 +116,12 @@ defineComponent({
 </script>
 <style scoped lang="scss">
 .centerRight{
-  width: px2rem(260);
+  width: px2rem($center-right-width);
   height: 100%;
+  overflow: hidden;
   .topInfo{
     width: 100%;
+    height: px2rem(440);
     .infoItem{
       width: 100%;
       margin-bottom: px2rem(20);
@@ -130,7 +167,7 @@ defineComponent({
 
       .dataScreen{
         width: 100%;
-        height: px2rem(90);
+        height: px2rem(120);
         display: flex;
         flex-wrap: wrap;
         align-content: flex-start;
@@ -156,19 +193,24 @@ defineComponent({
               line-height: px2rem(14);
               width: 100%;
               text-align: left;
-              color: #fff;
+              color: #99B3C8;
               margin-bottom: px2rem(4);
             }
             .dataNum{
               font-size: px2rem(14);
               line-height: px2rem(20);
-              color: #fff;
+              font-weight: bolder;
+              color: #B0D8F5;
+              display: flex;
+              align-items: flex-end;
+              .numUnit{
+                font-size: px2rem(8);
+                line-height: px2rem(16);
+                color: #99B3C8;
+                margin-left: px2rem(4);
+              }
             }
-            .numUnit{
-              font-size: px2rem(10);
-              line-height: px2rem(14);
-              color: #fff;
-            }
+            
           }
         }
         .dataItem:nth-child(2n){
@@ -176,9 +218,110 @@ defineComponent({
         }
       }
       
+      .infoHeader{
+        width: 100%;
+        height: px2rem(34);
+        display: flex;
+        align-items: center;
+        margin-bottom: px2rem(10);
+        img{
+          width: px2rem(38);
+          height: px2rem(34);
+        }
+        .titleName{
+          width: calc(100% - px2rem(38));
+          height: 100%;
+          background: linear-gradient(90deg, rgba(8, 83, 106, 0.4) 0%, rgba(13, 78, 99, 0.02) 100%);
+          p{
+            font-size: px2rem(12);
+            line-height: px2rem(34);
+            padding-left: px2rem(10);
+            font-weight: bolder;
+            color: #B0D8F5;
+          }
+        }
+      }
+
+      .formValue{
+        width: 100%;
+        height: px2rem(58);
+        position: relative;
+        .lineBar{
+          width: 100%;
+          height: px2rem(18);
+          // background: linear-gradient(90deg, rgba(73, 146, 255, 1) 0%, rgba(79, 223, 255, 1) 66.23%, rgba(27, 42, 64, 1) 67.23%);
+          margin-bottom: px2rem(10);
+        }
+        .bar{
+          width: 100%;
+          height: px2rem(6);
+          background: #1B2940;
+        }
+        .dataValue{
+          position: absolute;
+          top: px2rem(19);
+          left: 50%;
+          width: px2rem(50);
+          transform: translateX(-50%);
+          height: 100%;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: flex-start;
+          img{
+            width: px2rem(6);
+            height: px2rem(18);
+          }
+          p{
+            width: px2rem(50);
+            text-align: center;
+            font-size: px2rem(14);
+            line-height: px2rem(20);
+            font-weight: bolder;
+            color: #4EDFFF;
+            text-shadow: 0px 0px 8px  #4EDFFF;
+          }
+        }
+      }
 
 
-
+    }
+  }
+  .bottomInfo{
+    width: 100%;
+    height: calc(100% - px2rem(440));
+    .infoItem{
+      width: 100%;
+      height: 100%;
+      .scrollTab{
+        width: 100%;
+        height: px2rem(34);
+        margin-bottom: px2rem(16);
+        font-size: px2rem(10);
+        line-height: px2rem(14);
+        display: flex;
+        .tabItem{
+          width: auto;
+          height: 100%;
+          margin-right: px2rem(10);
+          padding: 0 px2rem(12);
+          box-sizing: border-box;
+          background: linear-gradient(180deg, #0C356F 0%, #0C356F 100%);
+          border: px2rem(1) solid #1760AE;
+          line-height: px2rem(30);
+          color: #B0D8F5;
+          font-size: px2rem(10);
+          opacity: 0.5;
+        }
+        .tabItem.active{
+          opacity: 1;
+        }
+      }
+      .charsCon{
+        width: 100%;
+        height: calc(100% - px2rem(94));
+        background-color: rgba(13, 48, 99, 0.5);
+      }
     }
   }
 }

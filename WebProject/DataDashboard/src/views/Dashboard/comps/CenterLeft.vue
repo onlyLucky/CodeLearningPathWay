@@ -96,7 +96,7 @@ defineComponent({
 </script>
 <style scoped lang="scss">
 .centerLeft{
-  width: px2rem(260);
+  width: px2rem($center-left-width);
   height: 100%;
   .dashboardTitle{
     width: 100%;
@@ -122,6 +122,7 @@ defineComponent({
     display: flex;
     flex-wrap: wrap;
     align-content: flex-start;
+    overflow-y: auto;
 
     .videoItem{
       width: calc((100% - px2rem(8))/2);

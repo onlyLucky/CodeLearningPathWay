@@ -49,6 +49,7 @@ defineComponent({
     height: calc(100% - px2rem(88));
     padding: px2rem(8) px2rem(20) px2rem(20) px2rem(20);
     box-sizing: border-box;
+    background: linear-gradient(180deg, rgba(7, 14, 28, 1) 0%, rgba(7, 14, 28, 0) 0%, rgba(7, 14, 28, 0.63) 20.83%, rgba(7, 14, 28, 0.79) 100%, rgba(7, 14, 28, 0.7) 100%);
     .conBox{
       width: 100%;
       height: 100%;
@@ -59,7 +60,7 @@ defineComponent({
         margin-bottom: px2rem(20);
         display: flex;
         .MapCon{
-          width: calc(100% - px2rem(560));
+          width: calc(100% - px2rem($center-left-width+40+$center-right-width));
           margin: 0 px2rem(20);
         }
       }
