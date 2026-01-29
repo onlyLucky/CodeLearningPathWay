@@ -30,28 +30,28 @@
             <img src="@/assets/images/r2_1.png" alt="">
             <div class="dataInfo">
               <p class="dataDesc">累计参战人数</p> 
-              <p class="dataNum">4396<span class="numUnit">人</span></p>
+              <p class="dataNum">{{ participantCount }}<span class="numUnit">人</span></p>
             </div>
           </div>
           <div class="dataItem">
-            <img src="@/assets/images/r2_1.png" alt="">
+            <img src="@/assets/images/r2_2.png" alt="">
             <div class="dataInfo">
               <p class="dataDesc">大型对抗次数</p>
-              <p class="dataNum">120<span class="numUnit">次</span></p>
+              <p class="dataNum">{{ battleCount }}<span class="numUnit">次</span></p>
             </div>
           </div>
           <div class="dataItem">
-            <img src="@/assets/images/r2_1.png" alt="">
+            <img src="@/assets/images/r2_3.png" alt="">
             <div class="dataInfo">
               <p class="dataDesc">阵亡人数</p>
-              <p class="dataNum">360<span class="numUnit">人</span></p>
+              <p class="dataNum">{{ deathCount }}<span class="numUnit">人</span></p>
             </div>
           </div>
           <div class="dataItem">
-            <img src="@/assets/images/r2_1.png" alt="">
+            <img src="@/assets/images/r2_4.png" alt="">
             <div class="dataInfo">
               <p class="dataDesc">战况反馈次数</p>
-              <p class="dataNum">560<span class="numUnit">次</span></p>
+              <p class="dataNum">{{ feedbackCount }}<span class="numUnit">次</span></p>
             </div>
           </div>
         </div>
@@ -64,16 +64,16 @@
         <div class="formValue">
           <div class="lineBar">
             <GradientGridProgress 
-            :progress="65" 
+            :progress="attackDefenseRatio" 
             start-color="#4992FF" 
             end-color="#4FDFFF" 
             bg-color="#1B2A40"
             ></GradientGridProgress>
           </div>
           <div class="bar"></div>
-          <div class="dataValue">
+          <div class="dataValue" :style="{left:attackDefenseRatio+'%'}">
             <img class="topPoly" src="@/assets/images/polygon1.png" alt="">
-            <p class="dataNum">65%</p>
+            <p class="dataNum">{{attackDefenseRatio}}%</p>
           </div>
         </div>
       </div>
@@ -86,19 +86,25 @@
           <div class="titleName">战场形势分析</div>
         </div>
         <div class="scrollTab">
-          <div class="tabItem active">波动和走势</div>
-          <div class="tabItem">新增作战量和幅度</div>
+          <div class="tabItem" :class="{'active':currentTab==0}" @click="handleTabClick(0)">波动和走势</div>
+          <div class="tabItem" :class="{'active':currentTab==1}" @click="handleTabClick(1)">新增作战量和幅度</div>
         </div>
-        <div class="charsCon"></div>
+        <div class="charsCon" @mouseenter="handleMouseEnter" @mouseleave="handleMouseLeave">
+          <AreaChart v-if="currentTab==0" :data="areaChartData1" :titles="areaChartTitles"></AreaChart>
+          <AreaChart v-if="currentTab==1" :data="areaChartData2" :titles="areaChartTitles"></AreaChart>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { defineComponent, ref } from 'vue';
+import { defineComponent, ref, onMounted, onUnmounted } from 'vue';
+import { gsap } from 'gsap';
 import GradientGridProgress from '@/components/GradientGridProgress.vue'
+import AreaChart from '@/components/AreaChart.vue'
 
+/* 监控画面 */
 const monitorList = ref([
   {
     title: '监控画面1',
@@ -110,8 +116,144 @@ const monitorList = ref([
   },
 ])
 
+/* 攻防转换率 */
+const attackDefenseRatio = ref(40)
+
+let ratioTimeline: gsap.core.Timeline | null = null
+
+const startRatioAnimation = () => {
+  if (ratioTimeline) {
+    ratioTimeline.kill()
+  }
+  
+  ratioTimeline = gsap.timeline({ repeat: -1, repeatDelay: 0.5 })
+  
+  const generateRandomValue = (min: number, max: number) => {
+    return Math.floor(Math.random() * (max - min + 1)) + min
+  }
+  
+  const generateRandomDuration = (min: number, max: number) => {
+    return Math.random() * (max - min) + min
+  }
+  
+  let currentValue = 40
+  
+  for (let i = 0; i < 20; i++) {
+    const nextValue = generateRandomValue(40, 60)
+    const duration = generateRandomDuration(2, 4)
+    
+    ratioTimeline.to(attackDefenseRatio, {
+      value: nextValue,
+      duration: duration,
+      ease: 'power2.inOut',
+      snap: { value: 1 }
+    })
+    
+    currentValue = nextValue
+  }
+}
+
+const stopRatioAnimation = () => {
+  if (ratioTimeline) {
+    ratioTimeline.kill()
+    ratioTimeline = null
+  }
+}
+
+
+
+/* 战场形势分析 */
+var currentTab = ref(0)
+const areaChartTitles = ref(['08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00'])
+const areaChartData1 = ref([900,820,930,600,850,890,560,630,830,990,850,780,650])
+const areaChartData2 = ref([3,2,3,5,10,10,6,6,4,2,1,1,2])
+// 自动切换tab
+let tabSwitchTimer: number | null = null
+const startTabAutoSwitch = () => {
+  const switchTab = () => {
+    currentTab.value = currentTab.value === 0 ? 1 : 0
+  }
+  
+  tabSwitchTimer = window.setInterval(switchTab, 5000)
+}
+
+const stopTabAutoSwitch = () => {
+  if (tabSwitchTimer !== null) {
+    // eslint-disable-next-line no-undef
+    clearInterval(tabSwitchTimer)
+    tabSwitchTimer = null
+  }
+}
+
+const handleTabClick = (index: number) => {
+  currentTab.value = index
+  stopTabAutoSwitch()
+  startTabAutoSwitch()
+}
+
+const handleMouseEnter = () => {
+  stopTabAutoSwitch()
+}
+
+const handleMouseLeave = () => {
+  startTabAutoSwitch()
+}
+
+/* 数据统计 */
+const participantCount = ref(0)
+const battleCount = ref(0)
+const deathCount = ref(0)
+const feedbackCount = ref(0)
+
+const updateCountDataFunc = ()=>{
+  gsap.to(participantCount, {
+    value: 4396,
+    duration: 2,
+    ease: 'power2.out',
+    snap: { value: 1 }
+  })
+  
+  gsap.to(battleCount, {
+    value: 120,
+    duration: 1.5,
+    ease: 'power2.out',
+    delay: 0.2,
+    snap: { value: 1 }
+  })
+  
+  gsap.to(deathCount, {
+    value: 360,
+    duration: 1.8,
+    ease: 'power2.out',
+    delay: 0.4,
+    snap: { value: 1 }
+  })
+  
+  gsap.to(feedbackCount, {
+    value: 560,
+    duration: 1.6,
+    ease: 'power2.out',
+    delay: 0.6,
+    snap: { value: 1 }
+  })
+}
+
+
+
+onMounted(() => {
+  updateCountDataFunc()
+  startTabAutoSwitch()
+  startRatioAnimation()
+})
+
+onUnmounted(() => {
+  stopTabAutoSwitch()
+  stopRatioAnimation()
+})
+
 defineComponent({
   name: 'CenterRight',
+  updateCountDataFunc,
 })
 </script>
 <style scoped lang="scss">
@@ -303,6 +445,7 @@ defineComponent({
         .tabItem{
           width: auto;
           height: 100%;
+          cursor: pointer;
           margin-right: px2rem(10);
           padding: 0 px2rem(12);
           box-sizing: border-box;

@@ -40,8 +40,8 @@ const initScene = () => {
   // scene.background = new THREE.Color(0x0a0e27)  // 设置场景背景颜色为深蓝色
   // scene.fog = new THREE.Fog(0x0a0e27, 10, 50)   // 添加雾效，增强深度感
   // 创建坐标轴，参数为轴的长度
-  const axesHelper = new THREE.AxesHelper(30)
-  scene.add(axesHelper)
+  /* const axesHelper = new THREE.AxesHelper(30)
+  scene.add(axesHelper) */
 }
 
 /* 
@@ -96,7 +96,7 @@ const lngLatToVector3 = d3.geoMercator()
 const createMapGeometry = ()=>{
   // 计算地图中心位置，用于居中显示
   const centerPos = calculateGeoJsonCenter(mapGeoData as GeoJSON)
-  lngLatToVector3.center(centerPos).scale(360).translate([4, 3]);
+  lngLatToVector3.center(centerPos).scale(400).translate([6,5]);//scale(360).translate([1, 4])
   // 主体
   createMapGeometryShape({
     depth: 1,
@@ -122,7 +122,8 @@ const createMapGeometry = ()=>{
     positionZ: 0,
     opacity: 0,
     borderColor: '',
-    texture: true,
+    bgColor: "green",
+    texture: false,
   })
   // 边框
   createMapGeometryShape({
@@ -207,7 +208,7 @@ const createMapGeometryShape = (options: MapGeometryOptions = {
     
     // 使用（在3D坐标上添加）
     var point:[number,number] = lngLatToVector3([120.13279236,30.22054087]) || [0,0]
-    createMapMarkPlane(new THREE.Vector3(point[0], point[1],0.5), textJpg)
+    // createMapMarkPlane(new THREE.Vector3(point[0], point[1],0.5), textJpg)
 
     // scene.rotation.x = -Math.PI / 2 // 旋转几何体（适配 Three.js 坐标系）
     // 添加鼠标交互（hover 高亮）
@@ -296,7 +297,7 @@ const createMapGeometryInsideShape = (options: MapGeometryOptions = {
 
     // 使用（在3D坐标上添加）
     var point:[number,number] = lngLatToVector3([120.13279236,30.22054087]) || [0,0]
-    createMapMarkPlane(new THREE.Vector3(point[0], point[1],0.5), textJpg)
+    // createMapMarkPlane(new THREE.Vector3(point[0], point[1],0.5), textJpg)
 
     // scene.rotation.x = -Math.PI / 2 // 旋转几何体（适配 Three.js 坐标系）
     // 添加鼠标交互（hover 高亮）
@@ -433,6 +434,12 @@ const handleResize = () => {
   renderer.setSize(width, height)
 }
 
+const animate = () => {
+  animationId = requestAnimationFrame(animate)
+  controls.update()
+  renderer.render(scene, camera)
+}
+
 const handleMouseInteraction = (event: MouseEvent) => {
   
 }
@@ -449,9 +456,10 @@ const init = () => {
   // 添加光照并启动动画
   addLights()
   // 开始渲染循环
-  renderer.setAnimationLoop(() => {
+  /* renderer.setAnimationLoop(() => {
     renderer.render(scene, camera)
-  })
+  }) */
+  animate()
   
   window.addEventListener('resize', handleResize)
   renderer.domElement.addEventListener('click', handleMouseInteraction)

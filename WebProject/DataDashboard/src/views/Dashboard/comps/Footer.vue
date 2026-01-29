@@ -5,45 +5,33 @@
         <div class="titleName">情报侦察</div>
       </div>
       <div class="msgInfoBox">
-        <div class="msgInfoCon">
-          <div class="msgInfoItem">
-            <img src="@/assets/images/f1_1.png" alt="">
-            <div class="msgInfo">
-              <div class="msgTop">
-                <p class="msgTitle">战场慧眼</p>
-                <p class="msgTime">09:10</p>
+        <div class="msgInfoCon" ref="msgInfoConRef" @mouseenter="pauseScroll" @mouseleave="resumeScroll">
+          <div class="msgInfoWrapper">
+            <div class="msgInfoItem" v-for="(item,index) in msgInfoList" :key="'first-' + index">
+              <img v-if="item.status === 1" src="@/assets/images/f1_1.png" alt="">
+              <img v-if="item.status === 2" src="@/assets/images/f1_2.png" alt="">
+              <img v-if="item.status === 3" src="@/assets/images/f1_3.png" alt="">
+              <img v-if="item.status === 4" src="@/assets/images/f1_4.png" alt="">
+              <div class="msgInfo">
+                <div class="msgTop">
+                  <p class="msgTitle">{{item.title}}</p>
+                  <p class="msgTime">{{item.time}}</p>
+                </div>
+                <p class="msgDesc">{{item.desc}}</p>
               </div>
-              <p class="msgDesc">无人机与侦察分队抵近侦察，实时回传敌部署...</p>
             </div>
-          </div>
-          <div class="msgInfoItem">
-            <img src="@/assets/images/f1_2.png" alt="">
-            <div class="msgInfo">
-              <div class="msgTop">
-                <p class="msgTitle">电磁密战</p>
-                <p class="msgTime">09:10</p>
+            <div class="msgInfoItem" v-for="(item,index) in msgInfoList" :key="'second-' + index">
+              <img v-if="item.status === 1" src="@/assets/images/f1_1.png" alt="">
+              <img v-if="item.status === 2" src="@/assets/images/f1_2.png" alt="">
+              <img v-if="item.status === 3" src="@/assets/images/f1_3.png" alt="">
+              <img v-if="item.status === 4" src="@/assets/images/f1_4.png" alt="">
+              <div class="msgInfo">
+                <div class="msgTop">
+                  <p class="msgTitle">{{item.title}}</p>
+                  <p class="msgTime">{{item.time}}</p>
+                </div>
+                <p class="msgDesc">{{item.desc}}</p>
               </div>
-              <p class="msgDesc">电子侦察单位监听、干扰敌通信与雷达信号...</p>
-            </div>
-          </div>
-          <div class="msgInfoItem">
-            <img src="@/assets/images/f1_3.png" alt="">
-            <div class="msgInfo">
-              <div class="msgTop">
-                <p class="msgTitle">哨兵前出</p>
-                <p class="msgTime">09:10</p>
-              </div>
-              <p class="msgDesc">通过战术数据链，将多源侦察情报实时融合...</p>
-            </div>
-          </div>
-          <div class="msgInfoItem">
-            <img src="@/assets/images/f1_4.png" alt="">
-            <div class="msgInfo">
-              <div class="msgTop">
-                <p class="msgTitle">战场迷雾</p>
-                <p class="msgTime">09:10</p>
-              </div>
-              <p class="msgDesc">敌实施伪装、佯动与电子欺骗，侦察需结合技...</p>
             </div>
           </div>
         </div>
@@ -58,22 +46,41 @@
             <img src="@/assets/icons/t_right.png" alt="">
           </div>
         </div>
-        <div class="taskBox">
-          <div class="taskItem" v-for="(item, index) in taskList" :key="index">
-            <div class="taskInfo">
-              <p class="taskTitle">{{item.title}}</p>
-              <div class="taskProgress">
-                <p class="tProgressTxt">任务进度</p>
-                <div class="tProgressBar">
-                  <div class="tProgress" :style="{width: item.progress + '%'}"></div>
+        <div class="taskBox" ref="taskBoxRef" @mouseenter="pauseTaskScroll" @mouseleave="resumeTaskScroll">
+          <div class="taskBoxWrapper">
+            <div class="taskItem" v-for="(item, index) in taskList" :key="'task-first-' + index">
+              <div class="taskInfo">
+                <p class="taskTitle">{{item.title}}</p>
+                <div class="taskProgress">
+                  <p class="tProgressTxt">任务进度</p>
+                  <div class="tProgressBar">
+                    <div class="tProgress" :style="{width: item.progress + '%'}"></div>
+                  </div>
+                  <p class="tProgressNum">{{item.progress}}%</p>
                 </div>
-                <p class="tProgressNum">{{item.progress}}%</p>
+              </div>
+              <div class="taskOpt">
+                <div class="taskBtn btnStatus01">汇报进度</div>
+                <div class="taskBtn btnStatus02">查看详情</div>
+                <div class="taskBtn btnStatus03">结束任务</div>
               </div>
             </div>
-            <div class="taskOpt">
-              <div class="taskBtn btnStatus01">汇报进度</div>
-              <div class="taskBtn btnStatus02">查看详情</div>
-              <div class="taskBtn btnStatus03">结束任务</div>
+            <div class="taskItem" v-for="(item, index) in taskList" :key="'task-second-' + index">
+              <div class="taskInfo">
+                <p class="taskTitle">{{item.title}}</p>
+                <div class="taskProgress">
+                  <p class="tProgressTxt">任务进度</p>
+                  <div class="tProgressBar">
+                    <div class="tProgress" :style="{width: item.progress + '%'}"></div>
+                  </div>
+                  <p class="tProgressNum">{{item.progress}}%</p>
+                </div>
+              </div>
+              <div class="taskOpt">
+                <div class="taskBtn btnStatus01">汇报进度</div>
+                <div class="taskBtn btnStatus02">查看详情</div>
+                <div class="taskBtn btnStatus03">结束任务</div>
+              </div>
             </div>
           </div>
         </div>
@@ -139,45 +146,15 @@
           <div class="tableItem">指挥</div>
           <div class="tableItem">状态</div>
         </div>
-        <div class="tableCon">
-          <div class="tableItem">
-            <div class="tableCell cellName">一团一营</div>
-            <div class="tableCell cellUser">白营长</div>
-            <div class="tableCell cellStatus">
-              <div class="status status01"></div>
-              <p class="tagName">四级战备</p>
-            </div>
-          </div>
-          <div class="tableItem activeBg">
-            <div class="tableCell cellName">一团二营</div>
-            <div class="tableCell cellUser">孟营长</div>
-            <div class="tableCell cellStatus">
-              <div class="status status02"></div>
-              <p class="tagName">三级战备</p>
-            </div>
-          </div>
-          <div class="tableItem">
-            <div class="tableCell cellName">一团三营</div>
-            <div class="tableCell cellUser">杜营长</div>
-            <div class="tableCell cellStatus">
-              <div class="status status02"></div>
-              <p class="tagName">三级战备</p>
-            </div>
-          </div>
-          <div class="tableItem">
-            <div class="tableCell cellName">一团四营</div>
-            <div class="tableCell cellUser">李营长</div>
-            <div class="tableCell cellStatus">
-              <div class="status status03"></div>
-              <p class="tagName">二级战备</p>
-            </div>
-          </div>
-          <div class="tableItem">
-            <div class="tableCell cellName">二团一营</div>
-            <div class="tableCell cellUser">张营长</div>
-            <div class="tableCell cellStatus">
-              <div class="status status04"></div>
-              <p class="tagName">一级战备</p>
+        <div class="tableCon" ref="tableConRef" @mouseenter="pauseTableScroll" @mouseleave="resumeTableScroll">
+          <div class="tableConWrapper">
+            <div class="tableItem" v-for="(item, index) in teamListData" :key="index">
+              <div class="tableCell cellName">{{item.teamName}}</div>
+              <div class="tableCell cellUser">{{item.leaderName}}</div>
+              <div class="tableCell cellStatus">
+                <div class="status" :class="`status0${item.status}`"></div>
+                <p class="tagName">{{item.statusTxt}}</p>
+              </div>
             </div>
           </div>
         </div>
@@ -189,111 +166,419 @@
   </div>
 </template>
 <script setup lang="ts">
-import { defineComponent, ref } from 'vue';
+import { defineComponent, ref, onMounted, onUnmounted, nextTick, reactive } from 'vue';
+import { gsap } from 'gsap';
 import CircleProgress from '@/components/CircleProgress.vue';
 import PolarBarChart from '@/components/PolarBarChart.vue';
 
+// 定义滚动功能的响应式引用
+const msgInfoConRef = ref<HTMLElement | null>(null);
+const taskBoxRef = ref<HTMLElement | null>(null);
+const tableConRef = ref<HTMLElement | null>(null);
+let animationFrameId: number | null = null;
+let msgScrollTop = 0;
+let taskScrollTop = 0;
+let tableScrollTop = 0;
+let scrollSpeed = 0.6; // 滚动速度
+let isMsgPaused = false;
+let isTaskPaused = false;
+let isTablePaused = false;
+let lastTimestamp = 0;
+const FRAME_RATE = 60; // 限制为30帧
+const FRAME_INTERVAL = 1000 / FRAME_RATE; // 每帧间隔时间
 
+/* 情报侦查 */
+var msgInfoList = ref([
+  {
+    title: "战场慧眼",
+    time: "09:00",
+    desc: "无人机与侦察分队抵近侦察，实时回传敌部署...",
+    status: 1,
+  },
+  {
+    title: "电磁密战",
+    time: "09:20",
+    desc: "电子侦察单位监听、干扰敌通信与雷达信号...",
+    status: 2,
+  },
+  {
+    title: "哨兵前出",
+    time: "10:12",
+    desc: "通过战术数据链，将多源侦察情报实时融合...",
+    status: 3,
+  },
+  {
+    title: "战场迷雾",
+    time: "10:30",
+    desc: "敌实施伪装、佯动与电子欺骗，侦察需结合技...",
+    status: 4,
+  },
+  {
+    title: "战场慧眼",
+    time: "09:00",
+    desc: "无人机与侦察分队抵近侦察，实时回传敌部署...",
+    status: 1,
+  },
+  {
+    title: "电磁密战",
+    time: "09:20",
+    desc: "电子侦察单位监听、干扰敌通信与雷达信号...",
+    status: 2,
+  },
+  {
+    title: "哨兵前出",
+    time: "10:12",
+    desc: "通过战术数据链，将多源侦察情报实时融合...",
+    status: 3,
+  },
+  {
+    title: "战场迷雾",
+    time: "10:30",
+    desc: "敌实施伪装、佯动与电子欺骗，侦察需结合技...",
+    status: 4,
+  },
+])
+
+// 统一的滚动函数，使用单个requestAnimationFrame并限制为30帧
+const unifiedScrollStep = (timestamp: number) => {
+  // 计算时间差，以确保帧率稳定在30fps
+  if (timestamp - lastTimestamp >= FRAME_INTERVAL) {
+    // 消息滚动
+    if (!isMsgPaused && msgInfoConRef.value) {
+      const msgContainer = msgInfoConRef.value;
+      const msgSingleSetHeight = msgContainer.scrollHeight / 2;
+      
+      msgScrollTop += scrollSpeed;
+      
+      if (msgScrollTop >= msgSingleSetHeight) {
+        msgScrollTop = 0;
+        msgInfoConRef.value.scrollTop = msgScrollTop;
+      } else {
+        msgInfoConRef.value.scrollTop = msgScrollTop;
+      }
+    }
+    
+    // 任务框滚动
+    if (!isTaskPaused && taskBoxRef.value) {
+      const taskContainer = taskBoxRef.value;
+      const taskSingleSetHeight = taskContainer.scrollHeight / 2;
+      
+      taskScrollTop += scrollSpeed;
+      
+      if (taskScrollTop >= taskSingleSetHeight) {
+        taskScrollTop = 0;
+        taskBoxRef.value.scrollTop = taskScrollTop;
+      } else {
+        taskBoxRef.value.scrollTop = taskScrollTop;
+      }
+    }
+    
+    // 表格滚动
+    if (!isTablePaused && tableConRef.value) {
+      const tableContainer = tableConRef.value;
+      const tableSingleSetHeight = tableContainer.scrollHeight / 2;
+      
+      tableScrollTop += scrollSpeed;
+      
+      if (tableScrollTop >= tableSingleSetHeight) {
+        tableScrollTop = 0;
+        tableConRef.value.scrollTop = tableScrollTop;
+      } else {
+        tableConRef.value.scrollTop = tableScrollTop;
+      }
+    }
+    
+    lastTimestamp = timestamp;
+  }
+  
+  animationFrameId = requestAnimationFrame(unifiedScrollStep);
+};
+
+const startScrolling = () => {
+  // 初始化滚动位置
+  msgScrollTop = 0;
+  taskScrollTop = 0;
+  tableScrollTop = 0;
+  
+  // 启动统一的滚动循环
+  animationFrameId = requestAnimationFrame(unifiedScrollStep);
+};
+
+const pauseScroll = () => {
+  isMsgPaused = true;
+};
+
+const resumeScroll = () => {
+  isMsgPaused = false;
+};
+
+const pauseTaskScroll = () => {
+  isTaskPaused = true;
+};
+
+const resumeTaskScroll = () => {
+  isTaskPaused = false;
+};
+
+const pauseTableScroll = () => {
+  isTablePaused = true;
+};
+
+const resumeTableScroll = () => {
+  isTablePaused = false;
+};
+
+/* 下级部队作战任务 */
+var teamListData = ref([
+  {
+    teamName: '一团一营',
+    leaderName: '白营长',
+    status: 3,
+    statusTxt: '三级战备',
+  },
+  {
+    teamName: '一团二营',
+    leaderName: '孟营长',
+    status: 2,
+    statusTxt: '二级战备',
+  },
+  {
+    teamName: '一团三营',
+    leaderName: '杜营长',
+    status: 2,
+    statusTxt: '二级战备',
+  },
+  {
+    teamName: '一团四营',
+    leaderName: '李营长',
+    status: 3,
+    statusTxt: '三级战备',
+  },
+  {
+    teamName: '二团一营',
+    leaderName: '张营长',
+    status: 4,  
+    statusTxt: '四级战备',
+  },
+  {
+    teamName: '二团二营',
+    leaderName: '王营长',
+    status: 2,  
+    statusTxt: '二级战备',
+  },
+  {
+    teamName: '二团三营',
+    leaderName: '赵营长',
+    status: 4,  
+    statusTxt: '四级战备',
+  },
+  {
+    teamName: '二团四营',
+    leaderName: '王营长',
+    status: 1,      
+    statusTxt: '一级战备',
+  },
+  {
+    teamName: '二团四营',
+    leaderName: '王营长',
+    status: 4,      
+    statusTxt: '四级战备',
+  },
+])
+
+
+/* 通信指挥 */
 const taskList = ref([
   {
     title: '一团对A区域作战任务',
-    progress: 50,
+    progress: 0,
+    targetProgress: 50,
   },
   {
     title: '一团对B区域作战任务',
-    progress: 30,
+    progress: 0,
+    targetProgress: 30,
   },
   {
     title: '二团对A区域作战任务',
-    progress: 70,
+    progress: 0,
+    targetProgress: 70,
   },
   {
     title: '二团对B区域作战任务',
-    progress: 80,
+    progress: 0,
+    targetProgress: 80,
   },
   {
     title: '二团对C区域作战任务',
-    progress: 90,
+    progress: 0,
+    targetProgress: 90,
+  },
+  {
+    title: '二团对D区域作战任务',
+    progress: 0,
+    targetProgress: 60,
+  },
+  {
+    title: '三团对A区域作战任务',
+    progress: 0,
+    targetProgress: 20,
+  },
+  {
+    title: '三团对B区域作战任务',
+    progress: 0,
+    targetProgress: 10,
   },
 ])
+
+const animateTaskProgress = () => {
+  taskList.value.forEach((task, index) => {
+    gsap.to(task, {
+      progress: task.targetProgress,
+      duration: 2,
+      ease: 'power2.out',
+      delay: index * 0.1,
+      snap: { progress: 1 }
+    })
+  })
+}
+
+
 
 const resourceList = ref([
   {
     title: '弹药',
-    progress: 50,
+    progress: 0,
+    targetProgress: 50,
   },
   {
     title: '能源',
-    progress: 25,
+    progress: 0,
+    targetProgress: 25,
   },
   {
     title: '装备',
-    progress: 13,
+    progress: 0,
+    targetProgress: 13,
   },
   {
     title: '人员',
-    progress: 14,
+    progress: 0,
+    targetProgress: 14,
   },
   {
     title: '后勤物资',
-    progress: 25,
+    progress: 0,
+    targetProgress: 25,
   },
   {
     title: '通信资源',
-    progress: 8,
+    progress: 0,
+    targetProgress: 8,
   },
   {
     title: '作战平台',
-    progress: 7,
+    progress: 0,
+    targetProgress: 7,
   },
   {
     title: '医疗',
-    progress: 13,
+    progress: 0,
+    targetProgress: 13,
   },
 ])
+
+const animateResourceProgress = () => {
+  resourceList.value.forEach((resource, index) => {
+    gsap.to(resource, {
+      progress: resource.targetProgress,
+      duration: 2.5,
+      ease: 'power2.out',
+      delay: index * 0.15 + 1,
+      snap: { progress: 1 }
+    })
+  })
+}
 
 const workData = ref([
   {
     title: '步兵营',
-    value: 20,
+    value: 0,
+    targetValue: 20,
     color: '#318FF9',
   },
   {
     title: '坦克营',
-    value: 10,
+    value: 0,
+    targetValue: 10,
     color: '#AA2FD6',
   },
   {
     title: '通信营',
-    value: 20,
+    value: 0,
+    targetValue: 20,
     color: '#67D62F',
   },
   {
     title: '炮兵营',
-    value: 15,
+    value: 0,
+    targetValue: 15,
     color: '#31F0FD',
   },
   {
     title: '汽车营',
-    value: 10,
+    value: 0,
+    targetValue: 10,
     color: '#8340FF',
   },
   {
     title: '后勤营',
-    value: 10,
+    value: 0,
+    targetValue: 10,
     color: '#E7E7E8',
   },
   {
     title: '飞机营',
-    value: 20,
+    value: 0,
+    targetValue: 20,
     color: '#E2BB31',
   },
   {
     title: '导弹营',
-    value: 2,
+    value: 0,
+    targetValue: 2,
     color: '#E33832',
   },
 ])
+
+const animateWorkData = () => {
+  workData.value.forEach((item, index) => {
+    gsap.to(item, {
+      value: item.targetValue,
+      duration: 1,
+      ease: 'power2.out',
+      delay: index * 0.1,
+      snap: { value: 1 }
+    })
+  })
+}
+
+onMounted(() => {
+  animateTaskProgress()
+  animateResourceProgress()
+  animateWorkData()
+  // 组件挂载后启动滚动动画
+  nextTick(() => {
+    startScrolling();
+  });
+})
+
+onUnmounted(() => {
+  // 组件卸载时取消动画帧
+  if (animationFrameId) {
+    cancelAnimationFrame(animationFrameId);
+  }
+})
 
 defineComponent({
   name: 'DashboardFooter',
@@ -318,7 +603,30 @@ defineComponent({
       .msgInfoCon{
         width: 100%;
         height: 100%;
-        overflow-y: auto;
+        overflow-y: hidden; /* 视觉上隐藏滚动条但保持滚动功能 */
+        position: relative;
+        
+        /* 隐藏不同浏览器的滚动条 */
+        &::-webkit-scrollbar {
+          display: none; /* Chrome, Safari, Opera */
+        }
+        
+        -ms-overflow-style: none;  /* IE 和 Edge */
+        scrollbar-width: none;  /* Firefox */
+        
+        .msgInfoWrapper {
+          width: 100%;
+          display: block;
+          
+          /* 通过复制内容创建无缝滚动 */
+          > .msgInfoItem {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            margin-bottom: px2rem(14);
+          }
+        }
+        
         .msgInfoItem{
           width: 100%;
           display: flex;
@@ -358,15 +666,6 @@ defineComponent({
               color: #B0D8F5;
             }
           }
-          .msgDesc{
-            font-size: px2rem(10);
-            line-height: px2rem(14);
-            color: #fff;
-            opacity: 0.7;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            overflow: hidden;
-          }
         }
       }
     }
@@ -386,7 +685,21 @@ defineComponent({
         height: calc(100% - px2rem(44));
         padding: px2rem(0) px2rem(10);
         box-sizing: border-box;
-        overflow-y: auto;
+        overflow-y: hidden; /* 视觉上隐藏滚动条但保持滚动功能 */
+        position: relative;
+        
+        /* 隐藏不同浏览器的滚动条 */
+        &::-webkit-scrollbar {
+          display: none; /* Chrome, Safari, Opera */
+        }
+        
+        -ms-overflow-style: none;  /* IE 和 Edge */
+        scrollbar-width: none;  /* Firefox */
+        
+        .taskBoxWrapper {
+          width: 100%;
+          display: block;
+        }
         .taskItem{
           width: 100%;
           display: flex;
@@ -651,9 +964,23 @@ defineComponent({
         justify-content: space-between;
       }
       .tableCon{
-        width: 100%;
-        height: calc(100% - px2rem(24));
-        overflow-y: auto;
+          width: 100%;
+          height: calc(100% - px2rem(24));
+          overflow-y: hidden; /* 视觉上隐藏滚动条但保持滚动功能 */
+          position: relative;
+          
+          /* 隐藏不同浏览器的滚动条 */
+          &::-webkit-scrollbar {
+            display: none; /* Chrome, Safari, Opera */
+          }
+          
+          -ms-overflow-style: none;  /* IE 和 Edge */
+          scrollbar-width: none;  /* Firefox */
+          
+          .tableConWrapper {
+            width: 100%;
+            display: block;
+          }
         .tableItem{
           width: 100%;
           height: px2rem(24);

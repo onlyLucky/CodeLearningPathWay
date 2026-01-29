@@ -9,22 +9,59 @@
             <img src="@/assets/images/weather.png" alt="">
             <div class="weatherType">多云</div>
           </div>
-          <p class="weatherInfo">17℃ ~ 24℃</p>
+          <p class="weatherInfo">1℃ ~ 8℃</p>
         </div>
       </div>
       <div class="headerCenter"></div>
       <div class="headerRight">
         <div class="dateString">
-          <p class="date">2023-08-10</p>
-          <p class="dateWeek">星期五</p>
+          <p class="date">{{ currentDate }}</p>
+          <p class="dateWeek">{{ currentWeek }}</p>
         </div>
-        <div class="timeString">16:13:22</div>
+        <div class="timeString">{{ currentTime }}</div>
       </div>
     </div>
   </div>
 </template>
 <script setup lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, ref, onMounted, onUnmounted } from 'vue';
+
+const currentDate = ref('')
+const currentWeek = ref('')
+const currentTime = ref('')
+let timer: number | null = null
+
+const updateTime = () => {
+  const now = new Date()
+  
+  const year = now.getFullYear()
+  const month = String(now.getMonth() + 1).padStart(2, '0')
+  const day = String(now.getDate()).padStart(2, '0')
+  
+  const weekDays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六']
+  const week = weekDays[now.getDay()]
+  
+  const hours = String(now.getHours()).padStart(2, '0')
+  const minutes = String(now.getMinutes()).padStart(2, '0')
+  const seconds = String(now.getSeconds()).padStart(2, '0')
+  
+  currentDate.value = `${year}-${month}-${day}`
+  currentWeek.value = week
+  currentTime.value = `${hours}:${minutes}:${seconds}`
+}
+
+onMounted(() => {
+  updateTime()
+  timer = window.setInterval(updateTime, 1000)
+})
+
+onUnmounted(() => {
+  if (timer) {
+    // eslint-disable-next-line no-undef
+    clearInterval(timer)
+    timer = null
+  }
+})
 
 defineComponent({
   name: 'DashboardHeader',

@@ -1,5 +1,5 @@
 <template>
-  <div class="charPolar" ref="chartRef"></div>
+  <div class="charArea" ref="chartRef"></div>
 </template>
 <script setup>
 import * as echarts from "echarts";
@@ -13,6 +13,10 @@ const props = defineProps({
     type: Array,
     default: ()=>[]
   },
+  titles: {
+    type: Array,
+    default: ()=>[]
+  }
 });
 
 // 初始化图表
@@ -36,53 +40,73 @@ const updateChart = ()=>{
   if (!chartInstance) return;
   var dataArr = []
   var titleArr = []
-  var colorArr = []
   props.data.map(item => {
     dataArr.push(item.value)
     titleArr.push(item.title)
-    colorArr.push(item.color)
   });
 
   const option = {
-    /* title: [
-      {
-        text: 'Tangential Polar Bar Label Position (middle)'
+    backgroundColor:'',
+    tooltip: {
+      trigger: 'axis',
+      axisPointer: {
+        type: 'cross'
       }
-    ], */
-    polar: {
-      radius: [2, '94%']
     },
-    angleAxis: {
-      show:false,
-      max: 30,
-      startAngle: 75
+    textStyle: {
+      color: '#99B3C8'
     },
-    radiusAxis: {
-      show:false,
+    xAxis: {
       type: 'category',
-      data: titleArr
-    },
-    tooltip: {},
-    series: {
-      type: 'bar',
-      roundCap: true,
-      data: dataArr,
-      barCategoryGap: 1,
-      colorBy: "data",
-      color: colorArr,
-      coordinateSystem: 'polar',
-      showBackground: true,
-      label: {
-        show: false,
-        position: 'middle',
-        formatter: '{b}: {c}'
+      boundaryGap: true,
+      data: props.titles,
+      axisLine:{
+        lineStyle:{
+          color: "#99B3C8"
+        }
       },
-      animation: true,
-      animationDuration: 2000,
-      animationEasing: 'cubicOut',
-      animationDelay: function (idx) {
-        return idx * 100
+    },
+    yAxis: {
+      type: 'value',
+      axisTick: {
+        lineStyle: {
+          
+        }
+      },
+      splitLine: {
+        lineStyle:{
+          color: "#99B3C8",
+          opacity: 0.5,
+          type: "dashed",
+        }
       }
+    },
+    series: [
+      {
+        data: props.data,
+        type: 'line',
+        itemStyle: {
+          color: '#3F91D8'
+        },
+        areaStyle: {
+          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+            {
+              offset: 0,
+              color: 'rgba(10, 71, 118, 0.71)'
+            },
+            {
+              offset: 1,
+              color: 'rgba(10, 71, 118, 0)'
+            }
+          ])
+        },
+      }
+    ],
+    grid: {
+      left: '40px',
+      right: '20px',
+      top: '20px',
+      bottom: '20px'
     }
   }
 
@@ -107,10 +131,10 @@ onUnmounted(() => {
 </script>
 
 <style scoped lang="scss">
-.charPolar {
+.charArea {
   width: 100%;
   height: 100%;
-  min-width: px2rem(130);
-  min-height: px2rem(130);
+  min-width: px2rem(260);
+  min-height: px2rem(160);
 }
 </style>
