@@ -12,7 +12,6 @@
     "typecheck": "vue-tsc --noEmit"
   },
   "dependencies": {
-    "@xylink/xy-rtc-sdk": "^4.0.7",
     "axios": "^1.6.5",
     "d3": "^7.9.0",
     "echarts": "^5.5.0",
