@@ -1,0 +1,63 @@
+@import '@/assets/style/var.scss';
+
+.meeting-header {
+  height: 36px;
+  width: 100%;
+  text-align: center;
+  color: #e7e7e7;
+  background: $toolbar-bg-color;
+  font-size: 12px;
+  z-index: 10;
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 0 6px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all 0.5s linear;
+
+  .header-time {
+    /* position: absolute; 
+    left: 20px; */
+    display: flex;
+    align-items: center;
+
+    cursor: pointer;
+  }
+
+  .meeting-stats-switch {
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+    fill: #86b952;
+    position: relative;
+    top: -1px;
+  }
+  .online {
+    fill: #86b952;
+  }
+  .offline {
+    fill: #fff;
+  }
+
+  .header-count {
+    cursor: default;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .el-icon-warning-outline {
+    transform: rotateZ(180deg);
+  }
+}
+
+.header-name {
+  margin-right: 10px;
+  max-width: 200px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}

@@ -8,7 +8,7 @@
 // 导入地图地理数据
 import mapGeoFullData from '@/assets/data/map/330000_full.json'
 import mapGeoData from '@/assets/data/map/330000.json'
-import textJpg from "@/assets/images/pic.jpg"
+import _textJpg from "@/assets/images/pic.jpg"
 import textScreen from "@/assets/images/screen.png"
 // 导入Vue组合式API
 import { ref, onMounted, onBeforeUnmount } from 'vue'
@@ -20,7 +20,7 @@ import * as d3 from 'd3'
 import { gsap } from 'gsap'
 // 导入轨道控制器
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
-import { calculateGeoJsonCenter,getGeoJsonDimensionsScaled, type GeoJSON } from '@/utils/genJson'
+import { calculateGeoJsonCenter, type GeoJSON } from '@/utils/genJson'
 
 // 地图容器DOM引用
 const mapContainer = ref<HTMLDivElement>()

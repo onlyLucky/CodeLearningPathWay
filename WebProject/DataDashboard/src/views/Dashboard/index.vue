@@ -4,7 +4,7 @@
     <div class="dashboardCon">
       <div class="conBox">
         <div class="dashboardCenter">
-          <CenterLeft></CenterLeft>
+          <CenterLeft ref="centerLeftRef"></CenterLeft>
           <div class="MapCon">
             <MapComps></MapComps>
             <div class="topTab">
@@ -65,7 +65,20 @@ import DashboardHeader from './comps/Header.vue'
 import CenterLeft from './comps/CenterLeft.vue'
 import CenterRight from './comps/CenterRight.vue'
 
-import { defineComponent, ref } from 'vue';
+import { defineComponent, ref, provide } from 'vue';
+
+// 创建一个引用，用于访问 CenterLeft 组件实例
+const centerLeftRef = ref();
+
+// 提供一个方法给子组件使用
+const triggerSendMessageToIframe = (message: any) => {
+  console.log(message)
+  if (centerLeftRef.value && typeof centerLeftRef.value.sendMessageToIframe === 'function') {
+    centerLeftRef.value.sendMessageToIframe(message);
+  }
+};
+
+provide('triggerSendMessageToIframe', triggerSendMessageToIframe);
 
 const teamTabCurrent = ref(0)
 const teamTab = ref([
@@ -118,6 +131,8 @@ const bottomTab = ref([
     name: "决策辅助"
   }
 ]);
+
+
 
 defineComponent({
   components: {

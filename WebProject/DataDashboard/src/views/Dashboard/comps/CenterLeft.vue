@@ -4,22 +4,30 @@
     <div class="dashboardTitle">
       <div class="titleName">指挥部</div>
     </div>
-    <div class="videoList">
-      <div class="videoItem" v-for="item in videoList" :key="item.name">
+    <div class="videoListBox" id="container" >
+      <div v-if="isLoading" class="loading-overlay">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">正在加载视频会议...</div>
+      </div>
+      <iframe v-show="!isLoading && isInMeeting" src="/xyLink/index.html" ref="iframeRef" frameborder="0" allowfullscreen @load="onLoad" @error="onError"></iframe>
+      <div class="videoItem" v-show="!isInMeeting" v-for="item in videoList" :key="item.name">
         <div class="videoCon">
           <img :src="item.img" alt="">
         </div>
         <div class="videoName">{{item.name}}</div>
         <div class="callBtn">发起呼叫</div>
       </div>
-      
     </div>
+    
   </div>
 </template>
 
 <script setup lang="ts">
-import { defineComponent, ref } from 'vue';
+import Message from '@/utils/message';
+import { defineComponent, onMounted, ref } from 'vue';
 
+const iframeRef = ref(null)
+const isLoading = ref(true)
 const videoList = ref([
   {
     name: '一团一营',
@@ -90,6 +98,43 @@ const videoList = ref([
   },
 ])
 
+// iframe 加载完成回调
+const onLoad = ()=>{
+  // iframe 加载完成后隐藏 loading
+  setTimeout(()=>{
+    isLoading.value = false;
+  },3000)
+  console.log('视频会议 iframe 加载完成');
+}
+
+// 处理 iframe 加载错误
+const onError = () => {
+  isLoading.value = false;
+  Message({ message: '视频会议加载失败，请稍后重试', type: 'error' });
+  console.error('视频会议 iframe 加载失败');
+}
+
+let isInMeeting = ref(true);
+const sendMessageToIframe = (message: any) => {
+  if (iframeRef.value) {
+    if(message.type === 'startMeet'){
+      isInMeeting.value = true;
+    }
+    if(message.type === 'stopMeet'){
+      isInMeeting.value = false;
+    }
+    (iframeRef.value as any).contentWindow!.postMessage(message, '*');
+  }
+}
+
+// 暴露方法给父组件
+defineExpose({
+  sendMessageToIframe
+})
+
+onMounted(()=>{
+})
+
 defineComponent({
   name: 'CenterLeft',
 })
@@ -116,13 +161,18 @@ defineComponent({
       text-shadow: 0 px2rem(4) px2rem(16)  #3F91D8;
     }
   }
-  .videoList{
+  .videoListBox{
     width: 100%;
     height: calc(100% - px2rem(44));
     display: flex;
     flex-wrap: wrap;
     align-content: flex-start;
     overflow-y: auto;
+    position: relative;
+    iframe{
+      width: 100%;
+      height: 100%;
+    }
 
     .videoItem{
       width: calc((100% - px2rem(8))/2);
@@ -168,9 +218,42 @@ defineComponent({
         background-color: rgba(11, 32, 67, 0.9);
       }
     }
-    .videoItem:nth-child(2n){ 
+    .videoItem:nth-child(2n+1){ 
       margin-right: 0;
     }
+  }
+  .loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 10;
+  }
+  
+  .loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-top: 4px solid #B0D8F5;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  
+  .loading-text {
+    margin-top: 16px;
+    color: #B0D8F5;
+    font-size: 14px;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
   }
 }
 </style>

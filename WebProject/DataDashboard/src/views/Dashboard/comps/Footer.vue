@@ -160,13 +160,14 @@
         </div>
       </div>
       <div class="right_bottom">
-        <div class="rb_Btn">联合指挥</div>
+        <div class="rb_Btn btn01" v-if="!isInMeeting" @click="goUnitVideo">联合指挥</div>
+        <div class="rb_Btn btn02" v-else @click="cancelUnitVideo">取消指挥</div>
       </div>
     </div>
   </div>
 </template>
 <script setup lang="ts">
-import { defineComponent, ref, onMounted, onUnmounted, nextTick, reactive } from 'vue';
+import { defineComponent, ref, onMounted, onUnmounted, nextTick, inject} from 'vue';
 import { gsap } from 'gsap';
 import CircleProgress from '@/components/CircleProgress.vue';
 import PolarBarChart from '@/components/PolarBarChart.vue';
@@ -561,6 +562,25 @@ const animateWorkData = () => {
       snap: { value: 1 }
     })
   })
+}
+
+// 注入父组件提供的方法
+const triggerSendMessageToIframe = inject('triggerSendMessageToIframe');
+
+let isInMeeting = ref(true);
+const goUnitVideo = ()=>{
+  // 触发 CenterLeft 组件中的 sendMessageToIframe 函数
+  if (triggerSendMessageToIframe) {
+    isInMeeting.value = true;
+    (triggerSendMessageToIframe as Function)({type: 'startMeet'});
+  }
+}
+const cancelUnitVideo = ()=>{
+  // 触发 CenterLeft 组件中的 sendMessageToIframe 函数
+  if (triggerSendMessageToIframe) {
+    isInMeeting.value = false;
+    (triggerSendMessageToIframe as Function)({type: 'stopMeet'});
+  }
 }
 
 onMounted(() => {
@@ -1037,6 +1057,13 @@ defineComponent({
         color: #fff;
         text-align: center;
         margin-top: px2rem(18);
+        cursor: pointer;
+      }
+      .btn01{
+        background-color: #006FFF;
+      }
+      .btn02{
+        background-color: #FF2F00;
       }
     }
   }
