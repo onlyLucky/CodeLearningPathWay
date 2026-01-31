@@ -25,76 +25,88 @@
 <script setup lang="ts">
 import Message from '@/utils/message';
 import { defineComponent, onMounted, ref } from 'vue';
+import v01 from '@/assets/images/v01.png'
+import v02 from '@/assets/images/v02.png'
+import v03 from '@/assets/images/v03.png'
+import v04 from '@/assets/images/v04.png'
+import v05 from '@/assets/images/v05.png'
+import v06 from '@/assets/images/v06.png'
+import v07 from '@/assets/images/v07.png'
+import v08 from '@/assets/images/v08.png'
+import v09 from '@/assets/images/v09.png'
+import v10 from '@/assets/images/v10.png'
+import v11 from '@/assets/images/v11.png'
+import v12 from '@/assets/images/v12.png'
 
 const iframeRef = ref(null)
 const isLoading = ref(true)
 const videoList = ref([
   {
     name: '一团一营',
-    img: 'https://img.js.design/assets/img/696af0820aebe8c71f879e26.png#10403c7229bc59e49a02a54d2d839e95',
+    img: v01,
   },
   {
     name: '一团二营',
-    img: 'https://img.js.design/assets/img/696af0890aebe8c71f879e90.png#25f84979980449e085754bc21004afb1',
+    img: v02,
   },
   {
     name: '一团三营',
-    img: 'https://img.js.design/assets/img/696af0910aebe8c71f879ed6.png#b8f153aa9a8ab5b5c84626c729655295',
+    img: v03,
   },
   {
     name: '一团四营',
-    img: 'https://img.js.design/assets/img/696af09981a6de7b918527a1.png#b7de9d5b523e7a6b5d0d163014279c0a',
+    img: v04,
   },
 
   {
     name: '二团一营',
-    img: 'https://img.js.design/assets/img/696af0a4d7769eec3e592b65.png#75436ac2ef375cb853a79aeb1310c2e7',
+    img: v05,
   },
   {
     name: '二团二营',
-    img: 'https://img.js.design/assets/img/696af0ba0aebe8c71f87a143.png#0ec9a6335e62f3fd49c5ff9053009d13',
+    img: v06,
   },
   {
     name: '二团三营',
-    img: 'https://img.js.design/assets/img/696af0c2b5e8b987e59c6c34.png#3ad0afe7f8ad41ccf2057850f8184471',
+    img: v07,
   },
   {
     name: '二团四营',
-    img: 'https://img.js.design/assets/img/696af0cabd7f77749ab5663c.png#c9fd292b5bea5cec57c712169f25a482',
+    img: v08,
   },
 
   {
     name: '三团一营',
-    img: 'https://img.js.design/assets/img/696af0d0053c4e58a768222d.png#80c41b7d0558b0606b5c5b07642d7d29',
+    img: v09,
   },
   {
     name: '三团二营',
-    img: 'https://img.js.design/assets/img/696af0d981a6de7b91852d8e.png#fa752c2d4147a47fe1f747bad99aa478',
+    img: v10,
   },
   {
     name: '三团三营',
-    img: 'https://img.js.design/assets/img/696af0e3d7769eec3e592e6d.png#69897ff8e5a9d32f9c8ff0536e411c9e',
+    img: v11,
   },
   {
     name: '三团四营',
-    img: 'https://img.js.design/assets/img/696af0efbd7f77749ab566ff.png#0266f5efaea321c018e023723f037cec',
+    img: v12,
   },
 
   {
     name: '四团一营',
-    img: 'https://img.js.design/assets/img/696af0cabd7f77749ab5663c.png#c9fd292b5bea5cec57c712169f25a482',
+    img: v08,
   },
   {
     name: '四团二营',
-    img: 'https://img.js.design/assets/img/696af0820aebe8c71f879e26.png#10403c7229bc59e49a02a54d2d839e95',
+    img: v01,
   },
   {
     name: '四团三营',
-    img: 'https://img.js.design/assets/img/696af0a4d7769eec3e592b65.png#75436ac2ef375cb853a79aeb1310c2e7',
+    img: v05,
   },
   {
     name: '四团四营',
-    img: 'https://img.js.design/assets/img/696af0910aebe8c71f879ed6.png#b8f153aa9a8ab5b5c84626c729655295',
+    img: v03,
   },
 ])
 
@@ -114,7 +126,7 @@ const onError = () => {
   console.error('视频会议 iframe 加载失败');
 }
 
-let isInMeeting = ref(true);
+let isInMeeting = ref(false);
 const sendMessageToIframe = (message: any) => {
   if (iframeRef.value) {
     if(message.type === 'startMeet'){
@@ -169,6 +181,12 @@ defineComponent({
     align-content: flex-start;
     overflow-y: auto;
     position: relative;
+    &::-webkit-scrollbar {
+      display: none; /* Chrome, Safari, Opera */
+    }
+    
+    -ms-overflow-style: none;  /* IE 和 Edge */
+    scrollbar-width: none;  /* Firefox */
     iframe{
       width: 100%;
       height: 100%;

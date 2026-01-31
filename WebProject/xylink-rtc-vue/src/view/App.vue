@@ -233,7 +233,7 @@ export default {
     VideoButton,
     AudioButton,
     PromptInfo,
-    MeetingHeader,
+    //MeetingHeader,
   },
   computed: {
     layoutStyle() {
@@ -349,7 +349,7 @@ export default {
   mounted(){
     // 暴露全局函数
     // 进入视频会议
-    this.submitForm()
+    // this.submitForm()
     var thisObj = this
     window.addEventListener('message', (e)=>{
       /* if (e.data.type === 'VUE2_EVENT') {
@@ -1770,8 +1770,14 @@ export default {
   z-index: 1;
   overflow: auto;
   align-content: flex-start;
+  &::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+  }
+  
+  -ms-overflow-style: none;  /* IE 和 Edge */
+  scrollbar-width: none;  /* Firefox */
 }
-.videoList::-webkit-scrollbar {
+/* .videoList::-webkit-scrollbar {
   width: 10px;
   height: 10px;
   border-radius: 10px;
@@ -1781,5 +1787,5 @@ export default {
   border-radius: 10px;
   background-color: rgba(153, 155, 157, 0.5);
   box-shadow: none;
-}
+} */
 </style>

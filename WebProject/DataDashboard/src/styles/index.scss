@@ -24,3 +24,11 @@ html, body {
   margin: 0;
   padding: 0;
 }
+.videoList{
+  &::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+  }
+  
+  -ms-overflow-style: none;  /* IE 和 Edge */
+  scrollbar-width: none;  /* Firefox */
+}

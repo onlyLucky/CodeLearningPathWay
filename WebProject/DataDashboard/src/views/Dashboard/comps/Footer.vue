@@ -567,7 +567,7 @@ const animateWorkData = () => {
 // 注入父组件提供的方法
 const triggerSendMessageToIframe = inject('triggerSendMessageToIframe');
 
-let isInMeeting = ref(true);
+let isInMeeting = ref(false);
 const goUnitVideo = ()=>{
   // 触发 CenterLeft 组件中的 sendMessageToIframe 函数
   if (triggerSendMessageToIframe) {

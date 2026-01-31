@@ -12,12 +12,13 @@
         </div>
         <!-- 监控画面 -->
         <div class="monitorScreen">
-          <div class="monitorItem" v-for="(item,index) in monitorList" :key="index">
+          <div class="monitorItem" v-for="(item,index) in monitorList" :key="index" @click="tapMonitor(index)">
             <p class="monitorTitle">{{item.title}}</p>
             <div class="monitorCon">
               <img :src="item.img" alt="">
             </div>
           </div>
+          
         </div>
       </div>
       <!-- 数据统计 -->
@@ -99,7 +100,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineComponent, ref, onMounted, onUnmounted } from 'vue';
+import { defineComponent, ref, onMounted, onUnmounted, inject } from 'vue';
 import { gsap } from 'gsap';
 import GradientGridProgress from '@/components/GradientGridProgress.vue'
 import AreaChart from '@/components/AreaChart.vue'
@@ -115,6 +116,15 @@ const monitorList = ref([
     img: 'https://img.js.design/assets/img/6968a8b5d7769eec3e3493fd.png#97b30edc9dcf2f6f8176dda7cbe328f0',
   },
 ])
+
+// 注入父组件提供的方法
+const triggerChangeMonitorIndex = inject('triggerChangeMonitorIndex');
+
+const tapMonitor = (index: number) => {
+  if(triggerChangeMonitorIndex){
+    (triggerChangeMonitorIndex as Function)(index)
+  }
+}
 
 /* 攻防转换率 */
 const attackDefenseRatio = ref(40)
@@ -273,6 +283,7 @@ defineComponent({
         display: flex;
         flex-wrap: wrap;
         align-content: flex-start;
+        position: relative;
         .monitorItem{
           width: calc((100% - px2rem(8))/2);
           height: px2rem(90);
@@ -280,6 +291,7 @@ defineComponent({
           background-color: rgba(22, 75, 118, 0.3);
           padding: px2rem(6);
           box-sizing: border-box;
+          cursor: pointer;
           .monitorTitle{
             font-size: px2rem(10);
             line-height: px2rem(14);

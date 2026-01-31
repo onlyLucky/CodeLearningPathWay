@@ -48,6 +48,124 @@
                 <p class="tabTitle">{{item.name}}</p>
               </div>
             </div>
+            <!-- 详情 -->
+            <div class="monitorDiv" v-if="isShowMonitor">
+              <div class="monitorMask" @click="onCloseMonitor"></div>
+              <div class="monitorDetail" v-show="monitorIndex==index" v-for="(item,index) in monitorDetails" :key="index">
+                <div class="mDetailTitle">
+                  <p>{{item.name}}详情</p>
+                </div>
+                <div class="mDetailInfoBox">
+                  <div class="mDetailInfoItem">
+                    <div class="itemTitle">
+                      基础信息
+                    </div> 
+                    <div class="detailValue">
+                      <div class="valueItem">
+                        <p class="itemValue">{{item.baseInfo.type}}</p>
+                        <p class="itemLabel">兵种</p>
+                      </div>
+                      <div class="valueItem">
+                        <p class="itemValue">{{item.baseInfo.progress}}<span class="unit">%</span></p>
+                        <p class="itemLabel">任务进度</p>
+                      </div>
+                      <div class="valueItem">
+                        <p class="itemValue">{{item.baseInfo.count}}<span class="unit">人</span></p>
+                        <p class="itemLabel">步兵人数</p>
+                      </div>
+                      <div class="valueItem">
+                        <p class="itemValue">{{item.baseInfo.deadNum}}<span class="unit">人</span></p>
+                        <p class="itemLabel">阵亡人数</p>
+                      </div>
+                      <div class="valueItem">
+                        <p class="itemValue">{{item.baseInfo.sourceNum}}<span class="unit">%</span></p>
+                        <p class="itemLabel">资源消耗</p>
+                      </div>
+                      <div class="valueItem">
+                        <p class="itemValue">{{item.baseInfo.supplyNum}}<span class="unit">辆</span></p>
+                        <p class="itemLabel">补给车</p>
+                      </div>
+                      <div class="valueItem">
+                        <p class="itemValue">{{item.baseInfo.doctorNum}}<span class="unit">人</span></p>
+                        <p class="itemLabel">队医</p>
+                      </div>
+                      <div class="valueItem">
+                        <p class="itemValue">{{item.baseInfo.speed}}<span class="unit">km/h</span></p>
+                        <p class="itemLabel">机动速度</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="mDetailInfoItem">
+                    <div class="itemTitle">
+                      其它信息
+                    </div>
+                    <div class="otherInfoBox">
+                      <div class="otherLeftBox">
+                        <div class="otherItem">
+                          <p class="otherLabel">地理位置：</p>
+                          <p class="otherValue">{{item.otherInfo.location}}</p>
+                        </div>
+                        <div class="otherItem">
+                          <p class="otherLabel">营长：</p>
+                          <p class="otherValue">{{item.otherInfo.position}}</p>
+                        </div>
+                        <div class="otherItem">
+                          <p class="otherLabel">战备状态：</p>
+                          <p class="otherValue" :class="`status${item.otherInfo.status}`">{{item.otherInfo.statusTxt}}</p>
+                        </div>
+                        <div class="otherItem">
+                          <p class="otherLabel">弹药储备：</p>
+                          <p class="otherValue" :class="`status${item.otherInfo.store}`">{{item.otherInfo.storeTxt}}</p>
+                        </div>
+                      </div>
+                      <div class="otherRightBox">
+                        <div class="otherItem">
+                          <p class="otherLabel">累计演练：</p>
+                          <p class="otherValue">{{item.otherInfo.workTime}}h</p>
+                        </div>
+                        <div class="otherItem">
+                          <p class="otherLabel">后勤保障：</p>
+                          <p class="otherValue">{{item.otherInfo.desc1}}</p>
+                        </div>
+                        <div class="otherItem">
+                          <p class="otherLabel">作战能力：</p>
+                          <p class="otherValue">{{item.otherInfo.desc2}}</p>
+                        </div>
+                        <div class="otherItem">
+                          <p class="otherLabel">生存能力：</p>
+                          <p class="otherValue">{{item.otherInfo.desc3}}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="mDetailInfoItem">
+                    <div class="itemTitle">
+                      当前任务
+                    </div>
+                    <div class="workListBox">
+                      <div class="workItem">
+                        <h3>一、完成对A目标区域的打击</h3>
+                        <div class="workInfo">
+                          <div class="otherItem">
+                            <p class="otherLabel">任务状态：</p>
+                            <p class="otherValue status0">进攻中</p>
+                          </div>
+                          <div class="otherItem">
+                            <p class="otherLabel">任务进度：</p>
+                            <p class="otherValue">10%</p>
+                          </div>
+                          <div class="otherItem">
+                            <p class="otherLabel">任务描述：</p>
+                            <p class="otherValue">配合其他营完成对A目标区域的占领</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </div>
           </div>
           <CenterRight></CenterRight>
         </div>
@@ -64,6 +182,7 @@ import DashboardFooter from './comps/Footer.vue'
 import DashboardHeader from './comps/Header.vue'
 import CenterLeft from './comps/CenterLeft.vue'
 import CenterRight from './comps/CenterRight.vue'
+import gsap from 'gsap'
 
 import { defineComponent, ref, provide } from 'vue';
 
@@ -132,7 +251,222 @@ const bottomTab = ref([
   }
 ]);
 
+var isShowMonitor = ref(false)
+var monitorIndex = ref(0)
+const monitorData = [
+  {
+    name: "二团四营",
+    baseInfo: {
+      type: '步兵',
+      progress: 0,
+      targetProgress: 33,
+      count: 0,
+      targetCount: 200,
+      deadNum: 0,
+      targetDeadNum: 20,
+      sourceNum: 0,
+      targetSourceNum: 20,
+      supplyNum: 0,
+      targetSupplyNum: 20,
+      doctorNum: 0,
+      targetDoctorNum: 2,
+      speed: 0,
+      targetSpeed: 30,
+    },
+    otherInfo: {
+      location: "A1001-1区域",
+      position: "白居易",
+      workTime: 1320,
+      status: 1,
+      statusTxt: "紧急",
+      store: 0,
+      storeTxt: "充足",
+      desc1: "日供餐300人、卫生员10人、救护车2辆",
+      desc2: "可承担主攻任务",
+      desc3: "单兵防护装备配发率100%",
+    },
+    workList: [
+      {
+        title: "一、完成对A目标区域的打击",
+        status: 0,
+        statusTxt: "进攻中",
+        progress: 0,
+        targetProgress: 10,
+        desc: "配合其他营完成对A目标区域的占领"
+      },
+      {
+        title: "二、完成对A目标区域的物资打扫",
+        status: 2,
+        statusTxt: "未开始",
+        progress: 0,
+        targetProgress: 0,
+        desc: "配合其他营完成对A目标区域的物资打扫工作"
+      }
+    ]
+  },
+  {
+    name: "一团三营",
+    baseInfo: {
+      type: '步兵',
+      progress: 0,
+      targetProgress: 33,
+      count: 0,
+      targetCount: 200,
+      deadNum: 0,
+      targetDeadNum: 20,
+      sourceNum: 0,
+      targetSourceNum: 20,
+      supplyNum: 0,
+      targetSupplyNum: 20,
+      doctorNum: 0,
+      targetDoctorNum: 2,
+      speed: 0,
+      targetSpeed: 30,
+    },
+    otherInfo: {
+      location: "A1001-1区域",
+      position: "白居易",
+      workTime: 1320,
+      status: 1,
+      statusTxt: "紧急",
+      store: 0,
+      storeTxt: "充足",
+      desc1: "日供餐300人、卫生员10人、救护车2辆",
+      desc2: "可承担主攻任务",
+      desc3: "单兵防护装备配发率100%",
+    },
+    workList: [
+      {
+        title: "一、完成对A目标区域的打击",
+        status: 0,
+        statusTxt: "进攻中",
+        progress: 0,
+        targetProgress: 10,
+        desc: "配合其他营完成对A目标区域的占领"
+      },
+      {
+        title: "二、完成对A目标区域的物资打扫",
+        status: 2,
+        statusTxt: "未开始",
+        progress: 0,
+        targetProgress: 0,
+        desc: "配合其他营完成对A目标区域的物资打扫工作"
+      }
+    ]
+  },
+]
+var monitorDetails = ref<any[]>([])
+monitorDetails.value = monitorData
 
+const onCloseMonitor = ()=>{
+  monitorDetails.value = monitorData
+  isShowMonitor.value = false
+}
+
+const updataMonitorAnimate = ()=>{
+  // 为当前显示的监控详情中的所有基础信息字段添加动画
+  const currentDetail = monitorDetails.value[monitorIndex.value];
+  if (currentDetail) {
+    // 为进度字段添加动画
+    gsap.to(currentDetail.baseInfo, {
+      progress: currentDetail.baseInfo.targetProgress,
+      duration: 2,
+      ease: 'power2.out',
+      onUpdate: () => {
+        // 确保数值保留适当的小数位
+        currentDetail.baseInfo.progress = Math.round(currentDetail.baseInfo.progress);
+      }
+    });
+
+    // 为其他数值字段也添加动画
+    gsap.to(currentDetail.baseInfo, {
+      count: currentDetail.baseInfo.targetCount,
+      duration: 2,
+      delay: 0.1,
+      ease: 'power2.out',
+      onUpdate: () => {
+        currentDetail.baseInfo.count = Math.round(currentDetail.baseInfo.count);
+      }
+    });
+
+    gsap.to(currentDetail.baseInfo, {
+      deadNum: currentDetail.baseInfo.targetDeadNum,
+      duration: 2,
+      delay: 0.15,
+      ease: 'power2.out',
+      snap: { value: 1 },
+      onUpdate: () => {
+        currentDetail.baseInfo.deadNum = Math.round(currentDetail.baseInfo.deadNum);
+      }
+    });
+
+    gsap.to(currentDetail.baseInfo, {
+      sourceNum: currentDetail.baseInfo.targetSourceNum,
+      duration: 2,
+      delay: 0.2,
+      ease: 'power2.out',
+      onUpdate: () => {
+        currentDetail.baseInfo.sourceNum = Math.round(currentDetail.baseInfo.sourceNum);
+      }
+    });
+
+    gsap.to(currentDetail.baseInfo, {
+      supplyNum: currentDetail.baseInfo.targetSupplyNum,
+      duration: 2,
+      delay: 0.25,
+      ease: 'power2.out',
+      onUpdate: () => {
+        currentDetail.baseInfo.supplyNum = Math.round(currentDetail.baseInfo.supplyNum);
+      }
+    });
+
+    gsap.to(currentDetail.baseInfo, {
+      doctorNum: currentDetail.baseInfo.targetDoctorNum,
+      duration: 2,
+      delay: 0.3,
+      ease: 'power2.out',
+      onUpdate: () => {
+        currentDetail.baseInfo.doctorNum = Math.round(currentDetail.baseInfo.doctorNum);
+      }
+    });
+
+    gsap.to(currentDetail.baseInfo, {
+      speed: currentDetail.baseInfo.targetSpeed,
+      duration: 2,
+      delay: 0.35,
+      ease: 'power2.out',
+      onUpdate: () => {
+        currentDetail.baseInfo.speed = Math.round(currentDetail.baseInfo.doctorNum);
+      }
+    });
+
+    // 为工作列表中的任务进度也添加动画
+    if (currentDetail.workList && Array.isArray(currentDetail.workList)) {
+      currentDetail.workList.forEach((workItem: any, index: number) => {
+        if (typeof workItem.targetProgress !== 'undefined') {
+          gsap.to(workItem, {
+            progress: workItem.targetProgress,
+            duration: 2,
+            delay: 0.4 + (index * 0.1),
+            ease: 'power2.out',
+            onUpdate: () => {
+              workItem.progress = Math.round(workItem.progress);
+            }
+          });
+        }
+      });
+    }
+  }
+};
+
+
+const triggerChangeMonitorIndex = (index: number) => {
+  monitorIndex.value = index
+  isShowMonitor.value = true
+  updataMonitorAnimate()
+};
+
+provide('triggerChangeMonitorIndex', triggerChangeMonitorIndex);
 
 defineComponent({
   components: {
@@ -365,6 +699,202 @@ defineComponent({
               }
             }
           }
+          .monitorDiv{
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+            .monitorMask{
+              position: absolute;
+              top: 0;
+              left: 0;
+              width: 100%;
+              height: 100%;
+              background-color: transparent;
+            }
+            .monitorDetail{
+              position: absolute;
+              top: px2rem(135);
+              right: px2rem(360);
+              width: px2rem(410);
+              height: px2rem(480);
+              background: url("@/assets/images/detailConBg.png") no-repeat center center;
+              background-size: cover;
+              .mDetailTitle{
+                width: px2rem(120);
+                height: px2rem(30);
+                padding: px2rem(0) px2rem(10);
+                box-sizing: border-box;
+                font-size: px2rem(14);
+                line-height: px2rem(18);
+                font-weight: bolder;
+                font-style: italic;
+                text-shadow: 0 px2rem(2) 0  #000817;
+                background: url("@/assets/images/detailTitleBg.png") no-repeat center center;
+                background-size: cover;
+                color: #fff;
+                position: absolute;
+                top: 0;
+                left: 0;
+                display: flex;
+                align-items: center;
+                justify-content: flex-start;
+              }
+              .mDetailInfoBox{
+                width: 100%;
+                height: 100%;
+                padding: px2rem(48) px2rem(16) px2rem(16) px2rem(16);
+                box-sizing: border-box;
+                overflow-y: auto;
+                .mDetailInfoItem{
+                  width: 100%;
+                  height: auto;
+                  margin-bottom: px2rem(16);
+                  .itemTitle{
+                    width: 100%;
+                    height: px2rem(18);
+                    font-size: px2rem(12);
+                    line-height: px2rem(18);
+                    font-weight: 500;
+                    margin-bottom: px2rem(8);
+                    color: #fff;
+                    position: relative;
+                    padding-left: px2rem(6);
+                    &::before{
+                      content: '';
+                      display: inline-block;
+                      width: px2rem(2);
+                      height: px2rem(12);
+                      background: #09DFEB;
+                      position: absolute;
+                      top: px2rem(2);
+                      left: px2rem(0);
+                    }
+                  }
+                  .detailValue{
+                    width: 100%;
+                    height: px2rem(40);
+                    font-size: px2rem(12);
+                    line-height: px2rem(18);
+                    font-weight: bold;
+                    color: #fff;
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    flex-wrap: nowrap;
+                    overflow: hidden;
+                    .valueItem{
+                      width: px2rem(40);
+                      height: px2rem(40);
+                      display: flex;
+                      flex-direction: column;
+                      align-items: center;
+                      justify-content: center;
+                      background: rgba(255,255,255,0.05);
+                      .itemValue{
+                        font-size: px2rem(10);
+                        line-height: px2rem(14);
+                        font-weight: 500;
+                        color: #fff;
+                        .unit{
+                          display: inline-block;
+                          font-size: px2rem(6);
+                          line-height: px2rem(14);
+                          margin-left: px2rem(2);
+                        }
+                      }
+                      .itemLabel{
+                        font-size: px2rem(8);
+                        line-height: px2rem(12);
+                        color: rgba(255,255,255,0.5);
+                      }
+                    }
+                  }
+                  .otherInfoBox{
+                    width: 100%;
+                    height: auto;
+                    display: flex;
+                    flex-wrap: wrap;
+                    align-items: center;
+                    .otherLeftBox{
+                      width: px2rem(120);
+                      height: auto;
+                      margin-right: px2rem(10);
+                    }
+                    .otherRightBox{
+                      width: calc(100% - px2rem(130));
+                      height: auto;
+                    }
+                  }
+                  .workListBox{
+                    width: 100%;
+                    height: auto;
+                    .workItem{
+                      width: 100%;
+                      height: auto;
+                      margin-bottom: px2rem(14);
+                      h3{
+                        width: 100%;
+                        height: px2rem(15);
+                        font-size: px2rem(12);
+                        line-height: px2rem(15);
+                        font-weight: 500;
+                        margin-bottom: px2rem(8);
+                        color: #fff;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        white-space: nowrap;
+                      }
+                      .workInfo{
+                        width: 100%;
+                        height: auto;
+                      }
+                    }
+                  }
+                  .otherItem{
+                    width: 100%;
+                    height: px2rem(16);
+                    margin-bottom: px2rem(8);
+                    display: flex;
+                    align-items: center;
+                    .otherLabel{
+                      width: px2rem(50);
+                      font-size: px2rem(8);
+                      line-height: px2rem(16);
+                      color: rgba(255,255,255,0.6);
+                      white-space: pre;
+                      text-align-last: justify;
+                      text-align: justify; 
+                      flex-shrink: 0;
+                    }
+                    .otherValue{
+                      width: calc(100% - px2rem(50));
+                      font-size: px2rem(8);
+                      line-height: px2rem(16);
+                      color: #fff;
+                      overflow: hidden;
+                      text-overflow: ellipsis;
+                      white-space: nowrap;
+                      flex-shrink: 0;
+                    }
+                    .otherValue.status2{
+                      color: #EB9809;
+                    }
+                    .otherValue.status1{
+                      color: #FF2626;
+                    }
+                    .otherValue.status0{
+                      color: #09DFEB;
+                    }
+                  }
+                }
+              }
+            }
+          }
+          
+
         }
       }
     }
