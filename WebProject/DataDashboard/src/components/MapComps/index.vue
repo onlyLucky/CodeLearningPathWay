@@ -8,7 +8,7 @@
 // 导入地图地理数据
 import mapGeoFullData from '@/assets/data/map/330000_full.json'
 import mapGeoData from '@/assets/data/map/330000.json'
-import _textJpg from "@/assets/images/pic.jpg"
+import textJpg from "@/assets/images/pic.jpg"
 import textScreen from "@/assets/images/screen.png"
 // 导入Vue组合式API
 import { ref, onMounted, onBeforeUnmount } from 'vue'
@@ -96,12 +96,12 @@ const lngLatToVector3 = d3.geoMercator()
 const createMapGeometry = ()=>{
   // 计算地图中心位置，用于居中显示
   const centerPos = calculateGeoJsonCenter(mapGeoData as GeoJSON)
-  lngLatToVector3.center(centerPos).scale(400).translate([6,5]);//scale(360).translate([1, 4])
+  lngLatToVector3.center(centerPos).scale(600).translate([6,5]);//scale(360).translate([1, 4])
   // 主体
   createMapGeometryShape({
     depth: 1,
-    opacity: 0.3,
-    bgColor: 0x409eff,
+    opacity: 0.8,
+    bgColor: 0x101b31,
     positionZ: -1,
   })                   
   // 区域层
@@ -114,7 +114,29 @@ const createMapGeometry = ()=>{
     depth: 0.001,
     positionZ: -1,
     opacity: 0,
-    borderColor: '#798089',
+    borderColor: 0xffffff,
+    borderOpacity: 0.4,
+  })
+  createMapGeometryShape({
+    depth: 0.001,
+    positionZ: -0.75,
+    opacity: 0,
+    borderColor: 0xffffff,
+    borderOpacity: 0.3,
+  })
+  createMapGeometryShape({
+    depth: 0.001,
+    positionZ: -0.5,
+    opacity: 0,
+    borderColor: 0xffffff,
+    borderOpacity: 0.2,
+  })
+  createMapGeometryShape({
+    depth: 0.001,
+    positionZ: -0.25,
+    opacity: 0,
+    borderColor: 0xffffff,
+    borderOpacity: 0.1,
   })
   // 贴图
   createMapGeometryShape({
@@ -131,7 +153,10 @@ const createMapGeometry = ()=>{
     opacity: 0,
     borderColor: '#1a8ed6',
     borderWidth: 4,
+    isCreateData: true,
   })
+  // 数据贴图
+
   scene.rotation.x = -Math.PI / 2 // 旋转几何体（适配 Three.js 坐标系）
 }
 
@@ -142,11 +167,13 @@ interface MapGeometryOptions{
   opacity?: number, // 地图透明度
   texture?: THREE.Texture | null | boolean,// 地图纹理
   borderColor?: number | string,// 地图边框颜色
+  borderOpacity?: number,// 地图边框透明度
   borderWidth?: number,// 地图边框宽度
   insideLineColor?: number | string,// 地图内部线颜色
   positionX?: number,// 地图X轴位置
   positionY?: number,// 地图Y轴位置
   positionZ?: number,// 地图Z轴位置
+  isCreateData?: boolean,// 是否创建数据贴图
 }
 const createMapGeometryShape = (options: MapGeometryOptions = {
   depth: 1,
@@ -156,9 +183,10 @@ const createMapGeometryShape = (options: MapGeometryOptions = {
   positionZ: 0,
   borderWidth: 1,
   texture: null,
+  isCreateData: false,
 }) =>{
   // console.log(mapGeoData)   // 输出地图数据用于调试
-  const {depth,bgColor,opacity,borderColor,texture,borderWidth} = options as MapGeometryOptions
+  const {depth,bgColor,opacity,borderColor,texture,borderWidth,borderOpacity,isCreateData} = options as MapGeometryOptions
   mapGeoData.features.forEach((feature: any) => {
     const coordinates = feature.geometry.coordinates;
     // 处理多级坐标（部分区域有子区域，如海岛）
@@ -181,7 +209,7 @@ const createMapGeometryShape = (options: MapGeometryOptions = {
     // 创建拉伸几何体（3D 高度）
     const geometry = new THREE.ExtrudeGeometry(shapes, {
       depth, // 地图厚度（3D 高度）
-      bevelEnabled: false // 关闭倒角（简化）
+      bevelEnabled: false, // 关闭倒角（简化）
     });
 
     // 创建材质（可自定义不同区域的颜色）
@@ -204,13 +232,14 @@ const createMapGeometryShape = (options: MapGeometryOptions = {
       createMapTexture(geometry)
     }
     if(borderColor){
-      createMapLine(geometry,mesh,borderColor,borderWidth)
+      createMapLine(geometry,mesh,borderColor,borderWidth,borderOpacity)
     }
     
     // 使用（在3D坐标上添加）
-    var point:[number,number] = lngLatToVector3([120.13279236,30.22054087]) || [0,0]
-    // createMapMarkPlane(new THREE.Vector3(point[0], point[1],0.5), textJpg)
-
+    if(isCreateData){
+      var point:[number,number] = lngLatToVector3([120.13279236,30.22054087]) || [0,0]
+      createMapMarkPlane(new THREE.Vector3(point[0], point[1],0.5), textJpg)
+    }
     // scene.rotation.x = -Math.PI / 2 // 旋转几何体（适配 Three.js 坐标系）
     // 添加鼠标交互（hover 高亮）
     /* mesh.addEventListener('pointerenter', () => {
@@ -225,12 +254,14 @@ const createMapGeometryShape = (options: MapGeometryOptions = {
 const createMapGeometryInsideShape = (options: MapGeometryOptions = {
   depth: 1,
   opacity: 0,
+  bgColor: "#ffffff",
   positionX: 0,
   positionY: 0,
   positionZ: 0,
+  borderWidth: 1,
 }) =>{
   // console.log(mapGeoFullData)   // 输出地图数据用于调试
-  const {depth,bgColor,opacity,borderColor} = options as MapGeometryOptions
+  const {depth,bgColor,opacity,borderColor,borderWidth,borderOpacity} = options as MapGeometryOptions
   mapGeoFullData.features.forEach((feature: any) => {
     const coordinates = feature.geometry.coordinates;
     // 处理多级坐标（部分区域有子区域，如海岛）
@@ -292,7 +323,7 @@ const createMapGeometryInsideShape = (options: MapGeometryOptions = {
 
     // createMapTexture(geometry)
     if(borderColor){
-      createMapLine(geometry,mesh,borderColor)
+      createMapLine(geometry,mesh,borderColor,borderWidth,borderOpacity)
     }
     
 
@@ -312,11 +343,13 @@ const createMapGeometryInsideShape = (options: MapGeometryOptions = {
 }
 
 /* 创建地图边缘线 */
-const createMapLine = (geometry: THREE.ExtrudeGeometry,mesh: THREE.Mesh,color: number|string =0xffffff,width: number = 1) =>{
+const createMapLine = (geometry: THREE.ExtrudeGeometry,mesh: THREE.Mesh,color: number|string =0xffffff,width: number = 1,borderOpacity: number = 1) =>{
   // 添加边缘描边（关键步骤）
   const edges = new THREE.EdgesGeometry(geometry) // 提取边缘 
   const lineMaterial = new THREE.LineBasicMaterial({ 
     color,  // 描边颜色
+    transparent: true,
+    opacity: borderOpacity,
     linewidth: width      // 线宽（部分浏览器支持有限）
   })
 
@@ -371,13 +404,19 @@ const createMapTexture = (geometry: THREE.ExtrudeGeometry) => {
   const sideMaterial = new THREE.MeshStandardMaterial({ 
     color: 0x888888,
     roughness: 0.4,
-    metalness: 0.1
+    metalness: 0.1,
+    polygonOffset: true,
+    polygonOffsetFactor: 1,  // 顶面向前偏移
+    polygonOffsetUnits: 1,
   })
   
   const faceMaterial = new THREE.MeshStandardMaterial({
     map: texture,
     roughness: 0.4,
-    metalness: 0.1
+    metalness: 0.1,
+    polygonOffset: true,
+    polygonOffsetFactor: -1,   // 侧面向后偏移
+    polygonOffsetUnits: -1
   })
     // ExtrudeGeometry 材质索引：0=顶面/底面, 1=侧面
     material = [faceMaterial, sideMaterial]
