@@ -8,7 +8,7 @@
           <div class="MapCon">
             <MapComps></MapComps>
             <div class="topTab">
-              <div class="teamItem" :class="{'active':teamTabCurrent==index}" v-for="(item,index) in teamTab" :key="index" @click="teamTabCurrent=index">
+              <div class="teamItem" :class="{'active':teamTabCurrent==index}" v-for="(item,index) in teamTab" :key="index" @click="changeTeamTab(index)">
                 <div class="activeLine"></div>
                 <p>{{item.name}}</p>
               </div>
@@ -16,11 +16,11 @@
             <div class="leftStatic">
               <div class="staticItem type01">
                 <div class="staticTitle">部署区域<span class="unit">（个）</span></div>
-                <p>15</p>
+                <p>{{static01}}</p>
               </div>
               <div class="staticItem type02">
                 <div class="staticTitle">正在作战区域<span class="unit">（个）</span></div>
-                <p>7</p>
+                <p>{{static02}}</p>
               </div>
             </div>
             <div class="leftBottom">
@@ -167,10 +167,10 @@
               </div>
             </div>
           </div>
-          <CenterRight></CenterRight>
+          <CenterRight ref="centerRightRef"></CenterRight>
         </div>
         
-        <DashboardFooter></DashboardFooter>
+        <DashboardFooter ref="footerRef"></DashboardFooter>
       </div>
     </div>
   </div>
@@ -184,10 +184,14 @@ import CenterLeft from './comps/CenterLeft.vue'
 import CenterRight from './comps/CenterRight.vue'
 import gsap from 'gsap'
 
-import { defineComponent, ref, provide } from 'vue';
+import { defineComponent, ref, provide, onMounted } from 'vue';
 
 // 创建一个引用，用于访问 CenterLeft 组件实例
 const centerLeftRef = ref();
+const centerRightRef = ref();
+const footerRef = ref();
+
+
 
 // 提供一个方法给子组件使用
 const triggerSendMessageToIframe = (message: any) => {
@@ -220,6 +224,31 @@ const teamTab = ref([
     name: "五团"
   },
 ])
+
+const static01 = ref(0)
+const static01List = [28,12,8,5,9,10]
+const static02 = ref(0)
+const static02List = [16,4,3,5,6,4]
+
+const updateStaticData = ()=>{
+  static01.value = 0
+  static02.value = 0
+  const targetStatic01 = static01List[teamTabCurrent.value]
+  const targetStatic02 = static02List[teamTabCurrent.value]
+  gsap.to(static01, {
+    value: targetStatic01,
+    duration: 2,
+    ease: 'power2.out',
+    snap: { value: 1 }
+  })
+  gsap.to(static02, {
+    value: targetStatic02,
+    duration: 2,
+    ease: 'power2.out',
+    snap: { value: 1 }
+  })
+}
+
 
 import cb01Png from "@/assets/images/cb_01.png"
 import cb02Png from "@/assets/images/cb_02.png"
@@ -465,6 +494,21 @@ const triggerChangeMonitorIndex = (index: number) => {
   isShowMonitor.value = true
   updataMonitorAnimate()
 };
+
+const changeTeamTab = (index: number) => {
+  teamTabCurrent.value = index
+  if (centerRightRef.value && typeof centerRightRef.value.tabDataChangeFunc === 'function') {
+    centerRightRef.value.tabDataChangeFunc(index);
+  }
+  updateStaticData()
+  if (footerRef.value && typeof footerRef.value.tabDataChangeFunc === 'function') {
+    footerRef.value.tabDataChangeFunc(index);
+  }
+}
+
+onMounted(()=>{
+  updateStaticData()
+})
 
 provide('triggerChangeMonitorIndex', triggerChangeMonitorIndex);
 

@@ -105,6 +105,7 @@ import { gsap } from 'gsap';
 import GradientGridProgress from '@/components/GradientGridProgress.vue'
 import AreaChart from '@/components/AreaChart.vue'
 
+let teamTabCurrent = ref(0)
 /* 监控画面 */
 const monitorList = ref([
   {
@@ -131,6 +132,15 @@ const attackDefenseRatio = ref(40)
 
 let ratioTimeline: gsap.core.Timeline | null = null
 
+var ratioTimeList = [
+  {start: 48, end: 63},
+  {start: 25, end: 52},
+  {start: 32, end: 68},
+  {start: 46, end: 54},
+  {start: 62, end: 70},
+  {start: 32, end: 38},
+]
+
 const startRatioAnimation = () => {
   if (ratioTimeline) {
     ratioTimeline.kill()
@@ -149,7 +159,8 @@ const startRatioAnimation = () => {
   let currentValue = 40
   
   for (let i = 0; i < 20; i++) {
-    const nextValue = generateRandomValue(40, 60)
+    const {start, end} = ratioTimeList[teamTabCurrent.value]
+    const nextValue = generateRandomValue(start, end)
     const duration = generateRandomDuration(2, 4)
     
     ratioTimeline.to(attackDefenseRatio, {
@@ -170,13 +181,33 @@ const stopRatioAnimation = () => {
   }
 }
 
-
-
 /* 战场形势分析 */
 var currentTab = ref(0)
 const areaChartTitles = ref(['08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00'])
-const areaChartData1 = ref([900,820,930,600,850,890,560,630,830,990,850,780,650])
-const areaChartData2 = ref([3,2,3,5,10,10,6,6,4,2,1,1,2])
+const areaChartData1 = ref<number[]>([])
+const areaChartData2 = ref<number[]>([])
+
+const areaChartData1List = [
+  [900,820,930,600,850,890,560,630,830,990,850,780,650],
+  [400,520,380,310,400,510,320,350,260,196,256,347,412],
+  [234,431,402,321,392,220,126,295,302,285,310,218,128],
+  [302,502,308,103,204,201,230,315,206,169,265,437,241],
+  [209,205,312,301,240,150,203,305,206,296,456,430,421],
+  [311,320,180,110,300,410,326,530,360,296,356,302,403],
+]
+
+const areaChartData2List = [
+  [8,10,9,12,18,19,13,13,8,9,11,7,10],
+  [3,2,3,5,10,10,6,6,4,2,1,1,2],
+  [4,6,6,5,3,6,5,5,4,6,3,4,5],
+  [2,2,3,4,5,3,2,3,4,3,5,6,5],
+  [3,5,6,8,6,5,6,7,5,7,8,3,2],
+  [6,3,2,5,6,3,4,6,7,8,4,3,2],
+]
+
+areaChartData1.value = areaChartData1List[teamTabCurrent.value] as number[]
+areaChartData2.value = areaChartData2List[teamTabCurrent.value] as number[]
+
 // 自动切换tab
 let tabSwitchTimer: number | null = null
 const startTabAutoSwitch = () => {
@@ -215,16 +246,57 @@ const battleCount = ref(0)
 const deathCount = ref(0)
 const feedbackCount = ref(0)
 
+
+const staticCountData = [
+  {
+    participantCount: 4396,
+    battleCount: 120,
+    deathCount: 360,
+    feedbackCount: 560,
+  },
+  {
+    participantCount: 925,
+    battleCount: 26,
+    deathCount: 40,
+    feedbackCount: 105,
+  },
+  {
+    participantCount: 1023,
+    battleCount: 29,
+    deathCount: 46,
+    feedbackCount: 112,
+  },
+  {
+    participantCount: 1040,
+    battleCount: 30,
+    deathCount: 52,
+    feedbackCount: 108,
+  },
+  {
+    participantCount: 1003,
+    battleCount: 32,
+    deathCount: 48,
+    feedbackCount: 113,
+  },
+  {
+    participantCount: 989,
+    battleCount: 29,
+    deathCount: 35,
+    feedbackCount: 101,
+  },
+]
+
 const updateCountDataFunc = ()=>{
+  const staticValue = staticCountData[teamTabCurrent.value]
   gsap.to(participantCount, {
-    value: 4396,
+    value: staticValue.participantCount,
     duration: 2,
     ease: 'power2.out',
     snap: { value: 1 }
   })
   
   gsap.to(battleCount, {
-    value: 120,
+    value: staticValue.battleCount,
     duration: 1.5,
     ease: 'power2.out',
     delay: 0.2,
@@ -232,7 +304,7 @@ const updateCountDataFunc = ()=>{
   })
   
   gsap.to(deathCount, {
-    value: 360,
+    value: staticValue.deathCount,
     duration: 1.8,
     ease: 'power2.out',
     delay: 0.4,
@@ -240,7 +312,7 @@ const updateCountDataFunc = ()=>{
   })
   
   gsap.to(feedbackCount, {
-    value: 560,
+    value: staticValue.feedbackCount,
     duration: 1.6,
     ease: 'power2.out',
     delay: 0.6,
@@ -248,7 +320,14 @@ const updateCountDataFunc = ()=>{
   })
 }
 
+const tabDataChangeFunc = (index: number) => {
+  teamTabCurrent.value = index
+  updateCountDataFunc()
+  areaChartData1.value = areaChartData1List[index] as number[]
+  areaChartData2.value = areaChartData2List[index] as number[]
 
+  startRatioAnimation()
+}
 
 onMounted(() => {
   updateCountDataFunc()
@@ -259,6 +338,10 @@ onMounted(() => {
 onUnmounted(() => {
   stopTabAutoSwitch()
   stopRatioAnimation()
+})
+
+defineExpose({
+  tabDataChangeFunc
 })
 
 defineComponent({

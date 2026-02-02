@@ -54,7 +54,7 @@ const updateChart = ()=>{
     },
     angleAxis: {
       show:false,
-      max: 30,
+      max: 100,
       startAngle: 75
     },
     radiusAxis: {

@@ -54,9 +54,9 @@
                 <div class="taskProgress">
                   <p class="tProgressTxt">任务进度</p>
                   <div class="tProgressBar">
-                    <div class="tProgress" :style="{width: item.progress + '%'}"></div>
+                    <div class="tProgress" :style="{width: item.targetProgress + '%'}"></div>
                   </div>
-                  <p class="tProgressNum">{{item.progress}}%</p>
+                  <p class="tProgressNum">{{item.targetProgress}}%</p>
                 </div>
               </div>
               <div class="taskOpt">
@@ -95,7 +95,7 @@
               <img src="@/assets/images/itemTitle.png" alt="">
               <div class="sTitleName">
                 <p class="title">各营作战量统计数</p>
-                <div class="titleNum">160 <span class="unit">次</span></div>
+                <div class="titleNum">{{workTotal}} <span class="unit">次</span></div>
               </div>
             </div>
           </div>
@@ -172,6 +172,7 @@ import { gsap } from 'gsap';
 import CircleProgress from '@/components/CircleProgress.vue';
 import PolarBarChart from '@/components/PolarBarChart.vue';
 
+let teamTabCurrent = ref(0)
 // 定义滚动功能的响应式引用
 const msgInfoConRef = ref<HTMLElement | null>(null);
 const taskBoxRef = ref<HTMLElement | null>(null);
@@ -330,176 +331,232 @@ const resumeTableScroll = () => {
 };
 
 /* 下级部队作战任务 */
-var teamListData = ref([
-  {
-    teamName: '一团一营',
-    leaderName: '白营长',
-    status: 3,
-    statusTxt: '三级战备',
-  },
-  {
-    teamName: '一团二营',
-    leaderName: '孟营长',
-    status: 2,
-    statusTxt: '二级战备',
-  },
-  {
-    teamName: '一团三营',
-    leaderName: '杜营长',
-    status: 2,
-    statusTxt: '二级战备',
-  },
-  {
-    teamName: '一团四营',
-    leaderName: '李营长',
-    status: 3,
-    statusTxt: '三级战备',
-  },
-  {
-    teamName: '二团一营',
-    leaderName: '张营长',
-    status: 4,  
-    statusTxt: '四级战备',
-  },
-  {
-    teamName: '二团二营',
-    leaderName: '王营长',
-    status: 2,  
-    statusTxt: '二级战备',
-  },
-  {
-    teamName: '二团三营',
-    leaderName: '赵营长',
-    status: 4,  
-    statusTxt: '四级战备',
-  },
-  {
-    teamName: '二团四营',
-    leaderName: '王营长',
-    status: 1,      
-    statusTxt: '一级战备',
-  },
-  {
-    teamName: '二团四营',
-    leaderName: '王营长',
-    status: 4,      
-    statusTxt: '四级战备',
-  },
-])
+var teamListData = ref<any[]>([])
+const teamTabList = [
+  [
+    {teamName: '一团一营',leaderName: '白营长',status: 3,statusTxt: '三级战备'},
+    {teamName: '一团二营',leaderName: '孟营长',status: 2,statusTxt: '二级战备'},
+    {teamName: '一团三营',leaderName: '杜营长',status: 2,statusTxt: '二级战备'},
+    {teamName: '一团四营',leaderName: '李营长',status: 3,statusTxt: '三级战备'},
+    {teamName: '二团一营',leaderName: '张营长',status: 4,statusTxt: '四级战备'},
+    {teamName: '二团二营',leaderName: '王营长',status: 2,statusTxt: '二级战备'},
+    {teamName: '二团三营',leaderName: '赵营长',status: 4,statusTxt: '四级战备'},
+    {teamName: '二团四营',leaderName: '王营长',status: 1,statusTxt: '一级战备'},
+    {teamName: '三团一营',leaderName: '王营长',status: 4,statusTxt: '四级战备'},
+    {teamName: '一团一营',leaderName: '白营长',status: 3,statusTxt: '三级战备'},
+    {teamName: '一团二营',leaderName: '孟营长',status: 2,statusTxt: '二级战备'},
+    {teamName: '一团三营',leaderName: '杜营长',status: 2,statusTxt: '二级战备'},
+    {teamName: '一团四营',leaderName: '李营长',status: 3,statusTxt: '三级战备'},
+    {teamName: '二团一营',leaderName: '张营长',status: 4,statusTxt: '四级战备'},
+    {teamName: '二团二营',leaderName: '王营长',status: 2,statusTxt: '二级战备'},
+    {teamName: '二团三营',leaderName: '赵营长',status: 4,statusTxt: '四级战备'},
+    {teamName: '二团四营',leaderName: '王营长',status: 1,statusTxt: '一级战备'},
+    {teamName: '三团一营',leaderName: '王营长',status: 4,statusTxt: '四级战备'},
+  ],
+  [
+    {teamName: '一团一营',leaderName: '白营长',status: 3,statusTxt: '三级战备'},
+    {teamName: '一团二营',leaderName: '孟营长',status: 2,statusTxt: '二级战备'},
+    {teamName: '一团三营',leaderName: '杜营长',status: 2,statusTxt: '二级战备'},
+    {teamName: '一团四营',leaderName: '李营长',status: 3,statusTxt: '三级战备'},
+    {teamName: '一团五营',leaderName: '孙营长',status: 4,statusTxt: '四级战备'},
+    {teamName: '一团六营',leaderName: '刘营长',status: 2,statusTxt: '二级战备'},
+    {teamName: '一团一营',leaderName: '白营长',status: 3,statusTxt: '三级战备'},
+    {teamName: '一团二营',leaderName: '孟营长',status: 2,statusTxt: '二级战备'},
+    {teamName: '一团三营',leaderName: '杜营长',status: 2,statusTxt: '二级战备'},
+    {teamName: '一团四营',leaderName: '李营长',status: 3,statusTxt: '三级战备'},
+    {teamName: '一团五营',leaderName: '孙营长',status: 4,statusTxt: '四级战备'},
+    {teamName: '一团六营',leaderName: '刘营长',status: 2,statusTxt: '二级战备'},
+  ],
+  [
+    {teamName: '二团一营',leaderName: '张营长',status: 4,statusTxt: '四级战备'},
+    {teamName: '二团二营',leaderName: '王营长',status: 2,statusTxt: '二级战备'},
+    {teamName: '二团三营',leaderName: '赵营长',status: 4,statusTxt: '四级战备'},
+    {teamName: '二团四营',leaderName: '王营长',status: 1,statusTxt: '一级战备'},
+    {teamName: '二团五营',leaderName: '周营长',status: 1,statusTxt: '一级战备'},
+    {teamName: '二团六营',leaderName: '刘营长',status: 1,statusTxt: '一级战备'},
+    {teamName: '二团一营',leaderName: '张营长',status: 4,statusTxt: '四级战备'},
+    {teamName: '二团二营',leaderName: '王营长',status: 2,statusTxt: '二级战备'},
+    {teamName: '二团三营',leaderName: '赵营长',status: 4,statusTxt: '四级战备'},
+    {teamName: '二团四营',leaderName: '王营长',status: 1,statusTxt: '一级战备'},
+    {teamName: '二团五营',leaderName: '周营长',status: 1,statusTxt: '一级战备'},
+    {teamName: '二团六营',leaderName: '刘营长',status: 1,statusTxt: '一级战备'},
+  ],
+  [
+    {teamName: '三团一营',leaderName: '张营长',status: 4,statusTxt: '四级战备'},
+    {teamName: '三团二营',leaderName: '王营长',status: 2,statusTxt: '二级战备'},
+    {teamName: '三团三营',leaderName: '赵营长',status: 4,statusTxt: '四级战备'},
+    {teamName: '三团四营',leaderName: '王营长',status: 1,statusTxt: '一级战备'},
+    {teamName: '三团五营',leaderName: '周营长',status: 1,statusTxt: '一级战备'},
+    {teamName: '三团六营',leaderName: '刘营长',status: 1,statusTxt: '一级战备'},
+    {teamName: '三团一营',leaderName: '张营长',status: 4,statusTxt: '四级战备'},
+    {teamName: '三团二营',leaderName: '王营长',status: 2,statusTxt: '二级战备'},
+    {teamName: '三团三营',leaderName: '赵营长',status: 4,statusTxt: '四级战备'},
+    {teamName: '三团四营',leaderName: '王营长',status: 1,statusTxt: '一级战备'},
+    {teamName: '三团五营',leaderName: '周营长',status: 1,statusTxt: '一级战备'},
+    {teamName: '三团六营',leaderName: '刘营长',status: 1,statusTxt: '一级战备'},
+  ],
+  [
+    {teamName: '四团一营',leaderName: '张营长',status: 4,statusTxt: '四级战备'},
+    {teamName: '四团二营',leaderName: '王营长',status: 2,statusTxt: '二级战备'},
+    {teamName: '四团三营',leaderName: '赵营长',status: 4,statusTxt: '四级战备'},
+    {teamName: '四团四营',leaderName: '王营长',status: 1,statusTxt: '一级战备'},
+    {teamName: '四团五营',leaderName: '周营长',status: 1,statusTxt: '一级战备'},
+    {teamName: '四团六营',leaderName: '刘营长',status: 1,statusTxt: '一级战备'},
+    {teamName: '四团一营',leaderName: '张营长',status: 4,statusTxt: '四级战备'},
+    {teamName: '四团二营',leaderName: '王营长',status: 2,statusTxt: '二级战备'},
+    {teamName: '四团三营',leaderName: '赵营长',status: 4,statusTxt: '四级战备'},
+    {teamName: '四团四营',leaderName: '王营长',status: 1,statusTxt: '一级战备'},
+    {teamName: '四团五营',leaderName: '周营长',status: 1,statusTxt: '一级战备'},
+    {teamName: '四团六营',leaderName: '刘营长',status: 1,statusTxt: '一级战备'},
+  ],
+  [
+    {teamName: '五团一营',leaderName: '张营长',status: 4,statusTxt: '四级战备'},
+    {teamName: '五团二营',leaderName: '王营长',status: 2,statusTxt: '二级战备'},
+    {teamName: '五团三营',leaderName: '赵营长',status: 4,statusTxt: '四级战备'},
+    {teamName: '五团四营',leaderName: '王营长',status: 1,statusTxt: '一级战备'},
+    {teamName: '五团五营',leaderName: '周营长',status: 1,statusTxt: '一级战备'},
+    {teamName: '五团六营',leaderName: '刘营长',status: 1,statusTxt: '一级战备'},
+    {teamName: '五团一营',leaderName: '张营长',status: 4,statusTxt: '四级战备'},
+    {teamName: '五团二营',leaderName: '王营长',status: 2,statusTxt: '二级战备'},
+    {teamName: '五团三营',leaderName: '赵营长',status: 4,statusTxt: '四级战备'},
+    {teamName: '五团四营',leaderName: '王营长',status: 1,statusTxt: '一级战备'},
+    {teamName: '五团五营',leaderName: '周营长',status: 1,statusTxt: '一级战备'},
+    {teamName: '五团六营',leaderName: '刘营长',status: 1,statusTxt: '一级战备'},
+  ]
+]
+teamListData.value = teamTabList[teamTabCurrent.value]
 
 
 /* 通信指挥 */
-const taskList = ref([
-  {
-    title: '一团对A区域作战任务',
-    progress: 0,
-    targetProgress: 50,
-  },
-  {
-    title: '一团对B区域作战任务',
-    progress: 0,
-    targetProgress: 30,
-  },
-  {
-    title: '二团对A区域作战任务',
-    progress: 0,
-    targetProgress: 70,
-  },
-  {
-    title: '二团对B区域作战任务',
-    progress: 0,
-    targetProgress: 80,
-  },
-  {
-    title: '二团对C区域作战任务',
-    progress: 0,
-    targetProgress: 90,
-  },
-  {
-    title: '二团对D区域作战任务',
-    progress: 0,
-    targetProgress: 60,
-  },
-  {
-    title: '三团对A区域作战任务',
-    progress: 0,
-    targetProgress: 20,
-  },
-  {
-    title: '三团对B区域作战任务',
-    progress: 0,
-    targetProgress: 10,
-  },
-])
+const taskList = ref<any[]>([])
 
-const animateTaskProgress = () => {
-  taskList.value.forEach((task, index) => {
-    gsap.to(task, {
-      progress: task.targetProgress,
-      duration: 2,
-      ease: 'power2.out',
-      delay: index * 0.1,
-      snap: { progress: 1 }
-    })
-  })
-}
+const taskTabList = [
+  [
+    {title: '一团对A区域作战任务',progress: 0,targetProgress: 50},
+    {title: '一团对B区域作战任务',progress: 0,targetProgress: 30},
+    {title: '二团对A区域作战任务',progress: 0,targetProgress: 70},
+    {title: '二团对B区域作战任务',progress: 0,targetProgress: 80},
+    {title: '二团对C区域作战任务',progress: 0,targetProgress: 90},
+    {title: '二团对D区域作战任务',progress: 0,targetProgress: 60},
+    {title: '三团对A区域作战任务',progress: 0,targetProgress: 20},
+    {title: '三团对B区域作战任务',progress: 0,targetProgress: 10},
+  ],
+  [
+    {title: '一团对A区域作战任务',progress: 0,targetProgress: 50},
+    {title: '一团对B区域作战任务',progress: 0,targetProgress: 30},
+    {title: '一团对C区域作战任务',progress: 0,targetProgress: 20},
+    {title: '一团对D区域作战任务',progress: 0,targetProgress: 25},
+    {title: '一团对E区域作战任务',progress: 0,targetProgress: 30},
+    {title: '一团对F区域作战任务',progress: 0,targetProgress: 10},
+  ],
+  [
+    {title: '二团对A区域作战任务',progress: 0,targetProgress: 50},
+    {title: '二团对B区域作战任务',progress: 0,targetProgress: 30},
+    {title: '二团对C区域作战任务',progress: 0,targetProgress: 20},
+    {title: '二团对D区域作战任务',progress: 0,targetProgress: 25},
+    {title: '二团对E区域作战任务',progress: 0,targetProgress: 30},
+    {title: '二团对F区域作战任务',progress: 0,targetProgress: 10},
+  ],
+  [
+    {title: '三团对A区域作战任务',progress: 0,targetProgress: 50},
+    {title: '三团对B区域作战任务',progress: 0,targetProgress: 30},
+    {title: '三团对C区域作战任务',progress: 0,targetProgress: 20},
+    {title: '三团对D区域作战任务',progress: 0,targetProgress: 25},
+    {title: '三团对E区域作战任务',progress: 0,targetProgress: 30},
+    {title: '三团对F区域作战任务',progress: 0,targetProgress: 10},
+  ],
+  [
+    {title: '四团对A区域作战任务',progress: 0,targetProgress: 50},
+    {title: '四团对B区域作战任务',progress: 0,targetProgress: 30},
+    {title: '四团对C区域作战任务',progress: 0,targetProgress: 20},
+    {title: '四团对D区域作战任务',progress: 0,targetProgress: 25},
+    {title: '四团对E区域作战任务',progress: 0,targetProgress: 30},
+    {title: '四团对F区域作战任务',progress: 0,targetProgress: 10},
+  ],
+  [
+    {title: '五团对A区域作战任务',progress: 0,targetProgress: 50},
+    {title: '五团对B区域作战任务',progress: 0,targetProgress: 30},
+    {title: '五团对C区域作战任务',progress: 0,targetProgress: 20},
+    {title: '五团对D区域作战任务',progress: 0,targetProgress: 25},
+    {title: '五团对E区域作战任务',progress: 0,targetProgress: 30},
+    {title: '五团对F区域作战任务',progress: 0,targetProgress: 10},
+  ],
+]
 
-
+taskList.value = taskTabList[teamTabCurrent.value]
 
 const resourceList = ref([
   {
     title: '弹药',
     progress: 0,
-    targetProgress: 50,
+    targetProgress: 53,
   },
   {
     title: '能源',
     progress: 0,
-    targetProgress: 25,
+    targetProgress: 42,
   },
   {
     title: '装备',
     progress: 0,
-    targetProgress: 13,
+    targetProgress: 33,
   },
   {
     title: '人员',
     progress: 0,
-    targetProgress: 14,
+    targetProgress: 68,
   },
   {
     title: '后勤物资',
     progress: 0,
-    targetProgress: 25,
+    targetProgress: 45,
   },
   {
     title: '通信资源',
     progress: 0,
-    targetProgress: 8,
+    targetProgress: 41,
   },
   {
     title: '作战平台',
     progress: 0,
-    targetProgress: 7,
+    targetProgress: 64,
   },
   {
     title: '医疗',
     progress: 0,
-    targetProgress: 13,
+    targetProgress: 21,
   },
 ])
 
+const resourceProgressList = [
+  [53,42,33,68,45,41,64,21],
+  [21,25,43,70,23,53,27,12],
+  [12,20,34,38,32,35,47,28],
+  [48,52,58,77,36,28,30,33],
+  [55,62,34,47,40,53,39,16],
+  [30,52,22,82,33,32,47,35],
+]
+
 const animateResourceProgress = () => {
+  var targetResourceData = resourceProgressList[teamTabCurrent.value]
+  resourceList.value.map((item,index)=>{
+    item.progress = 0
+    item.targetProgress = targetResourceData[index]
+  })
+  console.log(resourceList.value,'resourceList.value')
   resourceList.value.forEach((resource, index) => {
     gsap.to(resource, {
       progress: resource.targetProgress,
-      duration: 2.5,
+      duration: 1.2,
       ease: 'power2.out',
       delay: index * 0.15 + 1,
       snap: { progress: 1 }
     })
   })
 }
+
+const workTotal = ref(0)
+const workTotalList = [160, 23, 47, 30, 40, 30, 12]
 
 const workData = ref([
   {
@@ -552,7 +609,21 @@ const workData = ref([
   },
 ])
 
+const workDataList = [
+  [89, 62, 55, 50, 42, 36, 30, 28],
+  [20, 10, 20, 15, 10, 10, 5, 2],
+  [12, 15, 22, 18, 14, 12, 10, 3],
+  [20, 30, 12, 35, 40, 30, 12, 5],
+  [23, 25, 20, 18, 16, 18, 4, 8],
+  [12, 21, 10, 12, 9, 12, 5, 12],
+]
+
 const animateWorkData = () => {
+  var targetWorkData = workDataList[teamTabCurrent.value]
+  workData.value.forEach((item, index) => {
+    item.value = 0
+    item.targetValue = targetWorkData[index]
+  })
   workData.value.forEach((item, index) => {
     gsap.to(item, {
       value: item.targetValue,
@@ -561,6 +632,13 @@ const animateWorkData = () => {
       delay: index * 0.1,
       snap: { value: 1 }
     })
+  })
+  workTotal.value = 0
+  gsap.to(workTotal, {
+    value: workTotalList[teamTabCurrent.value],
+    duration: 2,
+    ease: 'power2.out',
+    snap: { value: 1 }
   })
 }
 
@@ -583,8 +661,19 @@ const cancelUnitVideo = ()=>{
   }
 }
 
+const tabDataChangeFunc = (index: number) => {
+  teamTabCurrent.value = index
+  animateResourceProgress()
+  animateWorkData()
+  msgScrollTop = 0;
+  taskScrollTop = 0;
+  tableScrollTop = 0;
+  teamListData.value = teamTabList[index]
+  taskList.value = taskTabList[index]
+}
+
 onMounted(() => {
-  animateTaskProgress()
+  // animateTaskProgress()
   animateResourceProgress()
   animateWorkData()
   // 组件挂载后启动滚动动画
@@ -598,6 +687,10 @@ onUnmounted(() => {
   if (animationFrameId) {
     cancelAnimationFrame(animationFrameId);
   }
+})
+
+defineExpose({
+  tabDataChangeFunc
 })
 
 defineComponent({
