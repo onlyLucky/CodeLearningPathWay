@@ -40,8 +40,8 @@ const initScene = () => {
   // scene.background = new THREE.Color(0x0a0e27)  // 设置场景背景颜色为深蓝色
   // scene.fog = new THREE.Fog(0x0a0e27, 10, 50)   // 添加雾效，增强深度感
   // 创建坐标轴，参数为轴的长度
-  /* const axesHelper = new THREE.AxesHelper(30)
-  scene.add(axesHelper) */
+  const axesHelper = new THREE.AxesHelper(30)
+  scene.add(axesHelper)
 }
 
 /* 
@@ -103,7 +103,7 @@ const createMapGeometry = ()=>{
     opacity: 0.3,
     bgColor: 0x409eff,
     positionZ: -1,
-  })
+  })                   
   // 区域层
   createMapGeometryInsideShape({
     depth: 0.001,
@@ -122,8 +122,7 @@ const createMapGeometry = ()=>{
     positionZ: 0,
     opacity: 0,
     borderColor: '',
-    bgColor: "green",
-    texture: false,
+    texture: true,
   })
   // 边框
   createMapGeometryShape({
@@ -200,6 +199,8 @@ const createMapGeometryShape = (options: MapGeometryOptions = {
     scene.add(mesh);
     mapMeshes.push(mesh);
     if(texture){
+      // 计算 UV 映射以确保贴图贴合
+      adjustUVs(geometry, shapes)
       createMapTexture(geometry)
     }
     if(borderColor){
@@ -323,25 +324,63 @@ const createMapLine = (geometry: THREE.ExtrudeGeometry,mesh: THREE.Mesh,color: n
   mesh.add(wireframe) // 将线条作为子对象添加
 }
 
+// 调整 UV 映射以确保贴图完全贴合
+const adjustUVs = (geometry: THREE.ExtrudeGeometry, shapes: THREE.Shape[]) => {
+  const uvAttribute = geometry.attributes.uv
+  const positionAttribute = geometry.attributes.position
+  const boundingBox = new THREE.Box3().setFromBufferAttribute(positionAttribute as THREE.BufferAttribute)
+  const size = new THREE.Vector3()
+  boundingBox.getSize(size)
+  
+  // 为每个顶点计算 UV
+  for (let i = 0; i < positionAttribute.count; i++) {
+    const x = positionAttribute.getX(i)
+    const y = positionAttribute.getY(i)
+    const z = positionAttribute.getZ(i)
+    
+    // 根据面的类型（顶面、底面、侧面）计算不同的 UV
+    // 这里使用平面投影，根据 x,y 坐标映射到 0-1 范围
+    const u = (x - boundingBox.min.x) / size.x
+    const v = (y - boundingBox.min.y) / size.y
+    
+    uvAttribute.setXY(i, u, v)
+  }
+  
+  uvAttribute.needsUpdate = true
+}
+
 /* 创建地图纹理 */
 const createMapTexture = (geometry: THREE.ExtrudeGeometry) => {
   // 加载地图纹理贴图
   const textureLoader = new THREE.TextureLoader()
-  const texture = textureLoader.load(textScreen, (texture) => {
-    // 纹理加载完成回调
-    // texture.wrapS = THREE.RepeatWrapping
-    // texture.wrapT = THREE.RepeatWrapping 
-    // texture.repeat.set(0, 0) // 设置重复次数
-    texture.wrapS = THREE.MirroredRepeatWrapping
-    texture.wrapT = THREE.MirroredRepeatWrapping
-    texture.repeat.set(1, 1)
+  const texture = textureLoader.load(textScreen, (tex) => {
+    // 纹理加载完成后调整
+    tex.colorSpace = THREE.SRGBColorSpace
+    tex.wrapS = THREE.ClampToEdgeWrapping
+    tex.wrapT = THREE.ClampToEdgeWrapping
+    tex.flipY = false
+    
+    // 如果希望贴图覆盖整个形状而不重复
+    tex.repeat.set(1, 1)
+    tex.offset.set(0, 0)
   }) 
-  texture.colorSpace = THREE.SRGBColorSpace
   // 3. 创建带纹理的材质
-  const material = new THREE.MeshLambertMaterial({ 
-    map: texture,  // 关键：添加贴图
-    side: THREE.DoubleSide
+  let material: THREE.MeshStandardMaterial | THREE.MeshStandardMaterial[]
+
+  // 创建数组材质：顶面/底面使用贴图，侧面使用纯色或贴图
+  const sideMaterial = new THREE.MeshStandardMaterial({ 
+    color: 0x888888,
+    roughness: 0.4,
+    metalness: 0.1
   })
+  
+  const faceMaterial = new THREE.MeshStandardMaterial({
+    map: texture,
+    roughness: 0.4,
+    metalness: 0.1
+  })
+    // ExtrudeGeometry 材质索引：0=顶面/底面, 1=侧面
+    material = [faceMaterial, sideMaterial]
 
   // 4. 创建网格
   const mesh = new THREE.Mesh(geometry, material)
@@ -403,11 +442,11 @@ const createDemoCube = () => {
 /* 初始化并添加场景光源：环境光、方向光与点光源 */
 const addLights = () => {
   // 环境光：提供均匀基础照明，避免死黑区域
-  const ambientLight = new THREE.AmbientLight(0xffffff, 0.4)
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.8)
   scene.add(ambientLight)
   
   // 方向光：模拟太阳光，产生阴影与立体感
-  const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8)
+  const directionalLight = new THREE.DirectionalLight(0x333333, 0.3)
   directionalLight.position.set(10, 20, 10)
   directionalLight.castShadow = true
   // 设置阴影贴图分辨率，提升阴影清晰度

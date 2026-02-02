@@ -7,6 +7,7 @@
           <CenterLeft ref="centerLeftRef"></CenterLeft>
           <div class="MapCon">
             <MapComps></MapComps>
+            <!-- <TMapCon></TMapCon> -->
             <div class="topTab">
               <div class="teamItem" :class="{'active':teamTabCurrent==index}" v-for="(item,index) in teamTab" :key="index" @click="changeTeamTab(index)">
                 <div class="activeLine"></div>
@@ -162,7 +163,9 @@
                       </div>
                     </div>
                   </div>
-
+                </div>
+                <div class="mDetailBottomBtn">
+                  <div class="btnItem" @click="goYunDeskTop">远程桌面</div>
                 </div>
               </div>
             </div>
@@ -171,6 +174,13 @@
         </div>
         
         <DashboardFooter ref="footerRef"></DashboardFooter>
+      </div>
+    </div>
+    <!-- 云桌面 -->
+    <div class="yunDeskTop" v-if="isShowYun">
+      <iframe src="https://chat.baidu.com/" frameborder="0"></iframe>
+      <div class="closeBtn" @click="closeYunDeskTop" @touchend="closeYunDeskTop">
+        <img src="@/assets/icons/close.png" alt="">
       </div>
     </div>
   </div>
@@ -182,6 +192,7 @@ import DashboardFooter from './comps/Footer.vue'
 import DashboardHeader from './comps/Header.vue'
 import CenterLeft from './comps/CenterLeft.vue'
 import CenterRight from './comps/CenterRight.vue'
+import TMapCon from '@/components/MapComps/TMapCon.vue'
 import gsap from 'gsap'
 
 import { defineComponent, ref, provide, onMounted } from 'vue';
@@ -506,6 +517,18 @@ const changeTeamTab = (index: number) => {
   }
 }
 
+let isShowYun = ref<boolean>(false)
+const goYunDeskTop = ()=>{
+  // window.open('https://www.baidu.com','_blank')
+  isShowYun.value = true
+}
+
+const closeYunDeskTop = ()=>{
+  isShowYun.value = false
+}
+
+
+
 onMounted(()=>{
   updateStaticData()
 })
@@ -515,6 +538,7 @@ provide('triggerChangeMonitorIndex', triggerChangeMonitorIndex);
 defineComponent({
   components: {
     MapComps,
+    // TMapCon,
     DashboardFooter,
     DashboardHeader,
     CenterLeft,
@@ -788,8 +812,8 @@ defineComponent({
               }
               .mDetailInfoBox{
                 width: 100%;
-                height: 100%;
-                padding: px2rem(48) px2rem(16) px2rem(16) px2rem(16);
+                height: calc(100% - px2rem(60));
+                padding: px2rem(48) px2rem(16) px2rem(0) px2rem(16);
                 box-sizing: border-box;
                 overflow-y: auto;
                 .mDetailInfoItem{
@@ -935,6 +959,25 @@ defineComponent({
                   }
                 }
               }
+              .mDetailBottomBtn{
+                width: 100%;
+                height: px2rem(60);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                overflow: hidden;
+                .btnItem{
+                  width: px2rem(160);
+                  height: px2rem(32);
+                  background-color: #006FFF;
+                  font-size: px2rem(12);
+                  line-height: px2rem(30);
+                  font-weight: bold;
+                  color: #fff;
+                  text-align: center;
+                  cursor: pointer;
+                }
+              }
             }
           }
           
@@ -943,6 +986,38 @@ defineComponent({
       }
     }
     // background-color: lightblue;
+  }
+  .yunDeskTop{
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 12;
+    iframe{
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      position: relative;
+    }
+    .closeBtn{
+      position: absolute;
+      top: px2rem(30);
+      right: px2rem(30);
+      width: px2rem(54);
+      height: px2rem(54);
+      background: rgba(0,0,0,0.5);
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2; /* 确保关闭按钮在顶层 */
+      img{
+        width: px2rem(26);
+        height: auto;
+      }
+    }
   }
 }
 </style>
