@@ -10,6 +10,19 @@ import mapGeoFullData from '@/assets/data/map/330000_full.json'
 import mapGeoData from '@/assets/data/map/330000.json'
 import textJpg from "@/assets/images/pic.jpg"
 import textScreen from "@/assets/images/screen.png"
+import map_mark01 from "@/assets/images/map_mark01.png"
+import map_mark02 from "@/assets/images/map_mark02.png"
+import map_mark03 from "@/assets/images/map_mark03.png"
+import map_mark04 from "@/assets/images/map_mark04.png"
+import map_mark05 from "@/assets/images/map_mark05.png"
+import map_mark06 from "@/assets/images/map_mark06.png"
+import map_mark07 from "@/assets/images/map_mark07.png"
+import map_mark08 from "@/assets/images/map_mark08.png"
+import map_area01 from "@/assets/images/map_area01.png"
+import map_area02 from "@/assets/images/map_area02.png"
+import map_area03 from "@/assets/images/map_area03.png"
+import map_area04 from "@/assets/images/map_area04.png"
+
 // 导入Vue组合式API
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 // 导入Three.js核心库
@@ -31,6 +44,7 @@ let camera: THREE.PerspectiveCamera  // 相机对象
 let renderer: THREE.WebGLRenderer   // 渲染器对象
 let controls: OrbitControls     // 轨道控制器
 let mapMeshes: THREE.Mesh[] = []; // 地图网格数组，用于存储多个区域的网格
+let mapMarkPlanes: THREE.Mesh[] = []; // 标记平面数组，用于存储标记点
 let animationId: number          // 动画帧ID
 
 
@@ -93,6 +107,350 @@ const initControls = () => {
 // 经纬度转墨卡托坐标（适配 Three.js 坐标系）
 const lngLatToVector3 = d3.geoMercator()
 
+var markDataList = [
+  [
+    {
+      lngLat: [118.61565501,28.4393911],
+      markImg: map_mark03,
+      to: "",
+    },
+    {
+      lngLat: [120.76965592,27.86485354],
+      markImg: map_mark04,
+      to: "D",
+    },
+    {
+      lngLat: [121.82855553,29.37426525],
+      markImg: map_mark05,
+      to: ""
+    },
+    {
+      lngLat: [122.19057249,30.0502638],
+      markImg: map_mark08,
+      to: "B",
+    },
+    {
+      lngLat: [121.25837882,30.30063158],
+      markImg: map_mark03,// 
+      to: "A",
+    },
+    {
+      lngLat: [120.65200041,28.85240721],
+      markImg: map_mark04,
+      to: "E",
+    },
+    {
+      lngLat: [119.8193614,28.39163094],
+      markImg: map_mark05,
+      to: "D",
+    },
+    {
+      lngLat: [120.4619415,27.40783758],
+      markImg: map_mark08,
+      to: "D",
+    },
+    {
+      lngLat: [119.90081522,29.52400497],
+      markImg: map_mark03,
+      to: "",
+    },
+    {
+      lngLat: [119.54784868,30.51918038],
+      markImg: map_mark04,// 
+      to: "A",
+    },
+    {
+      lngLat: [121.34888306,29.34271297],
+      markImg: map_mark05,
+      to: "B",
+    },
+    {
+      lngLat: [120.66105083,30.30844531],
+      markImg: map_mark08,
+      to: "",
+    },
+    {
+      lngLat: [120.89636186,30.61269418],
+      markImg: map_mark03,
+      to: "A",
+    },
+    {
+      lngLat: [120.045622,30.79167664],
+      markImg: map_mark04,
+      to: "A",
+    },
+    {
+      lngLat: [119.11342833,29.626331],
+      markImg: map_mark05,
+      to: "C",
+    },
+    {
+      lngLat: [118.35319272,29.16900093],
+      markImg: map_mark08,
+      to: "C",
+    },
+    {
+      lngLat: [121.33983263,28.29604606],
+      markImg: map_mark01,
+      to: "D",
+    },
+  ],
+  [
+    {
+      lngLat: [119.78400715,30.60272968],
+      markImg: map_mark03,
+      to: "",
+    },
+    {
+      lngLat: [121.23671543,29.40075844],
+      markImg: map_mark04,
+      to: "",
+    },
+    {
+      lngLat: [121.0281583,29.85086315],
+      markImg: map_mark05,
+      to: "",
+    },
+    {
+      lngLat: [119.87030666,29.58854638],
+      markImg: map_mark01,
+      to: "",
+    },
+    {
+      lngLat: [121.43439725,28.51234538],
+      markImg: map_mark03,
+      to: "",
+    },
+    {
+      lngLat: [120.72933911,30.56846957],
+      markImg: map_mark04,
+      to: "",
+    },
+    {
+      lngLat: [119.96018478,28.96195761],
+      markImg: map_mark05,
+      to: "",
+    },
+    {
+      lngLat: [118.79844126,28.54050274],
+      markImg: map_mark01,
+      to: "",
+    },
+    {
+      lngLat: [120.29732592,27.80749072],
+      markImg: map_mark04,
+      to: "",
+    }
+  ],
+  [
+    {
+      lngLat: [121.20503846,28.09706841],
+      markImg: map_mark02,
+      to: "",
+    },
+    {
+      lngLat: [121.91882702,29.52162644],
+      markImg: map_mark06,
+      to: "",
+    },
+    {
+      lngLat: [120.53090482,29.27114549],
+      markImg: map_mark07,
+      to: "",
+    },
+    {
+      lngLat: [119.202465,27.59742705],
+      markImg: map_mark08,
+      to: "",
+    },
+    {
+      lngLat: [121.24469338,30.20082414],
+      markImg: map_mark01,
+      to: "",
+    },
+    {
+      lngLat: [120.75892061,30.44043857],
+      markImg: map_mark02,
+      to: "",
+    },
+    {
+      lngLat: [120.50116363,30.14940203],
+      markImg: map_mark06,
+      to: "",
+    },
+    {
+      lngLat: [119.70806523,30.28646798],
+      markImg: map_mark05,  
+      to: "",
+    },
+    {
+      lngLat: [119.96582221,30.90089087],
+      markImg: map_mark07,
+      to: "",
+    },
+    {
+      lngLat: [119.31151603,28.91596816],
+      markImg: map_mark08,
+      to: "",
+    },
+    {
+      lngLat: [120.30288903,27.98331796],
+      markImg: map_mark07,
+      to: "",
+    }
+  ],
+  [
+    {
+      lngLat: [119.90888819,31.04855588],
+      markImg: map_mark01,
+      to: "",
+    },
+    {
+      lngLat: [121.20087168,29.34709359],
+      markImg: map_mark03,
+      to: "",
+    },
+    {
+      lngLat: [121.20087168,30.16959237],
+      markImg: map_mark05,
+      to: "",
+    },
+    {
+      lngLat: [119.1583073,29.83926878],
+      markImg: map_mark08,
+      to: "",
+    },
+    {
+      lngLat: [118.33389879,29.18608402],
+      markImg: map_mark01,
+      to: "",
+    },
+    {
+      lngLat: [119.95810661,28.97101099],
+      markImg: map_mark05,
+      to: "",
+    },
+    {
+      lngLat: [120.16728489,29.70041937],
+      markImg: map_mark08,
+      to: "",
+    },
+    {
+      lngLat: [120.49950921,27.57312259],
+      markImg: map_mark05,
+      to: "",
+    },
+    {
+      lngLat: [120.74560131,28.61516227],
+      markImg: map_mark08,
+      to: "",
+    },
+    {
+      lngLat: [119.20752572,28.39890694],
+      markImg: map_mark01,
+      to: "",
+    },
+    {
+      lngLat: [120.4502908,28.8309732],
+      markImg: map_mark05,
+      to: "",
+    },
+    {
+      lngLat: [121.27469931,28.57194668],
+      markImg: map_mark08,  
+      to: "",
+    },
+    {
+      lngLat: [121.61922824,29.34709359],
+      markImg: map_mark05,
+      to: "",
+    },
+  ],
+  [
+    {
+      lngLat: [119.40301702,29.43395688],
+      markImg: map_mark01,
+      to: "",
+    },
+    {
+      lngLat: [119.69600706,29.71607461],
+      markImg: map_mark02,
+      to: "",
+    },
+    {
+      lngLat: [120.08317248,30.0427027],
+      markImg: map_mark03,
+      to: "",
+    },
+    {
+      lngLat: [120.32384287,30.5846942],
+      markImg: map_mark04,
+      to: "",
+    },
+    {
+      lngLat: [121.03539013,30.67473399],
+      markImg: map_mark05,
+      to: "",
+    },
+    {
+      lngLat: [119.34023343,30.0427027],
+      markImg: map_mark06,
+      to: "",
+    },
+    {
+      lngLat: [120.99353441,28.52776039],
+      markImg: map_mark07,
+      to: "",
+    },
+    {
+      lngLat: [121.4748752,29.68880738],
+      markImg: map_mark08,
+      to: "",
+    },
+    {
+      lngLat: [120.7842558,29.13277442],
+      markImg: map_mark05,
+      to: "",
+    },
+    {
+      lngLat: [120.29245108,28.54614571],
+      markImg: map_mark04,
+      to: "",
+    },
+    {
+      lngLat: [121.87250454,29.40661338],
+      markImg: map_mark02,
+      to: "",
+    },
+    {
+      lngLat: [122.18642245,30.03364416],
+      markImg: map_mark05,
+      to: "",
+    },
+    {
+      lngLat: [119.83203815,27.79898863],
+      markImg: map_mark04,
+      to: "",
+    },
+    {
+      lngLat: [119.16234662,28.38976836],
+      markImg: map_mark02,
+      to: "",
+    },
+  ]
+]
+
+let mapCurrent = 0
+
+/* 切换地图数据源 */
+const renderMapDataChange = (index: number) => {
+  mapCurrent = index
+  // 重新渲染标记点
+  renderMapMarkers(mapCurrent);
+  // 重新渲染目标区域
+  generateMapTargetArea();
+}
+
 const createMapGeometry = ()=>{
   // 计算地图中心位置，用于居中显示
   const centerPos = calculateGeoJsonCenter(mapGeoData as GeoJSON)
@@ -107,7 +465,9 @@ const createMapGeometry = ()=>{
   // 区域层
   createMapGeometryInsideShape({
     depth: 0.001,
-    positionZ: 2,
+    positionZ: 0,
+    borderColor: 0xffffff,
+    borderOpacity: 0.15,
   })
   // 主体边框01
   createMapGeometryShape({
@@ -121,21 +481,21 @@ const createMapGeometry = ()=>{
     depth: 0.001,
     positionZ: -0.75,
     opacity: 0,
-    borderColor: 0xffffff,
+    borderColor: "#aaaaaa",
     borderOpacity: 0.3,
   })
   createMapGeometryShape({
     depth: 0.001,
-    positionZ: -0.5,
+    positionZ: -0.50,
     opacity: 0,
-    borderColor: 0xffffff,
+    borderColor: 0xaaaaaa,
     borderOpacity: 0.2,
   })
   createMapGeometryShape({
     depth: 0.001,
     positionZ: -0.25,
     opacity: 0,
-    borderColor: 0xffffff,
+    borderColor: 0xaaaaaa,
     borderOpacity: 0.1,
   })
   // 贴图
@@ -149,14 +509,19 @@ const createMapGeometry = ()=>{
   // 边框
   createMapGeometryShape({
     depth: 0.001,
-    positionZ: 0,
+    positionZ: 0.04,
     opacity: 0,
     borderColor: '#1a8ed6',
-    borderWidth: 4,
+    borderOpacity: 1,
+    borderWidth: 1,
     isCreateData: true,
   })
-  // 数据贴图
 
+  // 数据贴图 目标区域
+  generateMapTargetArea()
+  // 生成飞行线
+  generateFlyLine()
+  
   scene.rotation.x = -Math.PI / 2 // 旋转几何体（适配 Three.js 坐标系）
 }
 
@@ -177,6 +542,7 @@ interface MapGeometryOptions{
 }
 const createMapGeometryShape = (options: MapGeometryOptions = {
   depth: 1,
+  bgColor: "#ffffff",
   opacity: 0,
   positionX: 0,
   positionY: 0,
@@ -186,7 +552,10 @@ const createMapGeometryShape = (options: MapGeometryOptions = {
   isCreateData: false,
 }) =>{
   // console.log(mapGeoData)   // 输出地图数据用于调试
-  const {depth,bgColor,opacity,borderColor,texture,borderWidth,borderOpacity,isCreateData} = options as MapGeometryOptions
+  let {depth,bgColor,opacity,borderColor,texture,borderWidth,borderOpacity,isCreateData} = options as MapGeometryOptions
+  if(!bgColor){
+    bgColor = "#ffffff"
+  }
   mapGeoData.features.forEach((feature: any) => {
     const coordinates = feature.geometry.coordinates;
     // 处理多级坐标（部分区域有子区域，如海岛）
@@ -228,6 +597,7 @@ const createMapGeometryShape = (options: MapGeometryOptions = {
     mapMeshes.push(mesh);
     if(texture){
       // 计算 UV 映射以确保贴图贴合
+      // fixSeamUVs(geometry)
       adjustUVs(geometry, shapes)
       createMapTexture(geometry)
     }
@@ -237,8 +607,7 @@ const createMapGeometryShape = (options: MapGeometryOptions = {
     
     // 使用（在3D坐标上添加）
     if(isCreateData){
-      var point:[number,number] = lngLatToVector3([120.13279236,30.22054087]) || [0,0]
-      createMapMarkPlane(new THREE.Vector3(point[0], point[1],0.5), textJpg)
+      renderMapMarkers(mapCurrent)
     }
     // scene.rotation.x = -Math.PI / 2 // 旋转几何体（适配 Three.js 坐标系）
     // 添加鼠标交互（hover 高亮）
@@ -286,15 +655,18 @@ const createMapGeometryInsideShape = (options: MapGeometryOptions = {
         const edgeGeometry = new THREE.EdgesGeometry(shapeGeometry);
         // 步骤3：创建线材质（专用！纯色描边，可自定义颜色、线宽）
         const lineMaterial = new THREE.LineBasicMaterial({
-          color: 0xFFFFFF, // 边缘线颜色（黑色，与填充色对比）
+          color: borderColor, // 边缘线颜色（黑色，与填充色对比）
           linewidth: 1, // 线宽（注意：WebGL限制，默认1，多数浏览器不支持大于1）
+          depthTest: false, // 禁用深度测试，确保线条始终显示在顶层
+          transparent: true, // 启用透明度
+          opacity: borderOpacity, // 描边透明度（0.5）
         });
         // 步骤4：创建线对象（LineSegments 适合闭合轮廓，无断点）
         const shapeLine = new THREE.LineSegments(edgeGeometry, lineMaterial);
 
         // 3. 线对象与Shape填充Mesh同步旋转/偏移（关键！保证描边贴合）
         // shapeLine.rotation.x = -Math.PI / 2; // 与地图Mesh同步旋转
-        shapeLine.position.set(0, 0, -(depth ?? 0) / 2) // 偏移到地图中心下方，兜底处理 depth 为 undefined 的情况
+        shapeLine.position.set(0, 0, (options.positionZ || 0)) // 放置在线条应在的层级之上一点，避免被其他元素遮挡
 
         // 4. 添加到场景
         scene.add(shapeLine);
@@ -310,7 +682,7 @@ const createMapGeometryInsideShape = (options: MapGeometryOptions = {
     const material = new THREE.MeshLambertMaterial({
       color: 0x409eff, // 基础颜色（蓝色）
       transparent: true,
-      opacity: 0
+      opacity: 0,
     });
 
     // 创建网格并添加到场景
@@ -350,11 +722,54 @@ const createMapLine = (geometry: THREE.ExtrudeGeometry,mesh: THREE.Mesh,color: n
     color,  // 描边颜色
     transparent: true,
     opacity: borderOpacity,
-    linewidth: width      // 线宽（部分浏览器支持有限）
+    linewidth: width,      // 线宽（部分浏览器支持有限）
+    depthTest: false      // 禁用深度测试，确保线条始终显示在顶层
   })
 
   const wireframe = new THREE.LineSegments(edges, lineMaterial)
   mesh.add(wireframe) // 将线条作为子对象添加
+}
+
+// 修正 UV 映射
+const fixSeamUVs = (geometry: THREE.ExtrudeGeometry) => {
+  const uvAttribute = geometry.attributes.uv
+  const posAttribute = geometry.attributes.position
+  
+  // 获取边界框用于归一化
+  geometry.computeBoundingBox()
+  const min = geometry.boundingBox!.min
+  const max = geometry.boundingBox!.max
+  const range = new THREE.Vector2(max.x - min.x, max.y - min.y)
+  
+  for (let i = 0; i < posAttribute.count; i++) {
+    const x = posAttribute.getX(i)
+    const y = posAttribute.getY(i)
+    const z = posAttribute.getZ(i)
+    
+    // 判断是顶面/底面还是侧面
+    const isTopFace = Math.abs(z - max.z) < 0.01
+    const isBottomFace = Math.abs(z - min.z) < 0.01
+    
+    let u: number, v: number
+    
+    if (isTopFace || isBottomFace) {
+      // 顶面和底面使用平面投影
+      u = (x - min.x) / range.x
+      v = (y - min.y) / range.y
+    } else {
+      // 侧面使用圆柱投影或保持原样
+      u = (x - min.x) / range.x
+      v = (z - min.z) / (max.z - min.z)
+    }
+    
+    // 避免 UV 边缘重复（防止接缝闪烁）
+    u = Math.min(Math.max(u, 0.001), 0.999)
+    v = Math.min(Math.max(v, 0.001), 0.999)
+    
+    uvAttribute.setXY(i, u, v)
+  }
+  
+  uvAttribute.needsUpdate = true
 }
 
 // 调整 UV 映射以确保贴图完全贴合
@@ -405,7 +820,7 @@ const createMapTexture = (geometry: THREE.ExtrudeGeometry) => {
     color: 0x888888,
     roughness: 0.4,
     metalness: 0.1,
-    polygonOffset: true,
+    polygonOffset: true, // 开启多边形偏移
     polygonOffsetFactor: 1,  // 顶面向前偏移
     polygonOffsetUnits: 1,
   })
@@ -427,24 +842,44 @@ const createMapTexture = (geometry: THREE.ExtrudeGeometry) => {
   scene.add(mesh)
 }
 
-/* 创建地图数据平面点 */
-const createMapMarkPlane = (position: THREE.Vector3, textureUrl: any) =>{
-  const geometry = new THREE.PlaneGeometry(1, 1)
-  const textureLoader = new THREE.TextureLoader()
-  const texture = textureLoader.load(textureUrl)
-  const material = new THREE.MeshBasicMaterial({ 
-    map: texture,
-    transparent: true,
-    opacity: 0.9
-  })
-  const plane = new THREE.Mesh(geometry, material)
-  plane.position.set(position.x, position.y, position.z)
-  scene.add(plane)
+/* 清除所有标记平面 */
+const clearMapMarkPlanes = () => {
+  mapMarkPlanes.forEach(plane => {
+    scene.remove(plane); // 从场景中移除
+    plane.geometry.dispose(); // 释放几何体内存
+    if (plane.material) {
+      const material = plane.material as THREE.Material;
+      if ((material as THREE.MeshBasicMaterial).map) {
+        if ((material as THREE.MeshBasicMaterial).map) {
+          (material as THREE.MeshBasicMaterial).map!.dispose(); // 释放纹理内存
+        }
+      }
+      material.dispose(); // 释放材质内存
+    }
+  });
+  mapMarkPlanes = []; // 清空数组
 }
 
-/* 创建目标区域 */
-const createTargetArea = (position: THREE.Vector3, textureUrl: any) =>{
-  const geometry = new THREE.PlaneGeometry(1, 1)
+/* 渲染地图标记点 */
+const renderMapMarkers = (currentIndex: number) => {
+  clearMapMarkPlanes(); // 先清除现有的标记点
+  if (markDataList[currentIndex]) {
+    markDataList[currentIndex].forEach((item: any) => {
+      var point: [number, number] = lngLatToVector3(item.lngLat) || [0, 0];
+      createMapMarkPlane(new THREE.Vector3(point[0], point[1], 0.5), item.markImg, { width: 2.4, height: 2.4 });
+    });
+  }
+}
+
+/* 创建地图数据平面点 */
+interface CreateMapMarkPlaneOptions {
+  width?: number;
+  height?: number;
+}
+
+const createMapMarkPlane = (position: THREE.Vector3, textureUrl: any, options: CreateMapMarkPlaneOptions = {}) => {
+  const { width = 1, height = 1 } = options;
+  const geometry = new THREE.PlaneGeometry(width, height)
   const textureLoader = new THREE.TextureLoader()
   const texture = textureLoader.load(textureUrl)
   const material = new THREE.MeshBasicMaterial({ 
@@ -455,6 +890,426 @@ const createTargetArea = (position: THREE.Vector3, textureUrl: any) =>{
   const plane = new THREE.Mesh(geometry, material)
   plane.position.set(position.x, position.y, position.z)
   scene.add(plane)
+  mapMarkPlanes.push(plane) // 添加到标记平面数组中
+  return plane
+}
+
+const enum AreaTypeEnum {
+  STATUS01 = '01',
+  STATUS02 = '02',
+  STATUS03 = '03',
+  STATUS04 = '04',
+}
+
+const AreaColorEnum: Record<AreaTypeEnum, string> = {
+  [AreaTypeEnum.STATUS01]: '#33ef2b',
+  [AreaTypeEnum.STATUS02]: '#5ee8f1',
+  [AreaTypeEnum.STATUS03]: '#f2a824',
+  [AreaTypeEnum.STATUS04]: '#ed3309',
+}
+
+interface AreaDataInter {
+  [key: string]: {
+    lngLat: [number, number];
+    name: string;
+    type: AreaTypeEnum;
+    color?: string;
+  }
+}
+
+const areaGeoData: AreaDataInter[] = [
+  {
+    A: {
+      lngLat: [120.64822528, 30.25985951],
+      name: "A目标区域",
+      type: AreaTypeEnum.STATUS01
+    },
+    B: {
+      lngLat: [121.6527629,29.43395688],
+      name: "B目标区域",
+      type: AreaTypeEnum.STATUS02
+    },
+    C: {
+      lngLat: [119.09956311,29.23326748],
+      name: "C目标区域",
+      type: AreaTypeEnum.STATUS03
+    },
+    D: {
+      lngLat: [120.32384334,28.25159646],
+      name: "D目标区域",
+      type: AreaTypeEnum.STATUS04
+    },
+    E: {
+      lngLat: [120.4389466,29.35190464],
+      name: "E目标区域",
+      type: AreaTypeEnum.STATUS04
+    },
+  },
+  {
+    A: {
+      lngLat: [119.78075747,30.72614701],
+      name: "A目标区域",
+      type: AreaTypeEnum.STATUS03
+    },
+    B: {
+      lngLat: [119.30917859,29.81716855],
+      name: "B目标区域",
+      type: AreaTypeEnum.STATUS02
+    },
+    C: {
+      lngLat: [121.44153527,29.77565201],
+      name: "C目标区域",
+      type: AreaTypeEnum.STATUS01
+    },
+    D: {
+      lngLat: [120.7649221,30.63210045],
+      name: "D目标区域",
+      type: AreaTypeEnum.STATUS04
+    },
+  },
+  {
+    A: {
+      lngLat: [121.29431219,30.22678602],
+      name: "A目标区域",
+      type: AreaTypeEnum.STATUS01
+    },
+    B: {
+      lngLat: [121.4017543,28.43943396],
+      name: "B目标区域",
+      type: AreaTypeEnum.STATUS02
+    },
+    C: {
+      lngLat: [119.13651637,28.75388448],
+      name: "C目标区域",
+      type: AreaTypeEnum.STATUS03
+    },
+  },
+  {
+    A: {
+      lngLat: [120.42021622,30.22109907],
+      name: "A目标区域",
+      type: AreaTypeEnum.STATUS01
+    },
+    B: {
+      lngLat: [119.91973506,29.01171939],
+      name: "B目标区域",
+      type: AreaTypeEnum.STATUS02
+    },
+    C: {
+      lngLat: [120.18446769,28.39685409],
+      name: "C目标区域",
+      type: AreaTypeEnum.STATUS03
+    },
+    D: {
+      lngLat: [120.47764571,29.30984207],
+      name: "D目标区域",
+      type: AreaTypeEnum.STATUS04
+    },
+  },
+  {
+    A: {
+      lngLat: [120.20268327,30.18313014],
+      name: "A目标区域",
+      type: AreaTypeEnum.STATUS01
+    },
+    B: {
+      lngLat: [120.58586836,28.07728914],
+      name: "B目标区域",
+      type: AreaTypeEnum.STATUS02
+    },
+    C: {
+      lngLat: [118.79423781,29.00993314],
+      name: "C目标区域",
+      type: AreaTypeEnum.STATUS03
+    },
+  },
+]
+
+/* 创建目标区域 */
+const drawTargetArea = (key: any) => {
+  const AreaData = areaGeoData[mapCurrent];
+  const areaItem = AreaData[key];
+  const Point: [number, number] = lngLatToVector3(areaItem.lngLat as [number, number]) || [0, 0];
+  const PositionZ = 0.6
+  const AreaType: AreaTypeEnum = areaItem.type
+  const CircleColor = areaItem.color || AreaColorEnum[AreaType]
+  const AreaName = areaItem.name
+  let ArrowUrl: any = null
+
+  switch (AreaType) {
+    case AreaTypeEnum.STATUS01:
+      ArrowUrl = map_area01
+      break;
+    case AreaTypeEnum.STATUS02:  
+      ArrowUrl = map_area02
+      break;
+    case AreaTypeEnum.STATUS03:  
+      ArrowUrl = map_area03
+      break;
+    case AreaTypeEnum.STATUS04:  
+      ArrowUrl = map_area04
+      break;
+    default:
+      break;
+  }
+
+  /* 绘制圆点 */
+  const createCircleRing = (point: [number, number], positionZ: number, color: any)=>{
+    // 圆点
+    const spotGeometry = new THREE.CircleGeometry(0.6, 200);// 圆点半径为1.4，200个分段
+    const spotMaterial = new THREE.MeshBasicMaterial({
+      color: color,
+      side: THREE.DoubleSide,
+    });
+    const circle = new THREE.Mesh(spotGeometry, spotMaterial);
+    circle.position.set(point[0], point[1], positionZ);
+
+    // 圆环
+    const ringGeometry = new THREE.RingGeometry(0.8, 1.2, 50);
+    const ringMaterial = new THREE.MeshBasicMaterial({
+      color: color,
+      side: THREE.DoubleSide,
+      transparent: true,
+    });
+    const ring = new THREE.Mesh(ringGeometry, ringMaterial);
+    ring.position.set(point[0], point[1], positionZ);
+
+    return {circle, ring}
+  }
+  // 箭头贴图
+  const createArrow = (point: [number, number],positionZ: number,textUrl: any) => {
+    const arrowGeometry = new THREE.PlaneGeometry(1.4, 1.4);
+    const textureLoader = new THREE.TextureLoader()
+    const texture = textureLoader.load(textUrl)
+    const arrowMaterial = new THREE.MeshBasicMaterial({
+      map: texture,
+      transparent: true,
+      side: THREE.DoubleSide,
+    });
+    const arrow = new THREE.Mesh(arrowGeometry, arrowMaterial);
+    arrow.rotation.x = Math.PI / 2; // 绕X轴旋转90度使贴图面向观察者
+    arrow.position.set(point[0], point[1], positionZ+1);
+
+    return arrow
+  }
+  // 顶部标题
+  const createTitleBox = (point: [number, number],positionZ: number,title: string,color: any) => {
+    // 创建Canvas来绘制带背景和边框的文本
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return null;
+    
+    // 设置画布尺寸
+    canvas.width = 400;
+    canvas.height = 120;
+    
+    // 绘制背景
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)'; // 黑色半透明背景
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // 绘制红色边框
+    /* ctx.strokeStyle = color;
+    ctx.lineWidth = 2;
+    ctx.strokeRect(0, 0, canvas.width, canvas.height); */
+    ctx.beginPath()
+    ctx.moveTo(0, canvas.height)           // 左下角
+    ctx.lineTo(canvas.width, canvas.height)   // 右下角
+    ctx.strokeStyle = color
+    ctx.lineWidth = 10
+    ctx.stroke()
+    
+    // 绘制文字
+    ctx.font = 'bolder 50px Arial';
+    ctx.fillStyle = 'white';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(title, canvas.width / 2, canvas.height / 2);
+    
+    // 创建纹理
+    const texture = new THREE.CanvasTexture(canvas);
+    const material = new THREE.MeshBasicMaterial({ 
+      map: texture,
+      transparent: true,
+      side: THREE.DoubleSide
+    });
+    // TODO
+    
+    // 创建平面几何体
+    const geometry = new THREE.PlaneGeometry(6.6, 2); // 
+    const titleMesh = new THREE.Mesh(geometry, material);
+    titleMesh.position.set(point[0], point[1], positionZ + 3);
+    titleMesh.rotation.x = Math.PI / 2; // 绕X轴旋转90度使贴图面向观察者
+    return titleMesh;
+  }
+
+  const {circle, ring} = createCircleRing(Point, PositionZ, CircleColor)
+  const arrow = createArrow(Point, PositionZ, ArrowUrl)
+  const title = createTitleBox(Point, PositionZ, AreaName, CircleColor)
+
+  return { circle, ring, arrow, title };
+}
+
+let spotList:any = [] // 圆环
+let arrowList:any = [] // 箭头
+// 存储目标区域对象以便后续清理
+let areaObject3DInstance: THREE.Object3D | null = null;
+
+/* 清除现有的目标区域 */
+const clearMapTargetAreas = () => {
+  if (areaObject3DInstance) {
+    // 从场景中移除
+    scene.remove(areaObject3DInstance);
+    // 清理内存
+    areaObject3DInstance.traverse((child) => {
+      if (child instanceof THREE.Mesh) {
+        child.geometry.dispose();
+        if (child.material) {
+          const materials = Array.isArray(child.material) ? child.material : [child.material];
+          materials.forEach(material => {
+            if (material.map) material.map.dispose(); // 释放纹理
+            material.dispose(); // 释放材质
+          });
+        }
+      }
+    });
+    // 清空数组
+    arrowList = [];
+    spotList = [];
+  }
+}
+
+const generateMapTargetArea = ()=>{
+  // 先清理现有的目标区域
+  clearMapTargetAreas();
+  
+  // 创建新的目标区域对象
+  areaObject3DInstance = new THREE.Object3D();
+  const TempAreaData = areaGeoData[mapCurrent]
+  for (const areaKey of Object.keys(TempAreaData)) {
+    const areaTarget = drawTargetArea(areaKey)
+    areaObject3DInstance.add(areaTarget.circle)
+    areaObject3DInstance.add(areaTarget.ring)
+    areaObject3DInstance.add(areaTarget.arrow)
+    areaTarget.title && areaObject3DInstance.add(areaTarget.title)
+    arrowList.push(areaTarget.arrow)
+    spotList.push(areaTarget.ring)
+  }
+  scene.add(areaObject3DInstance)
+}
+
+const targetAreaAnimate = () => {
+  spotList.forEach((mesh: any) => {
+    mesh._s += 0.01;
+    mesh.scale.set(1 * mesh._s, 1 * mesh._s, 1 * mesh._s);
+    if (mesh._s <= 2) {
+      mesh.material.opacity = 2 - mesh._s;
+    } else {
+      mesh._s = 1;
+    }
+  });
+  // 箭头贴图动画
+  arrowList.forEach((arrow: any) => {
+    arrow.rotation.y += 0.01; // 沿Z轴持续旋转动画
+  });
+}
+
+/* 创建目标区域 标记位置 轨迹线 */
+const drawFlyLineFunc = (StartPoint: [number, number], EndPoint: [number, number], PositionZ: number) => {
+  StartPoint = StartPoint || [0, 0];
+  EndPoint = EndPoint || [0, 0];
+  PositionZ = PositionZ || 0.5
+
+  // 创建一个小的球体来表示轨迹线上的点
+  const drawFlyPoint = (curve: any) => {
+    const geometry = new THREE.SphereGeometry(0.2); // 球体半径为0.2
+    const material = new THREE.MeshBasicMaterial({
+      color: "#f66a4a",
+      side: THREE.DoubleSide,
+    });
+    const mesh: any = new THREE.Mesh(geometry, material);
+    // 保存曲线实例
+    mesh.curve = curve;
+    mesh._s = 0;
+    return mesh;
+  };
+
+  // 绘制两点链接轨迹线
+  const [x0, y0, z0] = [...StartPoint, PositionZ];
+  const [x1, y1, z1] = [...EndPoint, PositionZ];
+  // 使用 QuadraticBezierCurve3 创建 三维二次贝塞尔曲线
+  const curve = new THREE.QuadraticBezierCurve3(
+    new THREE.Vector3(x0, y0, z0),
+    new THREE.Vector3((x0 + x1) / 2, (y0 + y1) / 2, 20),
+    new THREE.Vector3(x1, y1, z1)
+  );
+
+  const flyPoint = drawFlyPoint(curve);
+
+  const lineGeometry = new THREE.BufferGeometry();
+  // 获取曲线上50个点
+  const points = curve.getPoints(50);
+  const positions = [];
+  const colors = [];
+  const color = new THREE.Color();
+
+  // 给每个顶点设置演示 实现渐变
+  for (let j = 0; j < points.length; j++) {
+    // 修改颜色偏向 #ed3309 (红橙色)，使用 HSL 值约为 H:0.07, S:0.79, L:0.57
+    color.setHSL(0.07 + j * 0.0005, 0.79 - j * 0.002, 0.57 - j * 0.001); // 色
+    colors.push(color.r, color.g, color.b);
+    positions.push(points[j].x, points[j].y, points[j].z);
+  }
+  // 放入顶点 和 设置顶点颜色
+  lineGeometry.setAttribute(
+    "position",
+    new THREE.BufferAttribute(new Float32Array(positions), 3, true)
+  );
+  lineGeometry.setAttribute(
+    "color",
+    new THREE.BufferAttribute(new Float32Array(colors), 3, true)
+  );
+
+  const material = new THREE.LineBasicMaterial({
+    vertexColors: true,
+    // color: "red",
+    side: THREE.DoubleSide,
+    linewidth: 2, // 设置线条宽度（注意：大部分浏览器只支持最大值为1）
+  });
+  const flyLine = new THREE.Line(lineGeometry, material);
+
+  return { flyLine, flyPoint };
+
+}
+var flyLinePointList:any = [] // 轨迹线上的小点
+const generateFlyLine = ()=>{
+  const flyObject3D = new THREE.Object3D();
+  const TempMarkData = markDataList[mapCurrent]
+  const TempAreaData = areaGeoData[mapCurrent]
+  TempMarkData.map((item: any)=>{
+    if(item.to!==''){
+      const StartPoint = lngLatToVector3(item.lngLat) || [0, 0];
+      var tempEndLngLat = TempAreaData[item.to]
+      const EndPoint = lngLatToVector3(tempEndLngLat.lngLat) || [0, 0];
+      const PositionZ = 0.5
+      
+      const {flyLine, flyPoint} = drawFlyLineFunc(StartPoint, EndPoint, PositionZ)
+      flyObject3D.add(flyLine)
+      flyObject3D.add(flyPoint)
+      flyLinePointList.push(flyPoint)
+      scene.add(flyObject3D)
+    }
+  })
+  
+}
+
+const flyLineAnimate = () => {
+  flyLinePointList.forEach((point: any) => {
+    point._s += 0.003;
+    let tankPosition = new THREE.Vector3();
+    // getPointAt() 根据弧长在曲线上的位置。必须在范围[0，1]内。
+    tankPosition = point.curve.getPointAt(point._s % 1);
+    point.position.set(tankPosition.x, tankPosition.y, tankPosition.z);
+  })
 }
 
 
@@ -515,6 +1370,10 @@ const handleResize = () => {
 const animate = () => {
   animationId = requestAnimationFrame(animate)
   controls.update()
+  // 目标区域动画
+  targetAreaAnimate()
+  // 轨迹线动画
+  flyLineAnimate()
   renderer.render(scene, camera)
 }
 
@@ -584,7 +1443,8 @@ const resetView = () => {
 
 defineExpose({
   zoomTo,
-  resetView
+  resetView,
+  renderMapDataChange
 })
 </script>
 

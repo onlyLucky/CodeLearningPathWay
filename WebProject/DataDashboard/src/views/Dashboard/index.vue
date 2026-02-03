@@ -6,7 +6,7 @@
         <div class="dashboardCenter">
           <CenterLeft ref="centerLeftRef"></CenterLeft>
           <div class="MapCon">
-            <MapComps></MapComps>
+            <MapComps ref="mapCompsRef"></MapComps>
             <!-- <TMapCon></TMapCon> -->
             <div class="topTab">
               <div class="teamItem" :class="{'active':teamTabCurrent==index}" v-for="(item,index) in teamTab" :key="index" @click="changeTeamTab(index)">
@@ -43,7 +43,7 @@
               </div> 
             </div>
             <div class="bottomTab">
-              <div class="tabItem" :class="{'active':bottomTabCurrent==index}" v-for="(item,index) in bottomTab" :key="index" @click="bottomTabCurrent=index">
+              <div class="tabItem" :class="{'active':bottomTabCurrent==index}" v-for="(item,index) in bottomTab" :key="index" @click="changeBottomTab(index)">
                 <img class="activeBg" src="@/assets/images/cb_active.png" alt="">
                 <img class="tabIcon" :src="item.icon" alt="">
                 <p class="tabTitle">{{item.name}}</p>
@@ -201,7 +201,7 @@ import { defineComponent, ref, provide, onMounted } from 'vue';
 const centerLeftRef = ref();
 const centerRightRef = ref();
 const footerRef = ref();
-
+const mapCompsRef = ref();
 
 
 // 提供一个方法给子组件使用
@@ -514,6 +514,13 @@ const changeTeamTab = (index: number) => {
   updateStaticData()
   if (footerRef.value && typeof footerRef.value.tabDataChangeFunc === 'function') {
     footerRef.value.tabDataChangeFunc(index);
+  }
+}
+
+const changeBottomTab = (index: number) => {
+  bottomTabCurrent.value = index
+  if (mapCompsRef.value && typeof mapCompsRef.value.renderMapDataChange === 'function') {
+    mapCompsRef.value.renderMapDataChange(index);
   }
 }
 
