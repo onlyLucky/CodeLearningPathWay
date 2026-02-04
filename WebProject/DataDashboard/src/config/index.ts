@@ -29,8 +29,8 @@ const envConfigs: Record<string, EnvConfig> = {
     apiBaseUrl: import.meta.env.VITE_API_BASE_URL || 'https://api.example.com',
     port: Number(import.meta.env.VITE_APP_PORT) || 3000,
     env: import.meta.env.VITE_APP_ENV || 'production',
-    flvUrl: import.meta.env.FLV_URL || 'http://192.168.19.127:8080/live/live200.flv',
-    yunDeskPath: import.meta.env.YUN_DESK_PATH || 'http://192.168.19.127:6802/index.html?RemoteUserCode=dm1&RemotePwd=Dm123456&RemoteIp=192.168.19.17:3389'
+    flvUrl: import.meta.env.FLV_URL || 'http://192.168.16.162:8080/live/live206.flv',
+    yunDeskPath: import.meta.env.YUN_DESK_PATH || 'https://meet.bjxmxx.com:3443/remote/index.html?RemoteUserCode=administrator&RemotePwd=xm123123&RemoteIp=192.168.16.163:3389'
   }
 }
 

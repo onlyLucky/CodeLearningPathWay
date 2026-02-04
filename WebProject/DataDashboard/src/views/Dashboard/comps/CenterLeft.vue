@@ -9,7 +9,7 @@
         <div class="loading-spinner"></div>
         <div class="loading-text">正在加载视频会议...</div>
       </div>
-      <iframe v-show="!isLoading && isInMeeting" src="/xyLink/index.html" ref="iframeRef" frameborder="0" allowfullscreen @load="onLoad" @error="onError"></iframe>
+      <iframe v-show="!isLoading && isInMeeting" src="./xyLink/index.html" ref="iframeRef" frameborder="0" allowfullscreen @load="onLoad" @error="onError"></iframe>
       <div class="videoItem" v-show="!isInMeeting" v-for="item in videoList" :key="item.name">
         <div class="videoCon">
           <img :src="item.img" alt="">
