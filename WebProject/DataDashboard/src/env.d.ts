@@ -8,6 +8,8 @@ interface ImportMetaEnv {
   readonly DEV: boolean
   readonly PROD: boolean
   readonly SSR: boolean
+  readonly FLV_URL: string
+  readonly YUN_DESK_PATH: string
 }
 
 interface ImportMeta {

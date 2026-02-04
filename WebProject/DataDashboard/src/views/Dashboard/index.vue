@@ -178,7 +178,7 @@
     </div>
     <!-- 云桌面 -->
     <div class="yunDeskTop" v-if="isShowYun">
-      <iframe src="https://chat.baidu.com/" frameborder="0"></iframe>
+      <iframe :src="detailYunDeskUrl" frameborder="0"></iframe>
       <div class="closeBtn" @click="closeYunDeskTop" @touchend="closeYunDeskTop">
         <img src="@/assets/icons/close.png" alt="">
       </div>
@@ -192,7 +192,8 @@ import DashboardFooter from './comps/Footer.vue'
 import DashboardHeader from './comps/Header.vue'
 import CenterLeft from './comps/CenterLeft.vue'
 import CenterRight from './comps/CenterRight.vue'
-import TMapCon from '@/components/MapComps/TMapCon.vue'
+// import TMapCon from '@/components/MapComps/TMapCon.vue'
+import config from '@/config/index'
 import gsap from 'gsap'
 
 import { defineComponent, ref, provide, onMounted } from 'vue';
@@ -525,8 +526,10 @@ const changeBottomTab = (index: number) => {
 }
 
 let isShowYun = ref<boolean>(false)
+let detailYunDeskUrl = ref<any>('')
 const goYunDeskTop = ()=>{
   // window.open('https://www.baidu.com','_blank')
+  detailYunDeskUrl.value = config.yunDeskPath
   isShowYun.value = true
 }
 
@@ -1001,6 +1004,7 @@ defineComponent({
     left: 0;
     top: 0;
     z-index: 12;
+    background-color: #000;
     iframe{
       width: 100%;
       height: 100%;

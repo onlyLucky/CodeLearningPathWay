@@ -46,6 +46,8 @@ let controls: OrbitControls     // 轨道控制器
 let mapMeshes: THREE.Mesh[] = []; // 地图网格数组，用于存储多个区域的网格
 let mapMarkPlanes: THREE.Mesh[] = []; // 标记平面数组，用于存储标记点
 let animationId: number          // 动画帧ID
+// 存储飞线对象以便后续清理
+let flyObject3DInstance: THREE.Object3D | null = null;
 
 
 // 初始化场景
@@ -54,8 +56,8 @@ const initScene = () => {
   // scene.background = new THREE.Color(0x0a0e27)  // 设置场景背景颜色为深蓝色
   // scene.fog = new THREE.Fog(0x0a0e27, 10, 50)   // 添加雾效，增强深度感
   // 创建坐标轴，参数为轴的长度
-  const axesHelper = new THREE.AxesHelper(30)
-  scene.add(axesHelper)
+  /* const axesHelper = new THREE.AxesHelper(30)
+  scene.add(axesHelper) */
 }
 
 /* 
@@ -199,243 +201,243 @@ var markDataList = [
     {
       lngLat: [119.78400715,30.60272968],
       markImg: map_mark03,
-      to: "",
+      to: "",//A
     },
     {
       lngLat: [121.23671543,29.40075844],
       markImg: map_mark04,
-      to: "",
+      to: "C",
     },
     {
       lngLat: [121.0281583,29.85086315],
-      markImg: map_mark05,
-      to: "",
+      markImg: map_mark05, 
+      to: "C",
     },
     {
       lngLat: [119.87030666,29.58854638],
       markImg: map_mark01,
-      to: "",
+      to: "B",
     },
     {
       lngLat: [121.43439725,28.51234538],
       markImg: map_mark03,
-      to: "",
+      to: "C",
     },
     {
       lngLat: [120.72933911,30.56846957],
       markImg: map_mark04,
-      to: "",
+      to: "",//D
     },
     {
       lngLat: [119.96018478,28.96195761],
       markImg: map_mark05,
-      to: "",
+      to: "B",
     },
     {
       lngLat: [118.79844126,28.54050274],
       markImg: map_mark01,
-      to: "",
+      to: "B",
     },
     {
       lngLat: [120.29732592,27.80749072],
       markImg: map_mark04,
-      to: "",
+      to: "C",
     }
   ],
   [
     {
       lngLat: [121.20503846,28.09706841],
       markImg: map_mark02,
-      to: "",
+      to: "A",
     },
     {
       lngLat: [121.91882702,29.52162644],
       markImg: map_mark06,
-      to: "",
+      to: "A",
     },
     {
       lngLat: [120.53090482,29.27114549],
       markImg: map_mark07,
-      to: "",
+      to: "B",
     },
     {
       lngLat: [119.202465,27.59742705],
       markImg: map_mark08,
-      to: "",
+      to: "C",
     },
     {
       lngLat: [121.24469338,30.20082414],
       markImg: map_mark01,
-      to: "",
+      to: "",//A
     },
     {
       lngLat: [120.75892061,30.44043857],
       markImg: map_mark02,
-      to: "",
+      to: "C",
     },
     {
       lngLat: [120.50116363,30.14940203],
       markImg: map_mark06,
-      to: "",
+      to: "C",
     },
     {
       lngLat: [119.70806523,30.28646798],
-      markImg: map_mark05,  
-      to: "",
+      markImg: map_mark05,
+      to: "C",
     },
     {
       lngLat: [119.96582221,30.90089087],
       markImg: map_mark07,
-      to: "",
+      to: "A",
     },
     {
       lngLat: [119.31151603,28.91596816],
       markImg: map_mark08,
-      to: "",
+      to: "",//C
     },
     {
       lngLat: [120.30288903,27.98331796],
       markImg: map_mark07,
-      to: "",
+      to: "C",
     }
   ],
   [
     {
       lngLat: [119.90888819,31.04855588],
       markImg: map_mark01,
-      to: "",
+      to: "A",
     },
     {
       lngLat: [121.20087168,29.34709359],
       markImg: map_mark03,
-      to: "",
+      to: "D",
     },
     {
       lngLat: [121.20087168,30.16959237],
       markImg: map_mark05,
-      to: "",
+      to: "D",
     },
     {
       lngLat: [119.1583073,29.83926878],
       markImg: map_mark08,
-      to: "",
+      to: "D",
     },
     {
       lngLat: [118.33389879,29.18608402],
       markImg: map_mark01,
-      to: "",
+      to: "B",
     },
     {
       lngLat: [119.95810661,28.97101099],
       markImg: map_mark05,
-      to: "",
+      to: "D",
     },
     {
       lngLat: [120.16728489,29.70041937],
       markImg: map_mark08,
-      to: "",
+      to: "D",
     },
     {
       lngLat: [120.49950921,27.57312259],
       markImg: map_mark05,
-      to: "",
+      to: "C",
     },
     {
       lngLat: [120.74560131,28.61516227],
       markImg: map_mark08,
-      to: "",
+      to: "B",
     },
     {
       lngLat: [119.20752572,28.39890694],
       markImg: map_mark01,
-      to: "",
+      to: "B",
     },
     {
       lngLat: [120.4502908,28.8309732],
       markImg: map_mark05,
-      to: "",
+      to: "D",
     },
     {
       lngLat: [121.27469931,28.57194668],
-      markImg: map_mark08,  
-      to: "",
+      markImg: map_mark08,
+      to: "C",
     },
     {
       lngLat: [121.61922824,29.34709359],
       markImg: map_mark05,
-      to: "",
+      to: "D",
     },
   ],
   [
     {
       lngLat: [119.40301702,29.43395688],
       markImg: map_mark01,
-      to: "",
+      to: "C",
     },
     {
       lngLat: [119.69600706,29.71607461],
       markImg: map_mark02,
-      to: "",
+      to: "C",
     },
     {
       lngLat: [120.08317248,30.0427027],
       markImg: map_mark03,
-      to: "",
+      to: "",//A
     },
     {
       lngLat: [120.32384287,30.5846942],
       markImg: map_mark04,
-      to: "",
+      to: "A",
     },
     {
       lngLat: [121.03539013,30.67473399],
       markImg: map_mark05,
-      to: "",
+      to: "A",
     },
     {
       lngLat: [119.34023343,30.0427027],
       markImg: map_mark06,
-      to: "",
+      to: "C",
     },
     {
       lngLat: [120.99353441,28.52776039],
       markImg: map_mark07,
-      to: "",
+      to: "B",
     },
     {
       lngLat: [121.4748752,29.68880738],
       markImg: map_mark08,
-      to: "",
+      to: "A",
     },
     {
       lngLat: [120.7842558,29.13277442],
       markImg: map_mark05,
-      to: "",
+      to: "B",
     },
     {
       lngLat: [120.29245108,28.54614571],
       markImg: map_mark04,
-      to: "",
+      to: "B",
     },
     {
       lngLat: [121.87250454,29.40661338],
       markImg: map_mark02,
-      to: "",
+      to: "C",
     },
     {
       lngLat: [122.18642245,30.03364416],
       markImg: map_mark05,
-      to: "",
+      to: "A",
     },
     {
       lngLat: [119.83203815,27.79898863],
       markImg: map_mark04,
-      to: "",
+      to: "B",
     },
     {
       lngLat: [119.16234662,28.38976836],
       markImg: map_mark02,
-      to: "",
+      to: "B",
     },
   ]
 ]
@@ -446,9 +448,11 @@ let mapCurrent = 0
 const renderMapDataChange = (index: number) => {
   mapCurrent = index
   // 重新渲染标记点
-  renderMapMarkers(mapCurrent);
+  renderMapMarkers();
   // 重新渲染目标区域
   generateMapTargetArea();
+  // 重新生成飞线
+  generateFlyLine();
 }
 
 const createMapGeometry = ()=>{
@@ -607,7 +611,7 @@ const createMapGeometryShape = (options: MapGeometryOptions = {
     
     // 使用（在3D坐标上添加）
     if(isCreateData){
-      renderMapMarkers(mapCurrent)
+      renderMapMarkers()
     }
     // scene.rotation.x = -Math.PI / 2 // 旋转几何体（适配 Three.js 坐标系）
     // 添加鼠标交互（hover 高亮）
@@ -861,10 +865,10 @@ const clearMapMarkPlanes = () => {
 }
 
 /* 渲染地图标记点 */
-const renderMapMarkers = (currentIndex: number) => {
+const renderMapMarkers = () => {
   clearMapMarkPlanes(); // 先清除现有的标记点
-  if (markDataList[currentIndex]) {
-    markDataList[currentIndex].forEach((item: any) => {
+  if (markDataList[mapCurrent]) {
+    markDataList[mapCurrent].forEach((item: any) => {
       var point: [number, number] = lngLatToVector3(item.lngLat) || [0, 0];
       createMapMarkPlane(new THREE.Vector3(point[0], point[1], 0.5), item.markImg, { width: 2.4, height: 2.4 });
     });
@@ -1132,16 +1136,15 @@ const drawTargetArea = (key: any) => {
       transparent: true,
       side: THREE.DoubleSide
     });
-    // TODO
     
     // 创建平面几何体
     const geometry = new THREE.PlaneGeometry(6.6, 2); // 
     const titleMesh = new THREE.Mesh(geometry, material);
     titleMesh.position.set(point[0], point[1], positionZ + 3);
     titleMesh.rotation.x = Math.PI / 2; // 绕X轴旋转90度使贴图面向观察者
+    titleMesh.userData = { isBillboard: true }; // 添加标识，用于在动画循环中识别
     return titleMesh;
   }
-
   const {circle, ring} = createCircleRing(Point, PositionZ, CircleColor)
   const arrow = createArrow(Point, PositionZ, ArrowUrl)
   const title = createTitleBox(Point, PositionZ, AreaName, CircleColor)
@@ -1213,6 +1216,16 @@ const targetAreaAnimate = () => {
   });
 }
 
+// 更新始终面向相机的标签
+const updateBillboardObjects = () => {
+  scene.traverse((obj) => {
+    if (obj instanceof THREE.Mesh && obj.userData && obj.userData.isBillboard) {
+      // 让对象始终面向相机
+      obj.lookAt(camera.position);
+    }
+  });
+}
+
 /* 创建目标区域 标记位置 轨迹线 */
 const drawFlyLineFunc = (StartPoint: [number, number], EndPoint: [number, number], PositionZ: number) => {
   StartPoint = StartPoint || [0, 0];
@@ -1237,9 +1250,11 @@ const drawFlyLineFunc = (StartPoint: [number, number], EndPoint: [number, number
   const [x0, y0, z0] = [...StartPoint, PositionZ];
   const [x1, y1, z1] = [...EndPoint, PositionZ];
   // 使用 QuadraticBezierCurve3 创建 三维二次贝塞尔曲线
+  // 随机3-6范围高度
+  const randomHeight = Math.floor(Math.random() * (6 - 3 + 1) + 3);
   const curve = new THREE.QuadraticBezierCurve3(
     new THREE.Vector3(x0, y0, z0),
-    new THREE.Vector3((x0 + x1) / 2, (y0 + y1) / 2, 20),
+    new THREE.Vector3((x0 + x1) / 2, (y0 + y1) / 2, randomHeight),
     new THREE.Vector3(x1, y1, z1)
   );
 
@@ -1281,8 +1296,36 @@ const drawFlyLineFunc = (StartPoint: [number, number], EndPoint: [number, number
 
 }
 var flyLinePointList:any = [] // 轨迹线上的小点
+
+// 清除现有的飞线
+const clearFlyLines = () => {
+  if (flyObject3DInstance) {
+    // 从场景中移除
+    scene.remove(flyObject3DInstance);
+    // 清理内存
+    flyObject3DInstance.traverse((child) => {
+      if (child instanceof THREE.Mesh) {
+        child.geometry.dispose();
+        if (child.material) {
+          const materials = Array.isArray(child.material) ? child.material : [child.material];
+          materials.forEach(material => {
+            if (material.map) material.map.dispose(); // 释放纹理
+            material.dispose(); // 释放材质
+          });
+        }
+      }
+    });
+    // 清空数组
+    flyLinePointList = [];
+  }
+}
+
 const generateFlyLine = ()=>{
-  const flyObject3D = new THREE.Object3D();
+  // 先清理现有的飞线
+  clearFlyLines();
+  
+  // 创建新的飞线对象
+  flyObject3DInstance = new THREE.Object3D() as THREE.Object3D;
   const TempMarkData = markDataList[mapCurrent]
   const TempAreaData = areaGeoData[mapCurrent]
   TempMarkData.map((item: any)=>{
@@ -1293,12 +1336,12 @@ const generateFlyLine = ()=>{
       const PositionZ = 0.5
       
       const {flyLine, flyPoint} = drawFlyLineFunc(StartPoint, EndPoint, PositionZ)
-      flyObject3D.add(flyLine)
-      flyObject3D.add(flyPoint)
+      flyObject3DInstance?.add(flyLine)
+      flyObject3DInstance?.add(flyPoint)
       flyLinePointList.push(flyPoint)
-      scene.add(flyObject3D)
     }
   })
+  scene.add(flyObject3DInstance)
   
 }
 
@@ -1374,6 +1417,8 @@ const animate = () => {
   targetAreaAnimate()
   // 轨迹线动画
   flyLineAnimate()
+  // 更新始终面向相机的标签
+  updateBillboardObjects()
   renderer.render(scene, camera)
 }
 
@@ -1461,3 +1506,4 @@ defineExpose({
   overflow: hidden;
 }
 </style>
+
