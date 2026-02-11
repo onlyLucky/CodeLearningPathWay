@@ -14,6 +14,7 @@
 - [008 水平滚动式画廊](./HorizontalScrolling.html)
 - [009 滚动平滑](./ScrollSmoother.html)
 - [010 缩放滚动画廊](./ScrollingGallery.html)
+- [011 滑动切换](./SwipeSlider.html)
 
 
 ### 参考资料

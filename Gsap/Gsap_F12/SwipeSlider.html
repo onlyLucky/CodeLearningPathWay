@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Swipe Slider</title>
+  <script src="../assets/libs/gsap3.13.0/gsap.min.js"></script>
+  <script src="../assets/libs/gsap3.13.0/Observer.min.js"></script>
+  <script src="../assets/libs/gsap3.13.0/SplitText.min.js"></script>
+  <style>
+    :root {
+      --bg-gradient: linear-gradient(
+        180deg,
+        rgba(0, 0, 0, 0.6) 50%,
+        rgba(0, 0, 0, 0.1) 100%
+      );
+      --color-surface-white: #fffce1;
+    }
+
+    * {
+      box-sizing: border-box;
+      user-select: none;
+    }
+
+    a {
+      color: var(--color-surface-white);
+      text-decoration: none;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      color: var(--color-surface-white);
+      text-transform: uppercase;
+      background-color: #232529;
+    }
+
+    h2 {
+      font-size: clamp(1rem, 6vw, 10rem);
+      font-weight: 600;
+      line-height: 1.2;
+      text-align: center;
+      margin-right: -0.5em;
+      width: 90vw;
+      max-width: 1200px;
+      text-transform: none;
+    }
+
+    header {
+      position: fixed;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 5%;
+      width: 100%;
+      z-index: 3;
+      height: 7em;
+      font-size: clamp(0.66rem, 2vw, 1rem);
+      letter-spacing: 0.5em;
+    }
+
+    section {
+      height: 100%;
+      width: 100%;
+      top: 0;
+      position: fixed;
+      visibility: hidden;
+    }
+
+    section .bg {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: absolute;
+      height: 100%;
+      width: 100%;
+      top: 0;
+    }
+
+    section .bg h2 {
+      z-index: 999;
+    }
+
+    section .bg .clip-text {
+      overflow: hidden;
+    }
+
+    section .outer,
+    section .inner {
+      width: 100%;
+      height: 100%;
+      overflow-y: hidden;
+    }
+
+    .first .bg{
+      background-color: #fd5f79;
+    }
+
+    .second .bg{
+      background-color: #24f9bd;
+    }
+
+    .third .bg{
+      background-color: #f74df7;
+    }
+
+    .fourth .bg{
+      background-color: #46fbe9;
+    }
+
+    .fifth .bg{
+      background-color: #fce91b;
+    }
+
+    h2{
+      will-change: transform;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>Animated Sections</div>
+    <div><a href="#">Original Inspiration</a></div>
+  </header>
+  <section class="first">
+    <div class="outer">
+      <div class="inner">
+        <div class="bg one">
+          <h2 class="section-heading">Scroll down</h2>
+        </div>
+      </div>
+    </div>
+
+  </section>
+  <section class="second">
+    <div class="outer">
+      <div class="inner">
+        <div class="bg">
+          <h2 class="section-heading">Animated with GSAP</h2>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="third">
+    <div class="outer">
+      <div class="inner">
+        <div class="bg">
+          <h2 class="section-heading">GreenSock</h2>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="fourth">
+    <div class="outer">
+      <div class="inner">
+        <div class="bg">
+          <h2 class="section-heading">Animation platform</h2>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="fifth">
+    <div class="outer">
+      <div class="inner">
+        <div class="bg">
+          <h2 class="section-heading">Keep scrolling</h2>
+        </div>
+      </div>
+    </div>
+  </section>
+  <script>
+    // 注册 GSAP Observer 插件，用于监听滚轮、触摸等事件
+    gsap.registerPlugin(Observer);
+
+    // 获取所有需要操作的 DOM 元素
+    let sections = document.querySelectorAll("section"),               // 所有 section 元素
+      images = document.querySelectorAll(".bg"),                       // 背景图元素
+      headings = gsap.utils.toArray(".section-heading"),               // 标题元素
+      outerWrappers = gsap.utils.toArray(".outer"),                    // 外层容器
+      innerWrappers = gsap.utils.toArray(".inner"),                    // 内层容器
+      splitHeadings = headings.map(heading => new SplitText(heading, { // 将标题拆分为字符、单词、行
+        type: "chars,words,lines",
+        linesClass: "clip-text"                                         // 每行添加 clip-text 类，用于溢出隐藏
+      })),
+      currentIndex = -1,                                               // 当前显示 section 的索引，初始为 -1
+      wrap = gsap.utils.wrap(0, sections.length),                      // 索引循环函数，越界后自动回到 0 或末尾
+      animating;                                                       // 动画锁，防止动画冲突
+
+    // 初始化外层与内层容器的 y 位置，分别置于视口上方和下方
+    gsap.set(outerWrappers, { yPercent: 100 });
+    gsap.set(innerWrappers, { yPercent: -100 });
+
+    // 跳转到指定索引的 section
+    // index: 目标索引
+    // direction: -1 向上滚动，1 向下滚动
+    function gotoSection(index, direction) {
+      index = wrap(index); // 确保索引在有效范围内
+      animating = true;    // 加锁，动画进行中禁止再次触发
+      let fromTop = direction === -1, // 是否从上方进入
+          dFactor = fromTop ? -1 : 1, // 方向因子，用于计算动画偏移
+          tl = gsap.timeline({
+            defaults: { duration: 1.25, ease: "power1.inOut" },
+            onComplete: () => animating = false // 动画结束后解锁
+          });
+
+      // 如果当前已有 section 显示，则将其动画移出
+      if (currentIndex >= 0) {
+        gsap.set(sections[currentIndex], { zIndex: 0 }); // 降低层级
+        tl.to(images[currentIndex], { yPercent: -15 * dFactor }) // 背景图轻微偏移
+          .set(sections[currentIndex], { autoAlpha: 0 }); // 隐藏旧 section
+      }
+
+      // 设置新 section 的初始状态
+      gsap.set(sections[index], { autoAlpha: 1, zIndex: 1 });
+
+      // 执行进入动画
+      tl.fromTo([outerWrappers[index], innerWrappers[index]], {
+          yPercent: i => i ? -100 * dFactor : 100 * dFactor // 外层与内层反向偏移
+        }, {
+          yPercent: 0 // 复位到视口中央
+        }, 0)
+        .fromTo(images[index], { yPercent: 15 * dFactor }, { yPercent: 0 }, 0) // 背景图回正
+        .fromTo(splitHeadings[index].chars, { // 标题字符从下方或上方飞入
+            autoAlpha: 0, // 初始透明度为 0
+            yPercent: 150 * dFactor // 从下方或上方偏移 150%
+        }, {
+            autoAlpha: 1,
+            yPercent: 0,
+            duration: 1,
+            ease: "power2",
+            stagger: {
+              each: 0.02,  // 每个字符间隔 0.02 秒
+              from: "random" // 随机顺序出现
+            }
+          }, 0.2); // 延迟 0.2 秒开始
+
+      currentIndex = index; // 更新当前索引
+    }
+
+    // 创建 Observer 实例，监听滚轮、触摸、指针事件
+    Observer.create({
+      type: "wheel,touch,pointer",
+      wheelSpeed: -1, // 反转滚轮速度，使向上滚动为 -1，向下为 1
+      onDown: () => !animating && gotoSection(currentIndex - 1, -1), // 向上滚动
+      onUp: () => !animating && gotoSection(currentIndex + 1, 1),     // 向下滚动
+      tolerance: 10, // 触发阈值，防止误触
+      preventDefault: true // 阻止默认滚动行为
+    });
+
+    // 初始化显示第一个 section
+    gotoSection(0, 1);
+
+  </script>
+</body>
+</html>
