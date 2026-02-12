@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image sequence</title>
+  <script src="../assets/libs/gsap3.13.0/gsap.min.js"></script>
+  <script src="../assets/libs/gsap3.13.0/ScrollTrigger.min.js"></script>
+  <style>
+    body {
+      height: 300vh;
+      background: #000;
+    }
+
+    canvas {
+      position: fixed;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      max-width: 80vw;
+      max-height: 80vh;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="image-sequence" width="1158" height="770" />
+  <script>
+
+    // 注册 GSAP 的 ScrollTrigger 插件，使滚动驱动动画生效
+    gsap.registerPlugin(ScrollTrigger);
+
+    // 定义总帧数：147 张序列图
+    let frameCount = 147,
+        // 生成 147 张图片的完整 URL 数组，格式化为 0001.jpg ~ 0147.jpg
+        urls = new Array(frameCount).fill().map((o, i) => `https://www.apple.com/105/media/us/airpods-pro/2019/1299e2f5_9206_4470_b28e_08307a42f19b/anim/sequence/large/01-hero-lightpass/${(i+1).toString().padStart(4, '0')}.jpg`);
+
+    // 调用 imageSequence 函数，将图片序列绑定到画布并受滚动控制
+    imageSequence({
+      urls, // 图片 URL 数组
+      canvas: "#image-sequence", // 目标 <canvas> 元素选择器
+      //clear: true, // 若图片含透明通道，可取消注释以在绘制前清空画布
+      //onUpdate: (index, image) => console.log("drew image index", index, ", image:", image), // 可选：每帧绘制后的回调
+      scrollTrigger: {
+        start: 0,   // 滚动触发起点：页面最顶部
+        end: "max", // 滚动触发终点：页面最底部
+        scrub: true, // 关键：让动画进度与滚动位置同步
+      }
+    });
+
+
+    /*
+    辅助函数：用于在滚动时逐帧绘制图片序列到指定画布。
+    配置对象属性：
+    - urls [数组]：图片 URL 数组
+    - canvas [画布]：要绘制的 <canvas> 元素
+    - scrollTrigger [对象]：可选的 ScrollTrigger 配置，如 {trigger: "#trigger", start: "top top", end: "+=1000", scrub: true, pin: true}
+    - clear [布尔值]：若为 true，则在绘制每一帧前清空画布（适用于图片带透明通道的情况）
+    - paused [布尔值]：若为 true，返回的动画初始状态为暂停（若已使用 scrub 的 ScrollTrigger 则无需设置；仅用于普通播放动画）
+    - fps [数字]：可选帧率，决定返回动画的时长。使用 scrub 的 ScrollTrigger 时无效。默认 30fps。
+    - onUpdate [函数]：可选回调，在 Tween 更新时触发。接收两个参数：1) 当前图片索引（从 0 开始），2) 被绘制到画布的图片对象
+
+    返回一个 Tween 实例
+    */
+    function imageSequence(config) {
+      // playhead 对象：保存当前帧索引，供 GSAP 动画驱动
+      let playhead = {frame: 0},
+          // 获取 canvas 元素，若未找到则控制台警告
+          canvas = gsap.utils.toArray(config.canvas)[0] || console.warn("canvas not defined"),
+          // 获取 2D 绘图上下文
+          ctx = canvas.getContext("2d"),
+          // 记录上一次绘制的帧索引，避免重复绘制
+          curFrame = -1,
+          // 缓存用户传入的 onUpdate 回调
+          onUpdate = config.onUpdate,
+          // 用于存放所有 Image 对象的数组
+          images,
+          // 更新画布函数：仅在帧索引变化时重绘
+          updateImage = function() {
+            let frame = Math.round(playhead.frame);
+            if (frame !== curFrame) { // 仅当帧索引变化时才绘制，提升性能
+              // 若配置 clear 为 true，则先清空画布（适用于透明 PNG）
+              config.clear && ctx.clearRect(0, 0, canvas.width, canvas.height);
+              // 将当前帧图片绘制到画布左上角
+              ctx.drawImage(images[Math.round(playhead.frame)], 0, 0);
+              // 更新当前帧记录
+              curFrame = frame;
+              // 若用户传入 onUpdate 回调，则调用并传入当前帧索引与图片对象
+              onUpdate && onUpdate.call(this, frame, images[frame]);
+            }
+          };
+      // 预加载所有图片：将 URL 数组映射为 Image 对象数组
+      images = config.urls.map((url, i) => {
+        let img = new Image();
+        img.src = url;
+        // 仅对第一张图片绑定 onload：确保首张图加载完成后立即绘制初始帧
+        i || (img.onload = updateImage);
+        return img;
+      });
+      // 返回 GSAP 动画实例：驱动 playhead.frame 从 0 到最后一帧
+      return gsap.to(playhead, {
+        frame: images.length - 1, // 动画目标帧数：最后一张图索引
+        ease: "none",           // 线性动画，确保帧与滚动同步
+        onUpdate: updateImage,  // 每更新一次就调用 updateImage 重绘
+        duration: images.length / (config.fps || 30), // 非滚动模式下动画时长（秒）
+        paused: !!config.paused, // 是否初始暂停（滚动驱动时无需设置）
+        scrollTrigger: config.scrollTrigger // 传入 ScrollTrigger 配置，实现滚动驱动
+      });
+    }
+  </script>
+</body>
+</html>
