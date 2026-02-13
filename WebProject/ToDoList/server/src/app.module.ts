@@ -4,6 +4,7 @@ import { CommonModule } from './common/common.module';
 import { DatabaseModule } from './database/database.module';
 import { UsersModule } from './modules/users/users.module';
 import { TodosModule } from './modules/todos/todos.module';
+import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
   imports: [
@@ -11,6 +12,7 @@ import { TodosModule } from './modules/todos/todos.module';
     DatabaseModule,
     UsersModule,
     TodosModule,
+    AuthModule,
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: ['.env.development', '.env.test', '.env.production'],
