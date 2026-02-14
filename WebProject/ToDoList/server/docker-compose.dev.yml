@@ -17,6 +17,18 @@ services:
     networks:
       - todolist-dev-network
 
+  redis:
+    image: redis:7-alpine
+    container_name: todolist-redis-dev
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_dev_data:/data
+    networks:
+      - todolist-dev-network
+    command: redis-server --appendonly yes
+
   app:
     build:
       context: .
@@ -43,8 +55,16 @@ services:
       LOG_LEVEL: debug
       LOG_MAX_SIZE: 20m
       LOG_MAX_FILES: 14d
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD:
+      REDIS_DB: 0
+      REDIS_TTL: 3600
+      REDIS_MAX_RETRIES: 3
+      REDIS_RETRY_DELAY: 1000
     depends_on:
       - mysql
+      - redis
     networks:
       - todolist-dev-network
     volumes:
@@ -55,6 +75,7 @@ services:
 
 volumes:
   mysql_dev_data:
+  redis_dev_data:
   app_dev_logs:
 
 networks:

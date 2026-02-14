@@ -18,7 +18,6 @@ import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { UserRole } from '../../common/constants/roles.constant';
 import { Request as ExpressRequest } from 'express';
-import { Public } from 'src/common';
 
 interface RequestWithUser extends ExpressRequest {
   user: {

@@ -3,17 +3,20 @@ import {
   NotFoundException,
   ConflictException,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm/dist/common';
+import { Repository } from 'typeorm/repository/Repository';
+
 import * as bcrypt from 'bcrypt';
 import { User } from '../../entities/user.entity';
 import { CreateUserDto, UpdateUserDto } from './dto';
+import { RedisService } from '../../common/services/redis.service';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    private readonly redisService: RedisService,
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
@@ -57,6 +60,13 @@ export class UsersService {
   }
 
   async findOne(id: number): Promise<User> {
+    const cacheKey = this.redisService.generateUserKey(id, 'profile');
+    const cachedUser = await this.redisService.get<User>(cacheKey);
+
+    if (cachedUser) {
+      return cachedUser;
+    }
+
     const user = await this.userRepository.findOne({
       where: { id },
       select: [
@@ -74,6 +84,7 @@ export class UsersService {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
 
+    await this.redisService.set(cacheKey, user);
     return user;
   }
 

@@ -11,6 +11,10 @@ import { Request, Response } from 'express';
 /**
  * 全局 HTTP 异常过滤器
  * 捕获所有未处理的异常，统一格式后返回给客户端，并记录日志
+ *
+ * 使用方式：
+ * 1. 全局注册：在主模块（如 app.module.ts）中使用 `app.useGlobalFilters(new HttpExceptionFilter(logger));`
+ * 2. 局部注册：在具体控制器或路由处理器上使用 `@UseFilters(new HttpExceptionFilter(logger))` 装饰器
  */
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
@@ -61,7 +65,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     // 返回统一格式的 JSON 响应给客户端
     response.status(status).json({
       code: status,
-      message: errorResponse.message
+      message: errorResponse.message,
     });
   }
 }

@@ -5,6 +5,7 @@ import { DatabaseModule } from './database/database.module';
 import { UsersModule } from './modules/users/users.module';
 import { TodosModule } from './modules/todos/todos.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { redisConfig } from './config/redis.config';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { AuthModule } from './modules/auth/auth.module';
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: ['.env.development', '.env.test', '.env.production'],
+      load: [redisConfig],
     }),
   ],
   controllers: [],
