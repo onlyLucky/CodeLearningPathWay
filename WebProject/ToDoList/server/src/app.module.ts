@@ -6,6 +6,8 @@ import { UsersModule } from './modules/users/users.module';
 import { TodosModule } from './modules/todos/todos.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { redisConfig } from './config/redis.config';
+import { APP_GUARD } from '@nestjs/core';
+import { AuthGuard } from './common/guards/auth.guard';
 
 @Module({
   imports: [
@@ -21,6 +23,11 @@ import { redisConfig } from './config/redis.config';
     }),
   ],
   controllers: [],
-  providers: [],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: AuthGuard,
+    },
+  ],
 })
 export class AppModule {}

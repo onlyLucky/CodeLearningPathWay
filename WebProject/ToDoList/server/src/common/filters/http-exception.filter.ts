@@ -7,6 +7,15 @@ import {
   LoggerService,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
+import {
+  errorResponse,
+  badRequestResponse,
+  unauthorizedResponse,
+  forbiddenResponse,
+  notFoundResponse,
+  conflictResponse,
+  internalServerErrorResponse,
+} from '../utils/response.util';
 
 /**
  * 全局 HTTP 异常过滤器
@@ -26,46 +35,67 @@ export class HttpExceptionFilter implements ExceptionFilter {
    * @param host 当前请求的上下文对象
    */
   catch(exception: unknown, host: ArgumentsHost) {
-    // 获取 HTTP 上下文
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
 
-    // 确定 HTTP 状态码：如果是 HttpException 则取其状态码，否则默认为 500
     const status =
       exception instanceof HttpException
         ? exception.getStatus()
         : HttpStatus.INTERNAL_SERVER_ERROR;
 
-    // 获取异常消息：如果是 HttpException 则取其响应体，否则使用默认消息
-    const message =
+    const exceptionResponse =
       exception instanceof HttpException
         ? exception.getResponse()
         : 'Internal server error';
 
-    // 构造统一的错误响应对象
-    const errorResponse = {
-      statusCode: status,
-      timestamp: new Date().toISOString(),
+    let message = 'Internal server error';
+    let errorType: string | undefined;
+
+    if (typeof exceptionResponse === 'string') {
+      message = exceptionResponse;
+    } else if (
+      typeof exceptionResponse === 'object' &&
+      exceptionResponse !== null
+    ) {
+      const responseObj = exceptionResponse as any;
+      message = responseObj.message || 'Internal server error';
+      errorType = responseObj.error;
+    }
+
+    const errorResponseData = this.getErrorResponse(status, message, errorType);
+
+    this.logger.error({
+      ...errorResponseData,
       path: request.url,
       method: request.method,
-      message:
-        typeof message === 'string'
-          ? message
-          : (message as any).message || 'Internal server error',
-      error: typeof message === 'object' ? (message as any).error : undefined,
-    };
-
-    // 记录错误日志，包含堆栈信息（如果异常是 Error 实例）
-    this.logger.error({
-      ...errorResponse,
       stack: exception instanceof Error ? exception.stack : undefined,
     });
 
-    // 返回统一格式的 JSON 响应给客户端
-    response.status(status).json({
-      code: status,
-      message: errorResponse.message,
-    });
+    response.status(status).json(errorResponseData);
+  }
+
+  private getErrorResponse(
+    status: number,
+    message: string,
+    errorType?: string,
+  ): any {
+    const statusCode = status as HttpStatus;
+    switch (statusCode) {
+      case HttpStatus.BAD_REQUEST:
+        return badRequestResponse(message);
+      case HttpStatus.UNAUTHORIZED:
+        return unauthorizedResponse(message);
+      case HttpStatus.FORBIDDEN:
+        return forbiddenResponse(message);
+      case HttpStatus.NOT_FOUND:
+        return notFoundResponse(message);
+      case HttpStatus.CONFLICT:
+        return conflictResponse(message);
+      case HttpStatus.INTERNAL_SERVER_ERROR:
+        return internalServerErrorResponse(message);
+      default:
+        return errorResponse(message, status, errorType);
+    }
   }
 }

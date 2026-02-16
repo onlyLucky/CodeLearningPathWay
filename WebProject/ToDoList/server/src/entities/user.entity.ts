@@ -20,6 +20,12 @@ export class User {
   @Column({ length: 255 })
   password!: string;
 
+  @Column({ type: 'text', nullable: true })
+  signature?: string;
+
+  @Column({ type: 'varchar', length: 500, nullable: true })
+  avatar?: string;
+
   @Column({
     type: 'enum',
     enum: ['admin', 'user', 'guest'],

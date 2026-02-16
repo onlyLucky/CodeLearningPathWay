@@ -1,6 +1,6 @@
 export interface PaginationParams {
-  page?: number;
-  limit?: number;
+  pageNum?: number;
+  pageSize?: number;
   sortBy?: string;
   sortOrder?: 'ASC' | 'DESC';
 }
@@ -8,14 +8,14 @@ export interface PaginationParams {
 export interface PaginatedResponse<T> {
   data: T[];
   total: number;
-  page: number;
-  limit: number;
+  pageNum: number;
+  pageSize: number;
   totalPages: number;
 }
 
 export interface ApiResponse<T = any> {
   success: boolean;
-  statusCode: number;
+  code: number;
   message: string;
   data?: T;
   timestamp: string;
@@ -23,12 +23,10 @@ export interface ApiResponse<T = any> {
 
 export interface ErrorResponse {
   success: false;
-  statusCode: number;
+  code: number;
   message: string;
   error?: string;
   timestamp: string;
-  path?: string;
-  method?: string;
 }
 
 export interface UserPayload {

@@ -2,12 +2,12 @@ import {
   Injectable,
   CanActivate,
   ExecutionContext,
-  UnauthorizedException, // 未授权异常，用于抛出 HTTP 401 错误
+  UnauthorizedException,
 } from '@nestjs/common';
-// 引入 JwtService 服务，用于验证 JWT 令牌
+import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
-// 引入 Express 请求对象类型，用于处理 HTTP 请求
 import { Request } from 'express';
+import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
 
 /**
  * 身份验证守卫
@@ -19,7 +19,10 @@ import { Request } from 'express';
  */
 @Injectable()
 export class AuthGuard implements CanActivate {
-  constructor(private jwtService: JwtService) {}
+  constructor(
+    private jwtService: JwtService,
+    private reflector: Reflector,
+  ) {}
 
   /**
    * 守卫主方法
@@ -29,9 +32,16 @@ export class AuthGuard implements CanActivate {
    * @throws UnauthorizedException 当 Token 缺失或无效时抛出
    */
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    // 获取 Express 请求对象
+    const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+
+    if (isPublic) {
+      return true;
+    }
+
     const request = context.switchToHttp().getRequest<Request>();
-    // 从请求头中提取 Bearer Token
     const token = this.extractTokenFromHeader(request);
 
     if (!token) {
@@ -39,9 +49,7 @@ export class AuthGuard implements CanActivate {
     }
 
     try {
-      // 异步验证 Token 有效性
       const payload = await this.jwtService.verifyAsync(token);
-      // 将解析后的用户信息挂载到请求对象，供后续路由处理器使用
       request['user'] = payload;
     } catch {
       throw new UnauthorizedException('Invalid token');

@@ -15,4 +15,23 @@ export class UpdateUserDto extends PartialType(
   @MinLength(6)
   @MaxLength(100)
   password?: string;
+
+  @ApiPropertyOptional({
+    example:
+      'Life is like a box of chocolates, you never know what you are going to get.',
+    description: 'Personal signature',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  signature?: string;
+
+  @ApiPropertyOptional({
+    example: 'https://example.com/avatar.jpg',
+    description: 'User avatar URL',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  avatar?: string;
 }

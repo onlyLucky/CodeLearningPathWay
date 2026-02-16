@@ -119,12 +119,21 @@ export class TodosService {
     return updatedTodo;
   }
 
-  async getStatistics(userId: number): Promise<{
+  async getStatistics(userId?: number): Promise<{
     total: number;
     completed: number;
     pending: number;
     inProgress: number;
   }> {
+    if (!userId) {
+      return {
+        total: 0,
+        completed: 0,
+        pending: 0,
+        inProgress: 0,
+      };
+    }
+
     const todos = await this.findAll(userId);
 
     return {

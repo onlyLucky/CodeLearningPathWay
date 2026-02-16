@@ -17,6 +17,7 @@ import { CreateTodoDto, UpdateTodoDto } from './dto';
 import { AuthGuard } from '../../common/guards/auth.guard';
 import { ApiTags, ApiOperation, ApiQuery } from '@nestjs/swagger';
 import { Request as ExpressRequest } from 'express';
+import { Public } from '../../common/decorators/public.decorator';
 
 interface RequestWithUser extends ExpressRequest {
   user: {
@@ -55,9 +56,19 @@ export class TodosController {
   }
 
   @Get('statistics')
-  @ApiOperation({ summary: 'Get todo statistics for the current user' })
-  getStatistics(@Request() req: RequestWithUser) {
-    return this.todosService.getStatistics(req.user.id);
+  @Public()
+  @ApiOperation({ summary: 'Get todo statistics' })
+  @ApiQuery({
+    name: 'userId',
+    required: false,
+    description: 'User ID to get statistics for (optional)',
+  })
+  getStatistics(
+    @Request() req: RequestWithUser,
+    @Query('userId') userId?: string,
+  ) {
+    const targetUserId = userId ? +userId : req.user?.id;
+    return this.todosService.getStatistics(targetUserId);
   }
 
   @Get(':id')

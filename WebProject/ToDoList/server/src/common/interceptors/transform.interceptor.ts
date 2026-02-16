@@ -3,26 +3,16 @@ import {
   NestInterceptor,
   ExecutionContext,
   CallHandler,
+  HttpStatus,
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-
-/**
- * 统一响应格式接口
- * @template T 响应数据的类型
- */
-export interface Response<T> {
-  /** 请求是否成功 */
-  success: boolean;
-  /** HTTP 状态码 */
-  statusCode: number;
-  /** 响应消息 */
-  message: string;
-  /** 响应数据 */
-  data: T;
-  /** 响应时间戳（ISO 格式） */
-  timestamp: string;
-}
+import { ApiResponse } from '../interfaces';
+import {
+  successResponse,
+  createdResponse,
+  noContentResponse,
+} from '../utils/response.util';
 
 /**
  * 全局响应转换拦截器
@@ -32,7 +22,7 @@ export interface Response<T> {
 @Injectable()
 export class TransformInterceptor<T> implements NestInterceptor<
   T,
-  Response<T>
+  ApiResponse<T>
 > {
   /**
    * 拦截器核心方法
@@ -44,16 +34,30 @@ export class TransformInterceptor<T> implements NestInterceptor<
   intercept(
     context: ExecutionContext,
     next: CallHandler,
-  ): Observable<Response<T>> {
+  ): Observable<ApiResponse<T>> {
+    const response = context.switchToHttp().getResponse();
+    const statusCode = response.statusCode;
+
     return next.handle().pipe(
-      // 将控制器返回的数据包装成统一格式
-      map((data) => ({
-        success: true,
-        statusCode: context.switchToHttp().getResponse().statusCode,
-        message: 'Operation successful',
-        data,
-        timestamp: new Date().toISOString(),
-      })),
+      map((data) => {
+        if (data && typeof data === 'object' && 'success' in data) {
+          return data;
+        }
+
+        return this.getSuccessResponse(statusCode, data);
+      }),
     );
+  }
+
+  private getSuccessResponse<T>(statusCode: number, data: T): ApiResponse<T> {
+    const httpStatus = statusCode as HttpStatus;
+    switch (httpStatus) {
+      case HttpStatus.CREATED:
+        return createdResponse(data);
+      case HttpStatus.NO_CONTENT:
+        return noContentResponse();
+      default:
+        return successResponse(data);
+    }
   }
 }
