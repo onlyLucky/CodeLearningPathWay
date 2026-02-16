@@ -6,11 +6,11 @@ import {
   IsOptional,
   IsBoolean,
   IsInt,
-  Min,
+  Min as MinValue,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
-export class CreateUserDto {
+export class RegisterDto {
   @ApiProperty({ example: 'john_doe', description: 'Username' })
   @IsString()
   @MinLength(3)
@@ -71,6 +71,6 @@ export class CreateUserDto {
   })
   @IsOptional()
   @IsInt()
-  @Min(0)
+  @MinValue(0)
   points?: number;
 }

@@ -1,10 +1,17 @@
 import { PartialType, OmitType } from '@nestjs/mapped-types';
 import { CreateUserDto } from './create-user.dto';
-import { IsOptional, IsString, MinLength, MaxLength } from 'class-validator';
+import {
+  IsOptional,
+  IsString,
+  MinLength,
+  MaxLength,
+  IsInt,
+  Min,
+} from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class UpdateUserDto extends PartialType(
-  OmitType(CreateUserDto, ['password'] as const),
+  OmitType(CreateUserDto, ['password', 'uid'] as const),
 ) {
   @ApiPropertyOptional({
     example: 'newpassword123',
@@ -34,4 +41,13 @@ export class UpdateUserDto extends PartialType(
   @IsString()
   @MaxLength(500)
   avatar?: string;
+
+  @ApiPropertyOptional({
+    example: 100,
+    description: 'User points',
+  })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  points?: number;
 }

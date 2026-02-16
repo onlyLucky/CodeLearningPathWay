@@ -14,6 +14,9 @@ export class User {
   @Column({ unique: true, length: 50 })
   username!: string;
 
+  @Column({ unique: true, length: 20 })
+  uid!: string;
+
   @Column({ unique: true, length: 100 })
   email!: string;
 
@@ -25,6 +28,9 @@ export class User {
 
   @Column({ type: 'varchar', length: 500, nullable: true })
   avatar?: string;
+
+  @Column({ type: 'int', default: 0 })
+  points!: number;
 
   @Column({
     type: 'enum',

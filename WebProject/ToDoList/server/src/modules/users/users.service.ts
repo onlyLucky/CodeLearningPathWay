@@ -24,11 +24,12 @@ export class UsersService {
       where: [
         { username: createUserDto.username },
         { email: createUserDto.email },
+        { uid: createUserDto.uid },
       ],
     });
 
     if (existingUser) {
-      throw new ConflictException('Username or email already exists');
+      throw new ConflictException('Username, email or uid already exists');
     }
 
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
@@ -94,6 +95,12 @@ export class UsersService {
     });
   }
 
+  async findByUid(uid: string): Promise<User | null> {
+    return this.userRepository.findOne({
+      where: { uid },
+    });
+  }
+
   async findByEmail(email: string): Promise<User | null> {
     return this.userRepository.findOne({
       where: { email },
@@ -139,8 +146,19 @@ export class UsersService {
     await this.userRepository.remove(user);
   }
 
-  async validateUser(username: string, password: string): Promise<User | null> {
-    const user = await this.findByUsername(username);
+  async validateUser(
+    identifier: string,
+    password: string,
+  ): Promise<User | null> {
+    let user: User | null = null;
+
+    if (identifier.includes('@')) {
+      user = await this.findByEmail(identifier);
+    } else if (/^\d+$/.test(identifier)) {
+      user = await this.findByUid(identifier);
+    } else {
+      user = await this.findByUsername(identifier);
+    }
 
     if (user && (await bcrypt.compare(password, user.password))) {
       const result = { ...user };
