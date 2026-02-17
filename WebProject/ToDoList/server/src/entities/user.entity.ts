@@ -2,9 +2,11 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
+  OneToOne,
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { UserProfile } from './user-profile.entity';
 
 @Entity()
 export class User {
@@ -41,6 +43,9 @@ export class User {
 
   @Column({ default: true })
   isActive!: boolean;
+
+  @OneToOne(() => UserProfile, (profile) => profile.user, { cascade: true })
+  profile?: UserProfile;
 
   @CreateDateColumn()
   createdAt!: Date;

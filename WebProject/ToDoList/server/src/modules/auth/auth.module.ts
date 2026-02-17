@@ -7,7 +7,7 @@ import { AuthController } from './auth.controller';
 
 @Module({
   imports: [
-    forwardRef(() => UsersModule),// forwardRef 解决循环依赖问题
+    forwardRef(() => UsersModule), // forwardRef 解决循环依赖问题
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
