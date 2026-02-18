@@ -8,6 +8,7 @@ import { Repository } from 'typeorm/repository/Repository';
 
 import * as bcrypt from 'bcrypt';
 import { User } from '../../entities/user.entity';
+import { UserProfile } from '../../entities/user-profile.entity';
 import { CreateUserDto, UpdateUserDto } from './dto';
 import { RedisService } from '../../common/services/redis.service';
 
@@ -16,6 +17,8 @@ export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(UserProfile)
+    private readonly userProfileRepository: Repository<UserProfile>,
     private readonly redisService: RedisService,
   ) {}
 
@@ -40,7 +43,21 @@ export class UsersService {
     });
 
     const savedUser = await this.userRepository.save(user);
-    const { password: excludedPassword, ...result } = savedUser;
+
+    const userProfile = this.userProfileRepository.create({
+      userId: savedUser.id,
+      userName: savedUser.username,
+    });
+
+    await this.userProfileRepository.save(userProfile);
+
+    const userWithProfile = await this.userRepository.findOne({
+      where: { id: savedUser.id },
+      relations: ['profile'],
+    });
+
+    const { password: excludedPassword, ...result } =
+      userWithProfile || savedUser;
     void excludedPassword;
     return result as User;
   }

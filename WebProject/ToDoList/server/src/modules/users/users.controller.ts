@@ -44,9 +44,10 @@ export class UsersController {
     return this.usersService.create(createUserDto);
   }
 
-  @Get()
-  @UseGuards(AuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN)
+  @Get('list')
+  @UseGuards(AuthGuard)
+  /* @UseGuards(AuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN) */
   findAll() {
     return this.usersService.findAll();
   }

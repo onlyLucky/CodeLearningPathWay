@@ -18,7 +18,7 @@ export class AuthController {
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Register a new user' })
   @SwaggerApiResponse({
-    status: 201,
+    status: 200,
     description: 'User registered successfully',
     type: Object,
   })

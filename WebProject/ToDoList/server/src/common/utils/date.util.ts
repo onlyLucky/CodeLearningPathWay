@@ -63,3 +63,49 @@ export const getEndOfDay = (date: Date): Date => {
   result.setHours(23, 59, 59, 999);
   return result;
 };
+
+/**
+ * 将日期字符串格式化为 Date 对象
+ * @param dateString - 日期字符串（支持多种格式，如：2023-01-01、2023/01/01、2023-01-01T00:00:00.000Z 等）
+ * @returns Date 对象，如果解析失败返回当前时间
+ */
+export const parseDateString = (dateString: string): Date => {
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) {
+    return new Date();
+  }
+  return date;
+};
+
+/**
+ * 格式化日期为指定格式
+ * @param date - 日期对象或可解析的日期字符串
+ * @param format - 输出格式字符串，支持占位符：YYYY(年)、MM(月)、DD(日)、hh(时)、mm(分)、ss(秒)
+ * @returns 格式化后的字符串
+ *
+ * @example
+ * // 输入：new Date('2023-01-01T12:30:45.000Z') 格式：YYYY-MM-DD hh:mm:ss
+ * // 输出："2023-01-01 12:30:45"
+ *
+ */
+export const formatDateTime = (
+  date: Date | string,
+  format: string = 'YYYY-MM-DD hh:mm:ss',
+): string => {
+  const d = typeof date === 'string' ? parseDateString(date) : date;
+
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  const hours = String(d.getHours()).padStart(2, '0');
+  const minutes = String(d.getMinutes()).padStart(2, '0');
+  const seconds = String(d.getSeconds()).padStart(2, '0');
+
+  return format
+    .replace('YYYY', String(year))
+    .replace('MM', month)
+    .replace('DD', day)
+    .replace('hh', hours)
+    .replace('mm', minutes)
+    .replace('ss', seconds);
+};

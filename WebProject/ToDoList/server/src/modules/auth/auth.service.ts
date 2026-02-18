@@ -18,22 +18,11 @@ export class AuthService {
   ): Promise<{ user: User; token: string }> {
     const username = registerDto.email.split('@')[0] || registerDto.email;
     const uid = await this.generateUniqueUid();
-    // 加密密码
-    const encryptedPassword = this.encryptPassword(registerDto.password);
-    console.log(
-      'encryptedPassword 加密',
-      encryptedPassword,
-      registerDto.password,
-    );
-    // 解密密码
-    const decryptedPassword = this.decryptPassword(encryptedPassword);
-    console.log('decryptedPassword 解密', decryptedPassword);
-
     const createUserDto: CreateUserDto = {
       username,
       uid,
       email: registerDto.email,
-      password: decryptedPassword,
+      password: registerDto.password,
       isActive: true,
       points: 0,
     };
@@ -44,10 +33,10 @@ export class AuthService {
   }
 
   async login(loginDto: LoginDto): Promise<{ user: User; token: string }> {
-    const decryptedPassword = this.decryptPassword(loginDto.password);
+    // const decryptedPassword = this.decryptPassword(loginDto.password);
     const user = await this.usersService.validateUser(
       loginDto.identifier,
-      decryptedPassword,
+      loginDto.password,
     );
 
     if (!user) {
