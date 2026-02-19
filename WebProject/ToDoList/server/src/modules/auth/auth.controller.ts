@@ -15,7 +15,7 @@ export class AuthController {
 
   @Public()
   @Post('register')
-  @HttpCode(HttpStatus.CREATED)
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Register a new user' })
   @SwaggerApiResponse({
     status: 200,

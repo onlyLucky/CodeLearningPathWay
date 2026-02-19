@@ -13,6 +13,7 @@ import {
   createdResponse,
   noContentResponse,
 } from '../utils/response.util';
+import { formatDateTime } from '../utils/date.util';
 
 /**
  * 全局响应转换拦截器
@@ -44,7 +45,8 @@ export class TransformInterceptor<T> implements NestInterceptor<
           return data;
         }
 
-        return this.getSuccessResponse(statusCode, data);
+        const formattedData = this.formatDates(data);
+        return this.getSuccessResponse(statusCode, formattedData);
       }),
     );
   }
@@ -59,5 +61,53 @@ export class TransformInterceptor<T> implements NestInterceptor<
       default:
         return successResponse(data);
     }
+  }
+
+  private formatDates(data: any): any {
+    if (!data) {
+      return data;
+    }
+
+    if (Array.isArray(data)) {
+      return data.map((item) => this.formatDates(item));
+    }
+
+    if (data instanceof Date) {
+      return formatDateTime(data, 'YYYY-MM-DD hh:mm:ss');
+    }
+
+    if (typeof data === 'object') {
+      const result: any = {};
+      for (const key in data) {
+        if (Object.prototype.hasOwnProperty.call(data, key)) {
+          const value = data[key];
+          if (
+            value instanceof Date ||
+            (this.isDateString(value) &&
+              (key.includes('date') ||
+                key.includes('Date') ||
+                key.includes('time') ||
+                key.includes('Time') ||
+                key === 'timestamp'))
+          ) {
+            result[key] = formatDateTime(value, 'YYYY-MM-DD hh:mm:ss');
+          } else {
+            result[key] = this.formatDates(value);
+          }
+        }
+      }
+      return result;
+    }
+
+    return data;
+  }
+
+  private isDateString(value: any): boolean {
+    return (
+      value instanceof Date ||
+      (typeof value === 'string' &&
+        !isNaN(Date.parse(value)) &&
+        /^\d{4}-\d{2}-\d{2}/.test(value))
+    );
   }
 }

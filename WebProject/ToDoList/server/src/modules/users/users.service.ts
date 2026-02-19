@@ -35,6 +35,7 @@ export class UsersService {
       throw new ConflictException('Username, email or uid already exists');
     }
 
+    // 对密码进行哈希处理
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
 
     const user = this.userRepository.create({
@@ -56,10 +57,26 @@ export class UsersService {
       relations: ['profile'],
     });
 
-    const { password: excludedPassword, ...result } =
-      userWithProfile || savedUser;
+    const {
+      password: excludedPassword,
+      createdTime: excludedCreatedTime,
+      updatedTime: excludedUpdatedTime,
+      profile,
+      ...result
+    } = userWithProfile || savedUser;
     void excludedPassword;
-    return result as User;
+    void excludedCreatedTime;
+    void excludedUpdatedTime;
+
+    const {
+      createdTime: profileCreatedTime,
+      updatedTime: profileUpdatedTime,
+      ...profileResult
+    } = profile || {};
+    void profileCreatedTime;
+    void profileUpdatedTime;
+
+    return { ...result, profile: profileResult } as User;
   }
 
   async findAll(): Promise<User[]> {
@@ -70,8 +87,8 @@ export class UsersService {
         'email',
         'role',
         'isActive',
-        'createdAt',
-        'updatedAt',
+        'createdTime',
+        'updatedTime',
       ] as any,
     });
     return users;
@@ -93,8 +110,8 @@ export class UsersService {
         'email',
         'role',
         'isActive',
-        'createdAt',
-        'updatedAt',
+        'createdTime',
+        'updatedTime',
       ] as any,
     });
 
@@ -177,10 +194,33 @@ export class UsersService {
       user = await this.findByUsername(identifier);
     }
 
-    if (user && (await bcrypt.compare(password, user.password))) {
-      const result = { ...user };
-      delete (result as any).password;
-      return result as User;
+    const compareResult = await bcrypt.compare(password, user?.password || '');
+    if (user && compareResult) {
+      const userWithProfile = await this.userRepository.findOne({
+        where: { id: user.id },
+        relations: ['profile'],
+      });
+
+      const {
+        password: excludedPassword,
+        createdTime: excludedCreatedTime,
+        updatedTime: excludedUpdatedTime,
+        profile,
+        ...result
+      } = userWithProfile || user;
+      void excludedPassword;
+      void excludedCreatedTime;
+      void excludedUpdatedTime;
+
+      const {
+        createdTime: profileCreatedTime,
+        updatedTime: profileUpdatedTime,
+        ...profileResult
+      } = profile || {};
+      void profileCreatedTime;
+      void profileUpdatedTime;
+
+      return { ...result, profile: profileResult } as User;
     }
 
     return null;

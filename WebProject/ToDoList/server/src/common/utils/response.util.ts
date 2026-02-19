@@ -1,5 +1,6 @@
 import { ApiResponse, ErrorResponse } from '../interfaces';
 import { HTTP_STATUS } from '../constants';
+import { formatDateTime } from './date.util';
 
 /**
  * 生成成功响应
@@ -18,7 +19,7 @@ export const successResponse = <T>(
     code,
     message,
     data,
-    timestamp: new Date().toISOString(),
+    timestamp: formatDateTime(new Date(), 'YYYY-MM-DD hh:mm:ss'),
   };
 };
 
@@ -39,7 +40,7 @@ export const errorResponse = (
     code,
     message,
     error,
-    timestamp: new Date().toISOString(),
+    timestamp: formatDateTime(new Date(), 'YYYY-MM-DD hh:mm:ss'),
   };
 };
 
@@ -65,7 +66,7 @@ export const noContentResponse = (): ApiResponse => {
     success: true,
     code: HTTP_STATUS.NO_CONTENT,
     message: 'Operation successful',
-    timestamp: new Date().toISOString(),
+    timestamp: formatDateTime(new Date(), 'YYYY-MM-DD hh:mm:ss'),
   };
 };
 

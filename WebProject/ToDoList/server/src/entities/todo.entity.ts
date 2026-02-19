@@ -46,9 +46,9 @@ export class Todo {
   @Column()
   userId!: number;
 
-  @CreateDateColumn()
-  createdAt!: Date;
+  @CreateDateColumn({ name: 'created_time' })
+  createdTime!: Date;
 
-  @UpdateDateColumn()
-  updatedAt!: Date;
+  @UpdateDateColumn({ name: 'updated_time' })
+  updatedTime!: Date;
 }

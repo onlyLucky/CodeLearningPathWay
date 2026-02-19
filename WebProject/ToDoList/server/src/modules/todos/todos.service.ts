@@ -61,7 +61,7 @@ export class TodosService {
 
     const todos = await this.todoRepository.find({
       where,
-      order: { createdAt: 'DESC' },
+      order: { createdTime: 'DESC' },
     });
 
     await this.redisService.set(cacheKey, todos);

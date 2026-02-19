@@ -9,3 +9,5 @@ export enum UserRole {
   /** 访客角色，仅具备只读权限 */
   GUEST = 'guest',
 }
+
+export const USER_ROLES = [UserRole.GUEST, UserRole.USER, UserRole.ADMIN];

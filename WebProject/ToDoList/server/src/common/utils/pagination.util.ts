@@ -17,8 +17,8 @@ export const getPaginationParams = (query: any): PaginationParams => {
     PAGINATION.MAX_LIMIT,
     Math.max(1, parseInt(query.pageSize) || PAGINATION.DEFAULT_LIMIT),
   );
-  // 默认按 createdAt 字段排序
-  const sortBy = query.sortBy || 'createdAt';
+  // 默认按 createdTime 字段排序
+  const sortBy = query.sortBy || 'createdTime';
   // 排序方式默认为 DESC，仅接受 ASC 或 DESC
   const sortOrder = (query.sortOrder || 'DESC').toUpperCase() as 'ASC' | 'DESC';
 

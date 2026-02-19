@@ -33,9 +33,9 @@ export class UserProfile {
   @JoinColumn({ name: 'user_id' })
   user!: User;
 
-  @CreateDateColumn({ name: 'created_at' })
-  createdAt!: Date;
+  @CreateDateColumn({ name: 'created_time' })
+  createdTime!: Date;
 
-  @UpdateDateColumn({ name: 'updated_at' })
-  updatedAt!: Date;
+  @UpdateDateColumn({ name: 'updated_time' })
+  updatedTime!: Date;
 }

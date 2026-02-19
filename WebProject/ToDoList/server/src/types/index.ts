@@ -3,8 +3,8 @@ export interface UserResponse {
   username: string;
   email: string;
   isActive: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+  createdTime: Date;
+  updatedTime: Date;
 }
 
 export interface TodoResponse {
@@ -15,8 +15,8 @@ export interface TodoResponse {
   priority: 'low' | 'medium' | 'high';
   dueDate: Date | null;
   userId: number;
-  createdAt: Date;
-  updatedAt: Date;
+  createdTime: Date;
+  updatedTime: Date;
 }
 
 export interface PaginationParams {

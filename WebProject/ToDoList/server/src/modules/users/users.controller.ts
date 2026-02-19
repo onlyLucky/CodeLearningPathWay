@@ -16,7 +16,7 @@ import {
 } from '@nestjs/common';
 import { ApiOperation, ApiConsumes, ApiBody } from '@nestjs/swagger';
 import { UsersService } from './users.service';
-import { CreateUserDto, UpdateUserDto } from './dto';
+import { UpdateUserDto } from './dto';
 import { AuthGuard } from '../../common/guards/auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
@@ -38,16 +38,9 @@ interface RequestWithUser extends ExpressRequest {
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Post()
-  @HttpCode(HttpStatus.CREATED)
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
-  }
-
   @Get('list')
-  @UseGuards(AuthGuard)
-  /* @UseGuards(AuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN) */
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
   findAll() {
     return this.usersService.findAll();
   }
@@ -58,9 +51,9 @@ export class UsersController {
     return this.usersService.findOne(req.user.id);
   }
 
-  @Get(':id')
+  @Get('detailById')
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN)
+  @Roles(UserRole.USER)
   findOne(@Param('id') id: string) {
     return this.usersService.findOne(+id);
   }

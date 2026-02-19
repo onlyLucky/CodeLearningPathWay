@@ -5,6 +5,7 @@ import { RegisterDto, LoginDto } from './dto';
 import { CreateUserDto } from '../users/dto';
 import { User } from '../../entities/user.entity';
 import * as crypto from 'crypto';
+import { USER_ROLES, UserRole } from '../../common/constants/roles.constant';
 
 @Injectable()
 export class AuthService {
@@ -25,6 +26,7 @@ export class AuthService {
       password: registerDto.password,
       isActive: true,
       points: 0,
+      role: USER_ROLES[registerDto.type] || UserRole.GUEST,
     };
 
     const user = await this.usersService.create(createUserDto);
