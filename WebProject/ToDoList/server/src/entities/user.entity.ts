@@ -22,7 +22,7 @@ export class User {
   @Column({ unique: true, length: 100 })
   email!: string;
 
-  @Column({ length: 255 })
+  @Column({ length: 255, select: false })
   password!: string;
 
   @Column({ type: 'text', nullable: true })
@@ -37,13 +37,14 @@ export class User {
   @Column({
     type: 'enum',
     enum: ['admin', 'user', 'guest'],
-    default: 'user',
+    default: 'guest',
   })
   role!: 'admin' | 'user' | 'guest';
 
   @Column({ default: true })
   isActive!: boolean;
 
+  // 关联用户个人信息 cascade: true 级联操作，当用户被删除时，关联的个人信息也会被删除
   @OneToOne(() => UserProfile, (profile) => profile.user, { cascade: true })
   profile?: UserProfile;
 

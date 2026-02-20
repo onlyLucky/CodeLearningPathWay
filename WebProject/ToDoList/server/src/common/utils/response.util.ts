@@ -38,6 +38,7 @@ export const errorResponse = (
   return {
     success: false,
     code,
+    data: null,
     message,
     error,
     timestamp: formatDateTime(new Date(), 'YYYY-MM-DD hh:mm:ss'),
@@ -64,8 +65,9 @@ export const createdResponse = <T>(
 export const noContentResponse = (): ApiResponse => {
   return {
     success: true,
-    code: HTTP_STATUS.NO_CONTENT,
-    message: 'Operation successful',
+    code: HTTP_STATUS.OK,
+    data: '',
+    message: 'Operation successful123',
     timestamp: formatDateTime(new Date(), 'YYYY-MM-DD hh:mm:ss'),
   };
 };

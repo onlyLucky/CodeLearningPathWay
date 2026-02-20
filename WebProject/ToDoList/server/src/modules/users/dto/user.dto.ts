@@ -91,6 +91,11 @@ export class CreateUserDto {
 export class UpdateUserDto extends PartialType(
   OmitType(CreateUserDto, ['password', 'uid'] as const),
 ) {
+  @ApiProperty({ example: 1, description: 'User ID' })
+  @IsInt()
+  @Min(1)
+  userId?: number;
+
   @ApiPropertyOptional({
     example: 'newpassword123',
     description: 'New password',
@@ -130,7 +135,7 @@ export class UpdateUserDto extends PartialType(
   points?: number;
 }
 
-export class GetUserDetailByIdDto {
+export class UserByIdDto {
   @ApiProperty({ example: 1, description: 'User ID' })
   @IsInt()
   @Min(1)

@@ -58,13 +58,11 @@ export class UsersService {
     });
 
     const {
-      password: excludedPassword,
       createdTime: excludedCreatedTime,
       updatedTime: excludedUpdatedTime,
       profile,
       ...result
     } = userWithProfile || savedUser;
-    void excludedPassword;
     void excludedCreatedTime;
     void excludedUpdatedTime;
 
@@ -90,8 +88,10 @@ export class UsersService {
         'createdTime',
         'updatedTime',
       ] as any,
+      relations: ['profile'],
     });
-    return users;
+
+    return users || [];
   }
 
   async findOne(id: number): Promise<User> {
@@ -112,7 +112,11 @@ export class UsersService {
         'isActive',
         'createdTime',
         'updatedTime',
+        'points',
+        'signature',
+        'avatar',
       ] as any,
+      relations: ['profile'],
     });
 
     if (!user) {
@@ -123,21 +127,41 @@ export class UsersService {
     return user;
   }
 
-  async findByUsername(username: string): Promise<User | null> {
-    return this.userRepository.findOne({
-      where: { username },
-    });
+  async findByUsername(userName: string): Promise<User | null> {
+    const user = await this.userRepository.createQueryBuilder('user')
+      .leftJoin('user.profile', 'profile')
+      .select([
+        'user.id as userId',
+        'user.username as userName',
+        'user.email as email',
+        'user.password as password',
+        'user.role as role',
+        'user.isActive as isActive',
+        'user.createdTime as createdTime',
+        'user.updatedTime as updatedTime',
+        'user.points as points',
+        'user.signature as signature',
+        'user.avatar as avatar',
+        'profile.birthDate as birthDate',
+        'profile.age as age',
+        'profile.address as address',
+      ] as any)
+      .where('user.userName = :userName', { userName })
+      .getRawOne();  // 关键：使用 getRawOne 获取原始对象 getRawMany 会返回多个对象
+    return user || null;
   }
 
   async findByUid(uid: string): Promise<User | null> {
     return this.userRepository.findOne({
       where: { uid },
+      relations: ['profile'],
     });
   }
 
   async findByEmail(email: string): Promise<User | null> {
     return this.userRepository.findOne({
       where: { email },
+      relations: ['profile'],
     });
   }
 
@@ -175,9 +199,10 @@ export class UsersService {
     return result as User;
   }
 
-  async remove(id: number): Promise<void> {
+  async remove(id: number): Promise<null> {
     const user = await this.findOne(id);
     await this.userRepository.remove(user);
+    return null;
   }
 
   async validateUser(

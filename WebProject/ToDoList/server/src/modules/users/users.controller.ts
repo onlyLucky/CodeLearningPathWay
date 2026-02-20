@@ -13,10 +13,11 @@ import {
   UseInterceptors,
   UploadedFile,
   BadRequestException,
+  Query,
 } from '@nestjs/common';
 import { ApiOperation, ApiConsumes, ApiBody } from '@nestjs/swagger';
 import { UsersService } from './users.service';
-import { UpdateUserDto } from './dto';
+import { UpdateUserDto, UserByIdDto } from './dto';
 import { AuthGuard } from '../../common/guards/auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
@@ -53,28 +54,29 @@ export class UsersController {
 
   @Get('detailById')
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles(UserRole.USER)
-  findOne(@Param('id') id: string) {
-    return this.usersService.findOne(+id);
+  @Roles(UserRole.ADMIN)
+  // Query ?userId=4; Body {userId: 4}; Param /users/detailById/4
+  findOne(@Query() userByIdDto: UserByIdDto) {
+    return this.usersService.findOne(userByIdDto.userId);
   }
 
-  @Patch(':id')
+  @Post('updateUserInfo')
   @UseGuards(AuthGuard)
   update(
-    @Param('id') id: string,
     @Body() updateUserDto: UpdateUserDto,
     @Request() req: RequestWithUser,
   ) {
-    if (req.user.role !== UserRole.ADMIN && req.user.id !== +id) {
+    if (req.user.id !== updateUserDto.userId) {
       throw new Error('You can only update your own profile');
     }
-    return this.usersService.update(+id, updateUserDto);
+    return this.usersService.update(req.user.id, updateUserDto);
   }
 
-  @Post(':id/avatar')
+  @Post('updateAvatar')
   @UseGuards(AuthGuard)
   @ApiOperation({ summary: 'Upload user avatar' })
   @ApiConsumes('multipart/form-data')
+  // 声明上传头像接口的请求体格式：multipart/form-data 中字段 avatar 为二进制文件
   @ApiBody({
     schema: {
       type: 'object',
@@ -94,27 +96,23 @@ export class UsersController {
     }),
   )
   async uploadAvatar(
-    @Param('id') id: string,
     @UploadedFile() file: Express.Multer.File,
     @Request() req: RequestWithUser,
   ) {
-    if (req.user.role !== UserRole.ADMIN && req.user.id !== +id) {
-      throw new BadRequestException('You can only update your own avatar');
-    }
 
     if (!file) {
       throw new BadRequestException('No file uploaded');
     }
 
     const avatarUrl = `/uploads/avatars/${file.filename}`;
-    return this.usersService.update(+id, { avatar: avatarUrl });
+    return this.usersService.update(req.user.id, { avatar: avatarUrl });
   }
 
-  @Delete(':id')
+  @Delete('delUser')
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
-  @HttpCode(HttpStatus.NO_CONTENT)
-  remove(@Param('id') id: string) {
-    return this.usersService.remove(+id);
+  @HttpCode(HttpStatus.OK)
+  remove(@Body() userByIdDto: UserByIdDto) {
+    return this.usersService.remove(userByIdDto.userId);
   }
 }

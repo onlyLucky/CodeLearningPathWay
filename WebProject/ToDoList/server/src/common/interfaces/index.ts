@@ -24,13 +24,14 @@ export interface ApiResponse<T = any> {
 export interface ErrorResponse {
   success: false;
   code: number;
+  data: null;
   message: string;
   error?: string;
   timestamp: string;
 }
 
 export interface UserPayload {
-  sub: number;
+  id: number;
   username: string;
   email: string;
   roles: string[];
@@ -39,7 +40,7 @@ export interface UserPayload {
 }
 
 export interface JwtPayload {
-  sub: number;
+  id: number;
   username: string;
   email: string;
   roles: string[];
