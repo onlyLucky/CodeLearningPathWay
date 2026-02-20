@@ -6,7 +6,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm/dist/common';
 import { Repository } from 'typeorm/repository/Repository';
 import { Todo } from '../../entities/todo.entity';
-import { CreateTodoDto, UpdateTodoDto } from './dto';
+import { CreateTodoDto, UpdateTodoDto } from './dto/todos.dto';
 import { RedisService } from '../../common/services/redis.service';
 
 @Injectable()
@@ -110,8 +110,8 @@ export class TodosService {
 
   async markAsCompleted(id: number, userId: number): Promise<Todo> {
     const todo = await this.findOne(id, userId);
-    todo.status = 'completed';
-    todo.completedAt = new Date();
+    todo.status = '2';
+    todo.completedTime = new Date();
     const updatedTodo = await this.todoRepository.save(todo);
 
     await this.invalidateUserTodosCache(userId);
@@ -138,9 +138,9 @@ export class TodosService {
 
     return {
       total: todos.length,
-      completed: todos.filter((t) => t.status === 'completed').length,
-      pending: todos.filter((t) => t.status === 'pending').length,
-      inProgress: todos.filter((t) => t.status === 'in_progress').length,
+      completed: todos.filter((t) => t.status === '2').length,
+      pending: todos.filter((t) => t.status === '0').length,
+      inProgress: todos.filter((t) => t.status === '1').length,
     };
   }
 }

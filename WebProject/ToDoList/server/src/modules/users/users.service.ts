@@ -128,7 +128,8 @@ export class UsersService {
   }
 
   async findByUsername(userName: string): Promise<User | null> {
-    const user = await this.userRepository.createQueryBuilder('user')
+    const user = await this.userRepository
+      .createQueryBuilder('user')
       .leftJoin('user.profile', 'profile')
       .select([
         'user.id as userId',
@@ -147,7 +148,7 @@ export class UsersService {
         'profile.address as address',
       ] as any)
       .where('user.userName = :userName', { userName })
-      .getRawOne();  // 关键：使用 getRawOne 获取原始对象 getRawMany 会返回多个对象
+      .getRawOne(); // 关键：使用 getRawOne 获取原始对象 getRawMany 会返回多个对象
     return user || null;
   }
 

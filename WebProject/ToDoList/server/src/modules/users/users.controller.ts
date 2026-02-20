@@ -3,8 +3,6 @@ import {
   Get,
   Post,
   Body,
-  Patch,
-  Param,
   Delete,
   HttpCode,
   HttpStatus,
@@ -99,7 +97,6 @@ export class UsersController {
     @UploadedFile() file: Express.Multer.File,
     @Request() req: RequestWithUser,
   ) {
-
     if (!file) {
       throw new BadRequestException('No file uploaded');
     }

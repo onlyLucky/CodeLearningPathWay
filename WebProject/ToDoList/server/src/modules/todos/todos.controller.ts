@@ -13,7 +13,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { TodosService } from './todos.service';
-import { CreateTodoDto, UpdateTodoDto } from './dto';
+import { CreateTodoDto, UpdateTodoDto } from './dto/todos.dto';
 import { AuthGuard } from '../../common/guards/auth.guard';
 import { ApiTags, ApiOperation, ApiQuery } from '@nestjs/swagger';
 import { Request as ExpressRequest } from 'express';

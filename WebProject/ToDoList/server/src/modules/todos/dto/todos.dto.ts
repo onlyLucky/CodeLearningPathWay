@@ -7,6 +7,7 @@ import {
   IsDateString,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { PartialType } from '@nestjs/mapped-types';
 
 export class CreateTodoDto {
   @ApiProperty({ example: 'Buy groceries', description: 'Todo title' })
@@ -25,6 +26,16 @@ export class CreateTodoDto {
   description?: string;
 
   @ApiPropertyOptional({
+    example: '0',
+    description: 'Todo status: 0=pending, 1=in_progress, 2=completed',
+    enum: ['0', '1', '2'],
+    default: '0',
+  })
+  @IsOptional()
+  @IsEnum(['0', '1', '2'])
+  status?: '0' | '1' | '2';
+
+  @ApiPropertyOptional({
     example: 'low',
     description: 'Priority level',
     enum: ['low', 'medium', 'high'],
@@ -38,4 +49,15 @@ export class CreateTodoDto {
   @IsOptional()
   @IsDateString()
   dueDate?: string;
+}
+
+export class UpdateTodoDto extends PartialType(CreateTodoDto) {
+  @ApiPropertyOptional({
+    example: '2',
+    description: 'Todo status: 0=pending, 1=in_progress, 2=completed',
+    enum: ['0', '1', '2'],
+  })
+  @IsOptional()
+  @IsEnum(['0', '1', '2'])
+  status?: '0' | '1' | '2';
 }
