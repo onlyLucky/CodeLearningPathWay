@@ -13,11 +13,10 @@ import {
   Query,
 } from '@nestjs/common';
 import { TodosService } from './todos.service';
-import { CreateTodoDto, UpdateTodoDto } from './dto/todos.dto';
+import { CreateTodoDto, UpdateTodoDto, QueryTodoDto } from './dto/todos.dto';
 import { AuthGuard } from '../../common/guards/auth.guard';
 import { ApiTags, ApiOperation, ApiQuery } from '@nestjs/swagger';
 import { Request as ExpressRequest } from 'express';
-import { Public } from '../../common/decorators/public.decorator';
 
 interface RequestWithUser extends ExpressRequest {
   user: {
@@ -34,9 +33,9 @@ interface RequestWithUser extends ExpressRequest {
 export class TodosController {
   constructor(private readonly todosService: TodosService) {}
 
-  @Post()
+  @Post('create')
   @ApiOperation({ summary: 'Create a new todo' })
-  @HttpCode(HttpStatus.CREATED)
+  @HttpCode(HttpStatus.OK)
   create(
     @Request() req: RequestWithUser,
     @Body() createTodoDto: CreateTodoDto,
@@ -44,19 +43,13 @@ export class TodosController {
     return this.todosService.create(req.user.id, createTodoDto);
   }
 
-  @Get()
+  @Get('list')
   @ApiOperation({ summary: 'Get all todos for the current user' })
-  @ApiQuery({
-    name: 'status',
-    required: false,
-    enum: ['pending', 'in_progress', 'completed'],
-  })
-  findAll(@Request() req: RequestWithUser, @Query('status') status?: string) {
-    return this.todosService.findAll(req.user.id, status);
+  findAll(@Request() req: RequestWithUser, @Body() queryTodoDto: QueryTodoDto) {
+    return this.todosService.findAll(req.user.id, queryTodoDto);
   }
 
   @Get('statistics')
-  @Public()
   @ApiOperation({ summary: 'Get todo statistics' })
   @ApiQuery({
     name: 'userId',
@@ -71,32 +64,31 @@ export class TodosController {
     return this.todosService.getStatistics(targetUserId);
   }
 
-  @Get(':id')
+  @Get('detailById')
   @ApiOperation({ summary: 'Get a specific todo by ID' })
-  findOne(@Param('id') id: string, @Request() req: RequestWithUser) {
-    return this.todosService.findOne(+id, req.user.id);
+  findOne(@Query('id') id: string) {
+    return this.todosService.findOne(+id);
   }
 
-  @Patch(':id')
+  @Post('updateById')
   @ApiOperation({ summary: 'Update a todo by ID' })
   update(
-    @Param('id') id: string,
     @Request() req: RequestWithUser,
     @Body() updateTodoDto: UpdateTodoDto,
   ) {
-    return this.todosService.update(+id, req.user.id, updateTodoDto);
+    return this.todosService.update(req.user.id, updateTodoDto);
   }
 
-  @Patch(':id/complete')
+  @Patch('complete')
   @ApiOperation({ summary: 'Mark a todo as completed' })
   markAsCompleted(@Param('id') id: string, @Request() req: RequestWithUser) {
     return this.todosService.markAsCompleted(+id, req.user.id);
   }
 
-  @Delete(':id')
-  @ApiOperation({ summary: 'Delete a todo by ID' })
-  @HttpCode(HttpStatus.NO_CONTENT)
-  remove(@Param('id') id: string, @Request() req: RequestWithUser) {
-    return this.todosService.remove(+id, req.user.id);
+  @Delete('delById')
+  @ApiOperation({ summary: 'Delete todos by IDs' })
+  @HttpCode(HttpStatus.OK)
+  remove(@Body('ids') ids: string, @Request() req: RequestWithUser) {
+    return this.todosService.remove(ids, req.user.id);
   }
 }

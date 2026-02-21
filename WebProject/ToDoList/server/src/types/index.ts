@@ -12,8 +12,11 @@ export interface TodoResponse {
   title: string;
   description: string | null;
   completed: boolean;
-  priority: 'low' | 'medium' | 'high';
-  dueDate: Date | null;
+  status: '0' | '1' | '2';
+  priority: '0' | '1' | '2';
+  reminderType: '0' | '1' | '2' | '3' | '4';
+  reminderTime: Date | null;
+  deadlineTime: Date | null;
   userId: number;
   createdTime: Date;
   updatedTime: Date;

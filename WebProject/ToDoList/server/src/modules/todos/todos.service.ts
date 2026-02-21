@@ -6,27 +6,20 @@ import {
 import { InjectRepository } from '@nestjs/typeorm/dist/common';
 import { Repository } from 'typeorm/repository/Repository';
 import { Todo } from '../../entities/todo.entity';
-import { CreateTodoDto, UpdateTodoDto } from './dto/todos.dto';
-import { RedisService } from '../../common/services/redis.service';
+import { CreateTodoDto, UpdateTodoDto, QueryTodoDto } from './dto/todos.dto';
+import {
+  getPaginationParams,
+  createPaginatedResponse,
+  calculateOffset,
+} from '../../common/utils/pagination.util';
+import { PaginatedResponse } from '../../common/interfaces';
 
 @Injectable()
 export class TodosService {
   constructor(
     @InjectRepository(Todo)
     private readonly todoRepository: Repository<Todo>,
-    private readonly redisService: RedisService,
   ) {}
-
-  private async invalidateUserTodosCache(userId: number): Promise<void> {
-    const keys = [
-      this.redisService.generateUserKey(userId, 'todos'),
-      this.redisService.generateUserKey(userId, 'todos', 'status=pending'),
-      this.redisService.generateUserKey(userId, 'todos', 'status=in_progress'),
-      this.redisService.generateUserKey(userId, 'todos', 'status=completed'),
-    ];
-
-    await Promise.all(keys.map((key) => this.redisService.del(key)));
-  }
 
   async create(userId: number, createTodoDto: CreateTodoDto): Promise<Todo> {
     const todo = this.todoRepository.create({
@@ -34,41 +27,73 @@ export class TodosService {
       userId,
     });
 
-    const savedTodo = await this.todoRepository.save(todo);
-
-    await this.invalidateUserTodosCache(userId);
-
-    return savedTodo;
+    return this.todoRepository.save(todo);
   }
 
-  async findAll(userId: number, status?: string): Promise<Todo[]> {
-    const cacheKey = this.redisService.generateUserKey(
-      userId,
-      'todos',
-      status ? `status=${status}` : '',
-    );
-    const cachedTodos = await this.redisService.get<Todo[]>(cacheKey);
+  async findAll(
+    userId: number,
+    queryTodoDto: QueryTodoDto,
+  ): Promise<PaginatedResponse<Todo>> {
+    const { pageNum, pageSize, sortBy, sortOrder } =
+      getPaginationParams(queryTodoDto);
+    const offset = calculateOffset(pageNum!, pageSize!);
 
-    if (cachedTodos) {
-      return cachedTodos;
+    const queryBuilder = this.todoRepository.createQueryBuilder('todo');
+
+    queryBuilder.where('todo.userId = :userId', { userId });
+
+    if (queryTodoDto.status) {
+      queryBuilder.andWhere('todo.status = :status', {
+        status: queryTodoDto.status,
+      });
     }
 
-    const where: any = { userId };
-
-    if (status) {
-      where.status = status;
+    if (queryTodoDto.priority) {
+      queryBuilder.andWhere('todo.priority = :priority', {
+        priority: queryTodoDto.priority,
+      });
     }
 
-    const todos = await this.todoRepository.find({
-      where,
-      order: { createdTime: 'DESC' },
-    });
+    if (queryTodoDto.reminderType) {
+      queryBuilder.andWhere('todo.reminderType = :reminderType', {
+        reminderType: queryTodoDto.reminderType,
+      });
+    }
 
-    await this.redisService.set(cacheKey, todos);
-    return todos;
+    if (queryTodoDto.title) {
+      queryBuilder.andWhere('todo.title LIKE :title', {
+        title: `%${queryTodoDto.title}%`,
+      });
+    }
+
+    if (queryTodoDto.description) {
+      queryBuilder.andWhere('todo.description LIKE :description', {
+        description: `%${queryTodoDto.description}%`,
+      });
+    }
+
+    if (queryTodoDto.deadlineTime) {
+      queryBuilder.andWhere('DATE(todo.deadlineTime) = :deadlineTime', {
+        deadlineTime: queryTodoDto.deadlineTime,
+      });
+    }
+
+    if (queryTodoDto.reminderTime) {
+      queryBuilder.andWhere('DATE(todo.reminderTime) = :reminderTime', {
+        reminderTime: queryTodoDto.reminderTime,
+      });
+    }
+
+    const [data, total] = await queryBuilder
+      .orderBy(`todo.${sortBy}`, sortOrder)
+      .skip(offset)
+      .take(pageSize)
+      .getManyAndCount();
+
+    return createPaginatedResponse(data, total, pageNum!, pageSize!);
   }
 
-  async findOne(id: number, userId: number): Promise<Todo> {
+  async findOne(id: number, userId?: number): Promise<Todo> {
     const todo = await this.todoRepository.findOne({
       where: { id },
     });
@@ -76,8 +101,7 @@ export class TodosService {
     if (!todo) {
       throw new NotFoundException(`Todo with ID ${id} not found`);
     }
-
-    if (todo.userId !== userId) {
+    if (userId && todo.userId !== userId) {
       throw new ForbiddenException(
         'You do not have permission to access this todo',
       );
@@ -86,37 +110,41 @@ export class TodosService {
     return todo;
   }
 
-  async update(
-    id: number,
-    userId: number,
-    updateTodoDto: UpdateTodoDto,
-  ): Promise<Todo> {
-    const todo = await this.findOne(id, userId);
+  async update(userId: number, updateTodoDto: UpdateTodoDto): Promise<Todo> {
+    const todo = await this.findOne(updateTodoDto.id, userId);
 
     Object.assign(todo, updateTodoDto);
-    const updatedTodo = await this.todoRepository.save(todo);
-
-    await this.invalidateUserTodosCache(userId);
-
-    return updatedTodo;
+    return this.todoRepository.save(todo);
   }
 
-  async remove(id: number, userId: number): Promise<void> {
-    const todo = await this.findOne(id, userId);
-    await this.todoRepository.remove(todo);
+  async remove(ids: string, userId: number): Promise<boolean> {
+    const idArray = ids.split(',').map((id) => +id.trim());
 
-    await this.invalidateUserTodosCache(userId);
+    const queryBuilder = this.todoRepository.createQueryBuilder('todo');
+    queryBuilder.where('todo.userId = :userId', { userId });
+    queryBuilder.andWhere('todo.id IN (:...ids)', { ids: idArray });
+
+    const todos = await queryBuilder.getMany();
+
+    if (todos.length === 0) {
+      throw new NotFoundException('No todos found with the provided IDs');
+    }
+
+    if (todos.length !== idArray.length) {
+      throw new ForbiddenException(
+        'Some todos do not belong to you or do not exist',
+      );
+    }
+
+    await this.todoRepository.remove(todos);
+    return true;
   }
 
   async markAsCompleted(id: number, userId: number): Promise<Todo> {
     const todo = await this.findOne(id, userId);
     todo.status = '2';
     todo.completedTime = new Date();
-    const updatedTodo = await this.todoRepository.save(todo);
-
-    await this.invalidateUserTodosCache(userId);
-
-    return updatedTodo;
+    return this.todoRepository.save(todo);
   }
 
   async getStatistics(userId?: number): Promise<{
@@ -134,13 +162,13 @@ export class TodosService {
       };
     }
 
-    const todos = await this.findAll(userId);
+    const todosResponse = await this.findAll(userId, {});
 
     return {
-      total: todos.length,
-      completed: todos.filter((t) => t.status === '2').length,
-      pending: todos.filter((t) => t.status === '0').length,
-      inProgress: todos.filter((t) => t.status === '1').length,
+      total: todosResponse.total,
+      completed: todosResponse.data.filter((t) => t.status === '2').length,
+      pending: todosResponse.data.filter((t) => t.status === '0').length,
+      inProgress: todosResponse.data.filter((t) => t.status === '1').length,
     };
   }
 }

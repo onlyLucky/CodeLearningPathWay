@@ -41,17 +41,21 @@ export class Todo {
   })
   reminderType?: '0' | '1' | '2' | '3' | '4';
 
-  // 优先级
-  @Column({ type: 'enum', enum: ['low', 'medium', 'high'], default: 'medium' })
-  priority?: 'low' | 'medium' | 'high';
+  // 优先级 0: low, 1: medium, 2: high
+  @Column({ type: 'enum', enum: ['0', '1', '2'], default: '1' })
+  priority?: '0' | '1' | '2';
 
   // 提醒时间
   @Column({ type: 'timestamp', nullable: true, name: 'reminder_time' })
   reminderTime?: Date | null;
 
-  // 截止时间
+  // 截止时间 默认每天最后时间
   @Column({ type: 'date', nullable: true, name: 'deadline_time' })
   deadlineTime?: Date | null;
+
+  // 评分
+  @Column({ type: 'float', name: 'score', default: 0.0 })
+  score?: number;
 
   @ManyToOne(() => User, { nullable: false })
   @JoinColumn({ name: 'userId' })
